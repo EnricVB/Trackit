@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
     implementation("io.github.rctcwyvrn:blake3:1.3")
+    implementation("org.tukaani:xz:1.8")
 
     testImplementation(kotlin("test"))
 }
