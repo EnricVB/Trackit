@@ -19,7 +19,7 @@ class Content(private val content: String) : TrackitObject<Content> {
         val encodedFile = encode()
 
         if(writeOnDisk) {
-            val contentFolder = Main.repository.getObjectsFolderPath().resolve(encodedFile.first.toString().substring(0, 2))
+            val contentFolder = Main.repository.getObjectsFolderPath().resolve(encodedFile.first.toString().take(2))
             val objectFile = contentFolder.resolve(encodedFile.first.toString())
             contentFolder.toFile().mkdir()
 
@@ -30,7 +30,7 @@ class Content(private val content: String) : TrackitObject<Content> {
     }
 
     override fun decode(hash: Hash): Content {
-        val contentFolder = Main.repository.getObjectsFolderPath().resolve(hash.toString().substring(0, 2))
+        val contentFolder = Main.repository.getObjectsFolderPath().resolve(hash.toString().take(2))
         val objectFile = contentFolder.resolve(hash.toString())
 
         return Content(decompressContent(Files.readAllBytes(objectFile)))
@@ -84,7 +84,9 @@ class Content(private val content: String) : TrackitObject<Content> {
     }
 
     override fun showDifferences(newer: Hash, oldest: Hash): String {
-        TODO("Not yet implemented")
-    }
+        val newerContent = decode(newer)
+        val oldestContent = decode(oldest)
 
+        return "Newer content: ${newerContent.content}\nOldest content: ${oldestContent.content}" // TODO: Implement a better way to show differences
+    }
 }
