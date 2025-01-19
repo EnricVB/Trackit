@@ -1,5 +1,6 @@
 package dev.enric.core.objects
 
+import dev.enric.Main
 import dev.enric.core.TrackitObject
 import java.io.ByteArrayOutputStream
 import java.nio.file.Files
@@ -7,7 +8,6 @@ import java.sql.Timestamp
 import java.time.Instant
 import java.util.zip.Deflater
 import java.util.zip.Inflater
-import kotlin.io.path.Path
 
 class Content(private val content: String) : TrackitObject<Content> {
 
@@ -16,14 +16,24 @@ class Content(private val content: String) : TrackitObject<Content> {
     }
 
     override fun encode(writeOnDisk: Boolean): Pair<Hash, ByteArray> {
-        TODO("Not yet implemented")
+        val encodedFile = encode()
+
+        if(writeOnDisk) {
+            val contentFolder = Main.repository.getObjectsFolderPath().resolve(encodedFile.first.toString().substring(0, 2))
+            val objectFile = contentFolder.resolve(encodedFile.first.toString())
+            contentFolder.toFile().mkdir()
+
+            Files.write(objectFile, compressContent())
+        }
+
+        return encodedFile
     }
 
     override fun decode(hash: Hash): Content {
-        val path = Path("") // TODO: Poner que el path se obtenga desde donde se ejecute
-        val compressedData = Files.readAllBytes(path)
+        val contentFolder = Main.repository.getObjectsFolderPath().resolve(hash.toString().substring(0, 2))
+        val objectFile = contentFolder.resolve(hash.toString())
 
-        return Content(decompressContent(compressedData))
+        return Content(decompressContent(Files.readAllBytes(objectFile)))
     }
 
     override fun generateKey(): Hash {
@@ -70,7 +80,7 @@ class Content(private val content: String) : TrackitObject<Content> {
     }
 
     override fun printInfo(): String {
-        TODO("Not yet implemented")
+        return "Content: $content"
     }
 
     override fun showDifferences(newer: Hash, oldest: Hash): String {
