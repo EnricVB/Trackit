@@ -11,6 +11,10 @@ data class Hash(val hash: String) {
         return Hash(hash + other.hash)
     }
 
+    override fun toString(): String {
+        return hash
+    }
+
     companion object {
         @JvmStatic
         fun parseText(hashData: String): Hash {
