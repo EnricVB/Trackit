@@ -1,5 +1,6 @@
 package dev.enric.core.objects
 
+import dev.enric.core.TrackitObject
 import java.io.ByteArrayOutputStream
 import java.nio.file.Files
 import java.sql.Timestamp
@@ -27,9 +28,10 @@ class Content(private val content: String) : TrackitObject<Content> {
 
     override fun generateKey(): Hash {
         val instantNow = Timestamp.from(Instant.now())
-        val hashData = "Content;${instantNow};${content.length};$content"
+        val hashType = Hash.parseText("Content", 1)
+        val hashData = Hash.parseText("${instantNow};${content.length};$content", 15)
 
-        return Hash.parseText(hashData)
+        return hashType.plus(hashData)
     }
 
     override fun compressContent(): ByteArray {

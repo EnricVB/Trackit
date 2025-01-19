@@ -1,4 +1,6 @@
-package dev.enric.core.objects
+package dev.enric.core
+
+import dev.enric.core.objects.Hash
 
 interface TrackitObject<T : TrackitObject<T>> {
 
