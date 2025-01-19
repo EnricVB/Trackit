@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package dev.enric.core.objects
 
 import io.github.rctcwyvrn.blake3.Blake3
@@ -31,5 +33,18 @@ data class Hash(val hash: String) {
 
             return Hash(hasher.hexdigest(length))
         }
+    }
+
+    enum class HashType(val hash: Hash) {
+        CONTENT(parseText("Content", 1)),
+        TREE(parseText("Content", 1)),
+        COMMIT(parseText("Content", 1)),
+        SIMPLE_TAG(parseText("Content", 1)),
+        COMPLEX_TAG(parseText("Content", 1)),
+        USER(parseText("Content", 1)),
+        BRANCH(parseText("Content", 1)),
+        ROLE(parseText("Content", 1)),
+        BRANCH_PERMISSION(parseText("Content", 1)),
+        ROLE_PERMISSION(parseText("Content", 1))
     }
 }
