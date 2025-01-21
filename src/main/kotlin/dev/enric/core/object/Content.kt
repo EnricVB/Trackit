@@ -1,39 +1,26 @@
-package dev.enric.core.objects
+package dev.enric.core.`object`
 
 import dev.enric.Main
+import dev.enric.core.Hash
 import dev.enric.core.TrackitObject
 import java.io.ByteArrayOutputStream
+import java.io.Serializable
 import java.nio.file.Files
 import java.sql.Timestamp
 import java.time.Instant
 import java.util.zip.Deflater
-import java.util.zip.Inflater
 
-class Content(private val content: String) : TrackitObject<Content> {
+class Content(private val content: String) : TrackitObject<Content>(), Serializable {
 
-    override fun encode(): Pair<Hash, ByteArray> {
-        return Pair(generateKey(), compressContent())
-    }
-
-    override fun encode(writeOnDisk: Boolean): Pair<Hash, ByteArray> {
-        val encodedFile = encode()
-
-        if(writeOnDisk) {
-            val contentFolder = Main.repository.getObjectsFolderPath().resolve(encodedFile.first.toString().take(2))
-            val objectFile = contentFolder.resolve(encodedFile.first.toString())
-            contentFolder.toFile().mkdir()
-
-            Files.write(objectFile, compressContent())
-        }
-
-        return encodedFile
-    }
+    constructor() : this("")
 
     override fun decode(hash: Hash): Content {
         val contentFolder = Main.repository.getObjectsFolderPath().resolve(hash.toString().take(2))
         val objectFile = contentFolder.resolve(hash.toString())
 
-        return Content(decompressContent(Files.readAllBytes(objectFile)))
+        val decompressedStringData = decompressContent(Files.readAllBytes(objectFile)) ?: return Content() // If the file is empty, return an empty content
+
+        return Content(String(decompressedStringData))
     }
 
     override fun generateKey(): Hash {
@@ -63,24 +50,8 @@ class Content(private val content: String) : TrackitObject<Content> {
         return outputStream.toByteArray()
     }
 
-    override fun decompressContent(compressedData : ByteArray): String {
-        val inflater = Inflater()
-        inflater.setInput(compressedData)
-        // This does not need all the data to be decompressed before starting
-
-        val outputStream = ByteArrayOutputStream(compressedData.size) // Stream to which is going to be sent the decompressed data
-        val buffer = ByteArray(1024)
-
-        while (!inflater.finished()) {
-            val length = inflater.inflate(buffer) // Decompress the data into the buffer
-            outputStream.write(buffer, 0, length) // Writes the decompressed data into the outputStream
-        }
-
-        return String(outputStream.toByteArray())
-    }
-
     override fun printInfo(): String {
-        return "Content: $content"
+        return "Content(content=$content)"
     }
 
     override fun showDifferences(newer: Hash, oldest: Hash): String {

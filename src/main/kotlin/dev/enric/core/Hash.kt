@@ -1,10 +1,11 @@
 @file:Suppress("unused")
 
-package dev.enric.core.objects
+package dev.enric.core
 
 import io.github.rctcwyvrn.blake3.Blake3
+import java.io.Serializable
 
-data class Hash(val hash: String) {
+data class Hash(val hash: String) : Serializable {
     init {
         requireNotNull(hash.length == 32) { "Hash must have 16 characters" }
     }
