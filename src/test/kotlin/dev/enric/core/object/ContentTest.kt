@@ -1,4 +1,4 @@
-package dev.enric.core.objects
+package dev.enric.core.`object`
 
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
