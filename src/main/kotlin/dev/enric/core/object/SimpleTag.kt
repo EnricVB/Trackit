@@ -2,6 +2,8 @@ package dev.enric.core.`object`
 
 import dev.enric.Main
 import dev.enric.core.Hash
+import dev.enric.core.Hash.HashType.COMPLEX_TAG
+import dev.enric.core.Hash.HashType.SIMPLE_TAG
 import dev.enric.core.TrackitObject
 import java.io.Serializable
 import java.nio.file.Files
@@ -27,10 +29,9 @@ data class SimpleTag(
 
     override fun generateKey(): Hash {
         val instantNow = Timestamp.from(Instant.now())
-        val hashType = Hash.parseText("SimpleTag", 1)
         val hashData = Hash.parseText("${instantNow};${this.toString().length};$name", 15)
 
-        return hashType.plus(hashData)
+        return SIMPLE_TAG.hash.plus(hashData)
     }
 
     override fun printInfo(): String {

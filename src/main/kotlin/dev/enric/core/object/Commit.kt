@@ -2,6 +2,7 @@ package dev.enric.core.`object`
 
 import dev.enric.Main
 import dev.enric.core.Hash
+import dev.enric.core.Hash.HashType.COMMIT
 import dev.enric.core.TrackitObject
 import java.io.Serializable
 import java.nio.file.Files
@@ -33,10 +34,9 @@ data class Commit(
 
     override fun generateKey(): Hash {
         val instantNow = Timestamp.from(Instant.now())
-        val hashType = Hash.parseText("Commit", 1)
         val hashData = Hash.parseText("${instantNow};${this.toString().length};$this", 15)
 
-        return hashType.plus(hashData)
+        return COMMIT.hash.plus(hashData)
     }
 
     override fun printInfo(): String {

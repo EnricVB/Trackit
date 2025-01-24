@@ -2,6 +2,8 @@ package dev.enric.core.`object`
 
 import dev.enric.Main
 import dev.enric.core.Hash
+import dev.enric.core.Hash.HashType.COMMIT
+import dev.enric.core.Hash.HashType.COMPLEX_TAG
 import dev.enric.core.TrackitObject
 import java.io.ByteArrayOutputStream
 import java.io.Serializable
@@ -23,10 +25,9 @@ class Content(private val content: String = "") : TrackitObject<Content>(), Seri
 
     override fun generateKey(): Hash {
         val instantNow = Timestamp.from(Instant.now())
-        val hashType = Hash.parseText("Content", 1)
         val hashData = Hash.parseText("${instantNow};${content.length};$content", 15)
 
-        return hashType.plus(hashData)
+        return COMMIT.hash.plus(hashData)
     }
 
     override fun compressContent(): ByteArray {

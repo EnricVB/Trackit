@@ -2,6 +2,8 @@ package dev.enric.core.`object`
 
 import dev.enric.Main
 import dev.enric.core.Hash
+import dev.enric.core.Hash.HashType.COMPLEX_TAG
+import dev.enric.core.Hash.HashType.TREE
 import dev.enric.core.TrackitObject
 import dev.enric.util.SerializablePath
 import java.io.Serializable
@@ -24,10 +26,9 @@ data class Tree(val child: Map<Hash, SerializablePath> = mapOf()) : TrackitObjec
 
     override fun generateKey(): Hash {
         val instantNow = Timestamp.from(Instant.now())
-        val hashType = Hash.parseText("Tree", 1)
         val hashData = Hash.parseText("${instantNow};${child.size};$child", 15)
 
-        return hashType.plus(hashData)
+        return TREE.hash.plus(hashData)
     }
 
     override fun printInfo(): String {
