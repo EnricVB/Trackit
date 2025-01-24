@@ -1,8 +1,9 @@
 package dev.enric.util
 
 import java.nio.file.Path
+import java.nio.file.Paths
 
-data class RepositoryFolderManager(val initFolder: Path) {
+data class RepositoryFolderManager(val initFolder: Path = Paths.get("")) {
 
     companion object {
         const val TRACKIT_FOLDER = ".trackit"

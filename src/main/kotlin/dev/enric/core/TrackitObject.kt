@@ -1,6 +1,6 @@
 package dev.enric.core
 
-import dev.enric.Main
+import dev.enric.util.RepositoryFolderManager
 import java.io.ByteArrayOutputStream
 import java.io.ObjectOutputStream
 import java.nio.file.Files
@@ -18,7 +18,7 @@ abstract class TrackitObject<T : TrackitObject<T>> {
         val encodedFile = encode()
 
         if (writeOnDisk) {
-            val objectFolder = Main.repository.getObjectsFolderPath().resolve(encodedFile.first.toString().take(2))
+            val objectFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(encodedFile.first.toString().take(2))
             val objectFile = objectFolder.resolve(encodedFile.first.toString())
             objectFolder.toFile().mkdir()
 

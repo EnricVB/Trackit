@@ -1,9 +1,9 @@
 package dev.enric.core.objects
 
-import dev.enric.Main
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.COMMIT
 import dev.enric.core.TrackitObject
+import dev.enric.util.RepositoryFolderManager
 import java.io.ByteArrayOutputStream
 import java.io.Serializable
 import java.nio.file.Files
@@ -14,7 +14,7 @@ import java.util.zip.Deflater
 class Content(private val content: String = "") : TrackitObject<Content>(), Serializable {
 
     override fun decode(hash: Hash): Content {
-        val contentFolder = Main.repository.getObjectsFolderPath().resolve(hash.toString().take(2))
+        val contentFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
         val objectFile = contentFolder.resolve(hash.toString())
 
         val decompressedStringData = decompressContent(Files.readAllBytes(objectFile)) ?: return Content() // If the file is empty, return an empty content

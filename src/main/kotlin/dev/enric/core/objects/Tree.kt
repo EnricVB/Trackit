@@ -1,9 +1,9 @@
 package dev.enric.core.objects
 
-import dev.enric.Main
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.TREE
 import dev.enric.core.TrackitObject
+import dev.enric.util.RepositoryFolderManager
 import dev.enric.util.SerializablePath
 import java.io.Serializable
 import java.nio.file.Files
@@ -13,7 +13,7 @@ import java.time.Instant
 data class Tree(val child: Map<Hash, SerializablePath> = mapOf()) : TrackitObject<Tree>(), Serializable {
 
     override fun decode(hash: Hash): Tree {
-        val treeFolder = Main.repository.getObjectsFolderPath().resolve(hash.toString().take(2))
+        val treeFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
         val objectFile = treeFolder.resolve(hash.toString())
         val decompressedData = decompressContent(Files.readAllBytes(objectFile)) ?: return Tree() // If the file is empty, return an empty tree
 

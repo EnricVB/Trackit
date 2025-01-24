@@ -1,9 +1,9 @@
 package dev.enric.core.objects.remote
 
-import dev.enric.Main
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.REMOTE
 import dev.enric.core.TrackitObject
+import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
 import java.sql.Timestamp
@@ -15,7 +15,7 @@ data class Remote(
 ) : TrackitObject<Remote>(), Serializable {
 
     override fun decode(hash: Hash): Remote {
-        val commitFolder = Main.repository.getObjectsFolderPath().resolve(hash.toString().take(2))
+        val commitFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
         val objectFile = commitFolder.resolve(hash.toString())
         val decompressedData = decompressContent(Files.readAllBytes(objectFile)) ?: return Remote() // If the file is empty, return an empty commit
 

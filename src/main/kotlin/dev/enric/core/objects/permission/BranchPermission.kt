@@ -1,9 +1,9 @@
 package dev.enric.core.objects.permission
 
-import dev.enric.Main
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.BRANCH_PERMISSION
 import dev.enric.core.TrackitObject
+import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
 import java.sql.Timestamp
@@ -18,7 +18,7 @@ data class BranchPermission(
         get() = if (writePermission) WRITE else if (readPermission) READ else READ
 
     override fun decode(hash: Hash): BranchPermission {
-        val commitFolder = Main.repository.getObjectsFolderPath().resolve(hash.toString().take(2))
+        val commitFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
         val objectFile = commitFolder.resolve(hash.toString())
         val decompressedData = decompressContent(Files.readAllBytes(objectFile)) ?: return BranchPermission() // If the file is empty, return an empty commit
 

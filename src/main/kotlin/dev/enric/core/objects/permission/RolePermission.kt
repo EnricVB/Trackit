@@ -1,9 +1,9 @@
 package dev.enric.core.objects.permission
 
-import dev.enric.Main
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.BRANCH_PERMISSION
 import dev.enric.core.TrackitObject
+import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
 import java.sql.Timestamp
@@ -21,7 +21,7 @@ data class RolePermission(
         get() = if (addRolePermission) ADD_ROLE else if (modifyRolePermission) MODIFY_ROLE else if (assignRolePermission) ASSIGN_ROLE else if (userOperationPermission) USER_OPERATION else 0
 
     override fun decode(hash: Hash): RolePermission {
-        val commitFolder = Main.repository.getObjectsFolderPath().resolve(hash.toString().take(2))
+        val commitFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
         val objectFile = commitFolder.resolve(hash.toString())
         val decompressedData = decompressContent(Files.readAllBytes(objectFile))
             ?: return RolePermission() // If the file is empty, return an empty commit

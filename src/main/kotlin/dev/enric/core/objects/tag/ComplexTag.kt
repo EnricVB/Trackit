@@ -1,9 +1,9 @@
 package dev.enric.core.objects.tag
 
-import dev.enric.Main
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.COMPLEX_TAG
 import dev.enric.core.TrackitObject
+import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
 import java.sql.Timestamp
@@ -18,7 +18,7 @@ data class ComplexTag(
 ) : Tag, TrackitObject<ComplexTag>(), Serializable {
 
     override fun decode(hash: Hash): ComplexTag {
-        val treeFolder = Main.repository.getObjectsFolderPath().resolve(hash.toString().take(2))
+        val treeFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
         val objectFile = treeFolder.resolve(hash.toString())
         val decompressedData = decompressContent(Files.readAllBytes(objectFile))
             ?: return ComplexTag() // If the file is empty, return an empty tree
