@@ -42,4 +42,11 @@ data class User(
     override fun showDifferences(newer: Hash, oldest: Hash): String {
         TODO("Not yet implemented")
     }
+
+    companion object {
+        @JvmStatic
+        fun decode(hash : Hash) : User {
+            return User().decode(hash)
+        }
+    }
 }
