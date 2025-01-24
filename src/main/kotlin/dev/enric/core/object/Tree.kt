@@ -9,9 +9,7 @@ import java.nio.file.Files
 import java.sql.Timestamp
 import java.time.Instant
 
-data class Tree(val child: Map<Hash, SerializablePath>) : TrackitObject<Tree>(), Serializable {
-
-    constructor() : this(mapOf())
+data class Tree(val child: Map<Hash, SerializablePath> = mapOf()) : TrackitObject<Tree>(), Serializable {
 
     override fun decode(hash: Hash): Tree {
         val treeFolder = Main.repository.getObjectsFolderPath().resolve(hash.toString().take(2))

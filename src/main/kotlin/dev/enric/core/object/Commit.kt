@@ -9,47 +9,16 @@ import java.sql.Timestamp
 import java.time.Instant
 
 data class Commit(
-    val previousCommit: Hash,
-    val tree: Hash,
-    val branch: Hash,
-    val autor: Hash,
-    val confirmer: Hash,
-    val date: Timestamp,
-    val title: String,
-    val message: String,
-    val tag: String
+    val previousCommit: Hash = Hash("0".repeat(32)),
+    val tree: Hash = Hash("0".repeat(32)),
+    val branch: Hash = Hash("0".repeat(32)),
+    val autor: Hash = Hash("0".repeat(32)),
+    val confirmer: Hash = Hash("0".repeat(32)),
+    val date: Timestamp = Timestamp.from(Instant.now()),
+    val title: String = "",
+    val message: String = "",
+    val tag: String = ""
 ) : TrackitObject<Commit>(), Serializable {
-
-    constructor(
-        previousCommit: Hash?,
-        tree: Hash,
-        branch: Hash,
-        autor: Hash,
-        title: String,
-        message: String
-    ) : this(
-        previousCommit ?: Hash("0".repeat(32)),
-        tree,
-        branch,
-        autor,
-        autor,
-        Timestamp.from(Instant.now()),
-        title,
-        message,
-        ""
-    )
-
-    constructor() : this(
-        previousCommit = Hash("0".repeat(32)),
-        tree = Hash("0".repeat(32)),
-        branch = Hash("0".repeat(32)),
-        autor = Hash("0".repeat(32)),
-        confirmer = Hash("0".repeat(32)),
-        date = Timestamp.from(Instant.now()),
-        title = "",
-        message = "",
-        tag = ""
-    )
 
     override fun decode(hash: Hash): Commit {
         val commitFolder = Main.repository.getObjectsFolderPath().resolve(hash.toString().take(2))

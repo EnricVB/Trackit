@@ -10,9 +10,7 @@ import java.sql.Timestamp
 import java.time.Instant
 import java.util.zip.Deflater
 
-class Content(private val content: String) : TrackitObject<Content>(), Serializable {
-
-    constructor() : this("")
+class Content(private val content: String = "") : TrackitObject<Content>(), Serializable {
 
     override fun decode(hash: Hash): Content {
         val contentFolder = Main.repository.getObjectsFolderPath().resolve(hash.toString().take(2))

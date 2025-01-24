@@ -9,14 +9,12 @@ import java.sql.Timestamp
 import java.time.Instant
 
 data class ComplexTag(
-    override val name: String,
-    override val commit: Hash?,
-    val user: Hash,
-    val date: Timestamp,
-    val message: String
+    override val name: String = "",
+    override val commit: Hash? = null,
+    val user: Hash = Hash("0".repeat(32)),
+    val date: Timestamp = Timestamp.from(Instant.now()),
+    val message: String = ""
 ) : Tag, TrackitObject<ComplexTag>(), Serializable {
-
-    constructor() : this("", null, Hash("0".repeat(32)), Timestamp.from(Instant.now()), "")
 
     override fun decode(hash: Hash): ComplexTag {
         val treeFolder = Main.repository.getObjectsFolderPath().resolve(hash.toString().take(2))

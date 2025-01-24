@@ -9,13 +9,9 @@ import java.sql.Timestamp
 import java.time.Instant
 
 data class SimpleTag(
-    override val name: String,
-    override val commit: Hash?
+    override val name: String = "",
+    override val commit: Hash? = null
 ) : Tag, TrackitObject<SimpleTag>(), Serializable {
-
-    constructor() : this("", null)
-
-    constructor(name: String) : this(name, null)
 
     override fun decode(hash: Hash): SimpleTag {
         val treeFolder = Main.repository.getObjectsFolderPath().resolve(hash.toString().take(2))
