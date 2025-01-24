@@ -45,7 +45,7 @@ data class User(
 
     companion object {
         @JvmStatic
-        fun decode(hash : Hash) : User {
+        fun newInstance(hash : Hash) : User {
             return User().decode(hash)
         }
     }

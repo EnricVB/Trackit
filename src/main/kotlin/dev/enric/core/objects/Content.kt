@@ -61,7 +61,7 @@ class Content(private val content: String = "") : TrackitObject<Content>(), Seri
 
     companion object {
         @JvmStatic
-        fun decode(hash : Hash) : Content {
+        fun newInstance(hash : Hash) : Content {
             return Content().decode(hash)
         }
     }

@@ -40,7 +40,7 @@ data class Branch(
 
     companion object {
         @JvmStatic
-        fun decode(hash : Hash) : Branch {
+        fun newInstance(hash : Hash) : Branch {
             return Branch().decode(hash)
         }
     }

@@ -46,7 +46,7 @@ data class ComplexTag(
 
     companion object {
         @JvmStatic
-        fun decode(hash : Hash) : ComplexTag {
+        fun newInstance(hash : Hash) : ComplexTag {
             return ComplexTag().decode(hash)
         }
     }

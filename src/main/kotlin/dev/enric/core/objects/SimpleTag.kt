@@ -43,7 +43,7 @@ data class SimpleTag(
 
     companion object {
         @JvmStatic
-        fun decode(hash : Hash) : SimpleTag {
+        fun newInstance(hash : Hash) : SimpleTag {
             return SimpleTag().decode(hash)
         }
     }

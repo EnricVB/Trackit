@@ -49,7 +49,7 @@ data class Commit(
 
     companion object {
         @JvmStatic
-        fun decode(hash : Hash) : Commit {
+        fun newInstance(hash : Hash) : Commit {
             return Commit().decode(hash)
         }
     }

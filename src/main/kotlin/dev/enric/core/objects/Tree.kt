@@ -43,7 +43,7 @@ data class Tree(val child: Map<Hash, SerializablePath> = mapOf()) : TrackitObjec
 
     companion object {
         @JvmStatic
-        fun decode(hash : Hash) : Tree {
+        fun newInstance(hash : Hash) : Tree {
             return Tree().decode(hash)
         }
     }
