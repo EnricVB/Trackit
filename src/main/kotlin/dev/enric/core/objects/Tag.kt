@@ -1,4 +1,4 @@
-package dev.enric.core.`object`
+package dev.enric.core.objects
 
 import dev.enric.core.Hash
 

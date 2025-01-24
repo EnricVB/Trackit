@@ -1,8 +1,7 @@
-package dev.enric.core.`object`
+package dev.enric.core.objects
 
 import dev.enric.Main
 import dev.enric.core.Hash
-import dev.enric.core.Hash.HashType.COMPLEX_TAG
 import dev.enric.core.Hash.HashType.TREE
 import dev.enric.core.TrackitObject
 import dev.enric.util.SerializablePath

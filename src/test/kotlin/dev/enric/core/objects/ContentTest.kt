@@ -1,4 +1,4 @@
-package dev.enric.core.`object`
+package dev.enric.core.objects
 
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -35,7 +35,7 @@ class ContentTest {
 
         assertEquals(
             initialMessage,
-            decompressedContent,
+            String(decompressedContent!!),
             "Initial message should be the same as the decompressed message"
         )
     }
