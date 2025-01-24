@@ -4,6 +4,7 @@ import dev.enric.Main
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.USER
 import dev.enric.core.TrackitObject
+import java.io.Serializable
 import java.nio.file.Files
 import java.sql.Timestamp
 import java.time.Instant
@@ -14,7 +15,7 @@ data class User(
     val email: String = "",
     val phone: String = "",
     val role: Hash = Hash("0".repeat(32))
-) : TrackitObject<User>() {
+) : TrackitObject<User>(), Serializable {
 
     override fun decode(hash: Hash): User {
         val treeFolder = Main.repository.getObjectsFolderPath().resolve(hash.toString().take(2))

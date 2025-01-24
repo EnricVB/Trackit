@@ -4,13 +4,14 @@ import dev.enric.Main
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.BRANCH
 import dev.enric.core.TrackitObject
+import java.io.Serializable
 import java.nio.file.Files
 import java.sql.Timestamp
 import java.time.Instant
 
 data class Branch(
     val name : String = ""
-) : TrackitObject<Branch>() {
+) : TrackitObject<Branch>(), Serializable {
 
     override fun decode(hash: Hash): Branch {
         val commitFolder = Main.repository.getObjectsFolderPath().resolve(hash.toString().take(2))
