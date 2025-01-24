@@ -1,4 +1,4 @@
-package dev.enric.core.objects
+package dev.enric.core.objects.remote
 
 import dev.enric.Main
 import dev.enric.core.Hash
@@ -10,8 +10,8 @@ import java.sql.Timestamp
 import java.time.Instant
 
 data class Remote(
-    val protocol: DataProtocolEnum? = null,
-    val type: RemoteTypeEnum? = null
+    val protocol: DataProtocol? = null,
+    val type: RemoteType? = null
 ) : TrackitObject<Remote>(), Serializable {
 
     override fun decode(hash: Hash): Remote {
@@ -27,7 +27,7 @@ data class Remote(
 
     override fun generateKey(): Hash {
         val instantNow = Timestamp.from(Instant.now())
-        val hashData = Hash.parseText("${instantNow};${toString()};${protocol.toString()};${type.toString()}", 15)
+        val hashData = Hash.parseText("${instantNow};${toString().length};${protocol.toString()};${type.toString()}", 15)
 
         return REMOTE.hash.plus(hashData)
     }
@@ -46,48 +46,4 @@ data class Remote(
             return Remote().decode(hash)
         }
     }
-}
-
-
-enum class DataProtocolEnum(
-    var user: String? = null,
-    var host: String? = null,
-    var port: Int? = null,
-    var path: String? = null
-) : Serializable {
-
-    SSH,
-    LOCAL;
-
-    override fun toString(): String {
-        return when (this) {
-            SSH -> "SSH://$user@$host:$port/$path"
-            LOCAL -> "LOCAL://$user:/$path"
-        }
-    }
-
-    companion object Factory {
-        @JvmStatic
-        fun newSSHInstance(user: String, host: String, port: Int, path: String): DataProtocolEnum {
-            return SSH.apply {
-                this.user = user
-                this.host = host
-                this.port = port
-                this.path = path
-            }
-        }
-
-        @JvmStatic
-        fun newLocalInstance(user: String, path: String): DataProtocolEnum {
-            return LOCAL.apply {
-                this.user = user
-                this.path = path
-            }
-        }
-    }
-}
-
-enum class RemoteTypeEnum : Serializable {
-    ORIGIN,
-    DESTINATION
 }
