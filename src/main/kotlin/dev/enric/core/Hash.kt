@@ -38,14 +38,15 @@ data class Hash(val hash: String) : Serializable {
 
     enum class HashType(val hash: Hash) {
         CONTENT(parseText("Content", 1)),
-        TREE(parseText("Content", 1)),
-        COMMIT(parseText("Content", 1)),
-        SIMPLE_TAG(parseText("Content", 1)),
-        COMPLEX_TAG(parseText("Content", 1)),
-        USER(parseText("Content", 1)),
-        BRANCH(parseText("Content", 1)),
-        ROLE(parseText("Content", 1)),
-        BRANCH_PERMISSION(parseText("Content", 1)),
-        ROLE_PERMISSION(parseText("Content", 1))
+        TREE(parseText("Tree", 1)),
+        COMMIT(parseText("Commit", 1)),
+        SIMPLE_TAG(parseText("SimpleTag", 1)),
+        COMPLEX_TAG(parseText("ComplexTag", 1)),
+        USER(parseText("User", 1)),
+        BRANCH(parseText("Branch", 1)),
+        REMOTE(parseText("Remote", 1)),
+        ROLE(parseText("Role", 1)),
+        BRANCH_PERMISSION(parseText("BranchPermission", 1)),
+        ROLE_PERMISSION(parseText("RolePermission", 1))
     }
 }
