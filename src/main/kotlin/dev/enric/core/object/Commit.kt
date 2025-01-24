@@ -77,4 +77,11 @@ data class Commit(
     override fun showDifferences(newer: Hash, oldest: Hash): String {
         TODO("Not yet implemented")
     }
+
+    companion object {
+        @JvmStatic
+        fun decode(hash : Hash) : Commit {
+            return Commit().decode(hash)
+        }
+    }
 }

@@ -46,4 +46,10 @@ data class ComplexTag(
         TODO("Not yet implemented")
     }
 
+    companion object {
+        @JvmStatic
+        fun decode(hash : Hash) : ComplexTag {
+            return ComplexTag().decode(hash)
+        }
+    }
 }

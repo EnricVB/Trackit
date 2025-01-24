@@ -42,4 +42,11 @@ data class Tree(val child: Map<Hash, SerializablePath>) : TrackitObject<Tree>(),
     override fun showDifferences(newer: Hash, oldest: Hash): String {
         TODO("Not yet implemented")
     }
+
+    companion object {
+        @JvmStatic
+        fun decode(hash : Hash) : Tree {
+            return Tree().decode(hash)
+        }
+    }
 }

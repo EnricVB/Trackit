@@ -60,4 +60,11 @@ class Content(private val content: String) : TrackitObject<Content>(), Serializa
 
         return "Newer content: ${newerContent.content}\nOldest content: ${oldestContent.content}" // TODO: Implement a better way to show differences
     }
+
+    companion object {
+        @JvmStatic
+        fun decode(hash : Hash) : Content {
+            return Content().decode(hash)
+        }
+    }
 }

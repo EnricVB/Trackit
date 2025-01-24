@@ -45,4 +45,10 @@ data class SimpleTag(
         TODO("Not yet implemented")
     }
 
+    companion object {
+        @JvmStatic
+        fun decode(hash : Hash) : SimpleTag {
+            return SimpleTag().decode(hash)
+        }
+    }
 }
