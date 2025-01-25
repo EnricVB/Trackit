@@ -14,23 +14,28 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
     private val stagingIndex = repositoryFolderManager.getStagingIndexPath()
 
     fun stage(content: Content, path: Path): Boolean {
+        val hash = content.encode(true).first
+        val pathString = path.toString().replace("\\.\\", "\\")
+
+        if(checkIfStaged(hash, path)) return false
+
         try {
             Files.writeString(
                 stagingIndex.toAbsolutePath(),
-                "${content.encode(true).first} : ${path.toString().replace("\\.\\", "\\")}\n",
+                "$hash : $pathString\n",
                 StandardOpenOption.APPEND
             )
 
             return true
         } catch (e: IOException) {
-            println("Error staging file $path")
+            println("Error staging file $pathString ${e.printStackTrace()}")
         }
 
         return false
     }
 
-    fun unstage(hash : Hash): Boolean {
-        val tempFile = Files.createTempFile("temp", ".txt")
+    fun unstage(hash: Hash): Boolean {
+        val tempFile = Files.createTempFile("temp", ".temp")
 
         try {
             Files.newBufferedReader(stagingIndex).use { reader ->
@@ -46,7 +51,7 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
 
             Files.move(tempFile, stagingIndex, StandardCopyOption.REPLACE_EXISTING)
         } catch (e: IOException) {
-            println("Error unstaging file")
+            println("Error unstaging file $hash ${e.printStackTrace()}")
         }
 
         return false
@@ -69,6 +74,10 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
 
     fun showDifferences(): String {
         return "Showing differences"
+    }
+
+    fun checkIfStaged(hash: Hash, path : Path): Boolean {
+        return getStagedFiles().any { it.first == hash && it.second == path }
     }
 
     companion object {

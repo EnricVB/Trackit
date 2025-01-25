@@ -30,25 +30,28 @@ class Stage : Callable<Int> {
         val file = repository.resolve(path)
 
         if(file.isDirectory()) {
-            getFilesToStage(repository.resolve(path)).forEach {
-                val path = repository.resolve(it)
-                stagingHandler.stage(Content(Files.readString(path)), path)
-            }
+            stageFolder(file)
         } else {
             stagingHandler.stage(Content(Files.readString(file)), file)
-        }
-
-        StagingHandler.getStagedFiles().forEach {
-            (hash, path) -> println("$hash : $path")
         }
 
         return 0
     }
 
+    fun stageFolder(path: Path) {
+        val repository = RepositoryFolderManager().initFolder
+        val stagingHandler = StagingHandler(force)
+
+        getFilesToStage(path).forEach {
+            val pathFile = repository.resolve(it)
+            stagingHandler.stage(Content(Files.readString(pathFile)), pathFile)
+        }
+    }
+
     @OptIn(ExperimentalPathApi::class)
     fun getFilesToStage(directory: Path): List<String> {
         return directory.walk(PathWalkOption.INCLUDE_DIRECTORIES)
-            .filter { !it.isDirectory() }
+            .filter { !it.isDirectory() && !it.toFile().absolutePath.toString().contains(".trackit") }
             .map { it.toString() }
             .toList()
     }
