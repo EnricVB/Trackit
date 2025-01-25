@@ -1,22 +1,31 @@
 package dev.enric
 
-import dev.enric.core.objects.Content
-import dev.enric.util.RepositoryFolderManager
-import java.nio.file.Paths
+import dev.enric.command.repository.Init
+import picocli.CommandLine
+import picocli.CommandLine.Command
+import java.util.concurrent.Callable
+import kotlin.system.exitProcess
 
-class Main {
+@Command(
+    name = "trackit",
+    mixinStandardHelpOptions = true,
+    version = ["trackit 1.0"],
+    description = ["Track your files"],
+    subcommands = [Init::class]
+)
+class Main : Callable<Int> {
+
     companion object {
         @JvmStatic
-        val repository = RepositoryFolderManager(Paths.get("D:\\test"))
+        fun main(args: Array<String>) {
+            val exitCode = CommandLine(Main()).execute(*args)
+            exitProcess(exitCode)
+        }
     }
-}
 
-fun main() {
-    Main.repository.createRepositoryFolder()
+    override fun call(): Int {
+        CommandLine.usage(this, System.out)
 
-    val content = Content("Hello, World!")
-    val encodedContent = content.encode(true)
-
-    val decodedContent = content.decode(encodedContent.first)
-    println(decodedContent.printInfo())
+        return 0
+    }
 }
