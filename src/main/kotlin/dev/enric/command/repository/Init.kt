@@ -5,7 +5,7 @@ import picocli.CommandLine.Command
 import java.util.concurrent.Callable
 
 @Command(
-    name = "--init",
+    name = "init",
     description = ["Initialize a new repository"]
 )
 class Init : Callable<Int> {

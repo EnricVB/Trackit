@@ -19,16 +19,16 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
         const val PERMISSION_INDEX = "PERMISSION_INDEX"
     }
 
-    private val repositoryFolder: Path by lazy { initFolder.resolve(TRACKIT_FOLDER) }
-    private val logsFolder: Path by lazy { repositoryFolder.resolve(LOGS_FOLDER) }
-    private val objectsFolder: Path by lazy { repositoryFolder.resolve(OBJECTS_FOLDER) }
-    private val indexFolder: Path by lazy { repositoryFolder.resolve(INDEX_FOLDER) }
+    private val trackitFolder: Path by lazy { initFolder.resolve(TRACKIT_FOLDER) }
+    private val logsFolder: Path by lazy { trackitFolder.resolve(LOGS_FOLDER) }
+    private val objectsFolder: Path by lazy { trackitFolder.resolve(OBJECTS_FOLDER) }
+    private val indexFolder: Path by lazy { trackitFolder.resolve(INDEX_FOLDER) }
 
 
     fun createRepositoryFolder() {
         initFolder.toFile().mkdir()
 
-        repositoryFolder.toFile().mkdir()
+        trackitFolder.toFile().mkdir()
         logsFolder.toFile().mkdir()
         objectsFolder.toFile().mkdir()
         indexFolder.toFile().mkdir()
@@ -43,7 +43,7 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
         getPermissionIndexPath().toFile().createNewFile()
     }
 
-    fun getRepositoryFolderPath(): Path { return repositoryFolder }
+    fun getRepositoryFolderPath(): Path { return trackitFolder }
 
     fun getLogsFolderPath(): Path { return logsFolder }
 

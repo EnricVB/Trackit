@@ -1,6 +1,7 @@
 package dev.enric
 
 import dev.enric.command.repository.Init
+import dev.enric.command.staging.Stage
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import java.util.concurrent.Callable
@@ -11,7 +12,7 @@ import kotlin.system.exitProcess
     mixinStandardHelpOptions = true,
     version = ["trackit 1.0"],
     description = ["Track your files"],
-    subcommands = [Init::class]
+    subcommands = [Init::class, Stage::class]
 )
 class Main : Callable<Int> {
 

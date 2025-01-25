@@ -1,4 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.internal.declarativedsl.parsing.main
+import java.util.Scanner
 
 plugins {
     kotlin("jvm") version "2.0.21"
@@ -34,4 +36,24 @@ tasks {
         archiveClassifier.set("")
         archiveVersion.set("")
     }
+}
+
+
+// Ejecutar el programa con comandos
+tasks.register<JavaExec>("tktInit") {
+    mainClass.set("dev.enric.Main")
+    workingDir = file("${project.rootDir}/tktFolder")
+    group = "execute"
+    classpath = project.sourceSets["main"].runtimeClasspath
+
+    args = listOf("init")
+}
+
+tasks.register<JavaExec>("tktStage") {
+    mainClass.set("dev.enric.Main")
+    workingDir = file("${project.rootDir}/tktFolder")
+    group = "execute"
+    classpath = project.sourceSets["main"].runtimeClasspath
+
+    args = listOf("stage", ".")
 }
