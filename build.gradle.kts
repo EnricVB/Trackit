@@ -1,5 +1,8 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     kotlin("jvm") version "2.0.21"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "dev.zanckor"
@@ -10,12 +13,25 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.rctcwyvrn:blake3:1.3")
-    implementation("org.tukaani:xz:1.8")
+    implementation("io.github.rctcwyvrn:blake3:1.3")             // Blake3 hash function
+    implementation("org.tukaani:xz:1.8")                         // ZLib compression algorithm
+    implementation("info.picocli:picocli:4.7.6")                 // Command line interface
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.21")  // Standard library
 
     testImplementation(kotlin("test"))
 }
 
-tasks.test {
-    useJUnitPlatform()
+tasks {
+    withType<Jar> {
+        manifest {
+            attributes["Main-Class"] = "dev.enric.Main"
+        }
+    }
+
+    // Configurar Shadow para generar un JAR ejecutable
+    named<ShadowJar>("shadowJar") {
+        archiveBaseName.set("trackit")
+        archiveClassifier.set("")
+        archiveVersion.set("")
+    }
 }
