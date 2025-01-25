@@ -33,8 +33,7 @@ data class Commit(
     }
 
     override fun generateKey(): Hash {
-        val instantNow = Timestamp.from(Instant.now())
-        val hashData = Hash.parseText("${instantNow};${this.toString().length};$this", 15)
+        val hashData = Hash.parseText("${this.toString().length};$this", 15)
 
         return COMMIT.hash.plus(hashData)
     }

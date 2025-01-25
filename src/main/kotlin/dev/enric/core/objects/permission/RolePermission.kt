@@ -6,8 +6,6 @@ import dev.enric.core.TrackitObject
 import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
-import java.sql.Timestamp
-import java.time.Instant
 
 
 data class RolePermission(
@@ -33,10 +31,8 @@ data class RolePermission(
     }
 
     override fun generateKey(): Hash {
-        val instantNow = Timestamp.from(Instant.now())
         val hashData = Hash.parseText(
             """
-            ${instantNow};
             ${toString().length};
             $addRolePermission;
             $modifyRolePermission;

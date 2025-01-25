@@ -6,8 +6,6 @@ import dev.enric.core.TrackitObject
 import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
-import java.sql.Timestamp
-import java.time.Instant
 
 data class Role(val name: String = "", val permissionLevel: Int = -1, val permissions: MutableList<Hash> = mutableListOf()) : TrackitObject<Role>(),
     Serializable {
@@ -25,8 +23,7 @@ data class Role(val name: String = "", val permissionLevel: Int = -1, val permis
     }
 
     override fun generateKey(): Hash {
-        val instantNow = Timestamp.from(Instant.now())
-        val hashData = Hash.parseText("${instantNow};${toString().length};$name$permissionLevel$permissions", 15)
+        val hashData = Hash.parseText("${toString().length};$name$permissionLevel$permissions", 15)
 
         return ROLE.hash.plus(hashData)
     }

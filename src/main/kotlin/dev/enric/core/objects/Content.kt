@@ -7,8 +7,6 @@ import dev.enric.util.RepositoryFolderManager
 import java.io.ByteArrayOutputStream
 import java.io.Serializable
 import java.nio.file.Files
-import java.sql.Timestamp
-import java.time.Instant
 import java.util.zip.Deflater
 
 class Content(private val content: String = "") : TrackitObject<Content>(), Serializable {
@@ -23,8 +21,7 @@ class Content(private val content: String = "") : TrackitObject<Content>(), Seri
     }
 
     override fun generateKey(): Hash {
-        val instantNow = Timestamp.from(Instant.now())
-        val hashData = Hash.parseText("${instantNow};${content.length};$content", 15)
+        val hashData = Hash.parseText("${content.length};$content", 15)
 
         return COMMIT.hash.plus(hashData)
     }

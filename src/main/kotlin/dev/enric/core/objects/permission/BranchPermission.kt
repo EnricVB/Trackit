@@ -6,8 +6,6 @@ import dev.enric.core.TrackitObject
 import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
-import java.sql.Timestamp
-import java.time.Instant
 
 data class BranchPermission(
     val readPermission: Boolean = false,
@@ -29,8 +27,7 @@ data class BranchPermission(
     }
 
     override fun generateKey(): Hash {
-        val instantNow = Timestamp.from(Instant.now())
-        val hashData = Hash.parseText("${instantNow};${toString().length};${readPermission};${writePermission}", 15)
+        val hashData = Hash.parseText("${toString().length};${readPermission};${writePermission}", 15)
 
         return BRANCH_PERMISSION.hash.plus(hashData)
     }

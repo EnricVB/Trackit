@@ -6,8 +6,6 @@ import dev.enric.core.TrackitObject
 import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
-import java.sql.Timestamp
-import java.time.Instant
 
 data class Remote(
     val protocol: DataProtocol? = null,
@@ -26,8 +24,7 @@ data class Remote(
     }
 
     override fun generateKey(): Hash {
-        val instantNow = Timestamp.from(Instant.now())
-        val hashData = Hash.parseText("${instantNow};${toString().length};${protocol.toString()};${type.toString()}", 15)
+        val hashData = Hash.parseText("${toString().length};${protocol.toString()};${type.toString()}", 15)
 
         return REMOTE.hash.plus(hashData)
     }

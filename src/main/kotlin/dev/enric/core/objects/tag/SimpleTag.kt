@@ -6,8 +6,6 @@ import dev.enric.core.TrackitObject
 import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
-import java.sql.Timestamp
-import java.time.Instant
 
 data class SimpleTag(
     override val name: String = "",
@@ -27,8 +25,7 @@ data class SimpleTag(
     }
 
     override fun generateKey(): Hash {
-        val instantNow = Timestamp.from(Instant.now())
-        val hashData = Hash.parseText("${instantNow};${this.toString().length};$name", 15)
+        val hashData = Hash.parseText("${this.toString().length};$name", 15)
 
         return SIMPLE_TAG.hash.plus(hashData)
     }

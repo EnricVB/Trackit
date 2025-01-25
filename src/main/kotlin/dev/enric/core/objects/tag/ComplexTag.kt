@@ -30,8 +30,7 @@ data class ComplexTag(
     }
 
     override fun generateKey(): Hash {
-        val instantNow = Timestamp.from(Instant.now())
-        val hashData = Hash.parseText("${instantNow};${this.toString().length};$name", 15)
+        val hashData = Hash.parseText("${this.toString().length};$name", 15)
 
         return COMPLEX_TAG.hash.plus(hashData)
     }

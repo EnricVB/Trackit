@@ -7,8 +7,6 @@ import dev.enric.util.RepositoryFolderManager
 import dev.enric.util.SerializablePath
 import java.io.Serializable
 import java.nio.file.Files
-import java.sql.Timestamp
-import java.time.Instant
 
 data class Tree(val child: Map<Hash, SerializablePath> = mapOf()) : TrackitObject<Tree>(), Serializable {
 
@@ -24,8 +22,7 @@ data class Tree(val child: Map<Hash, SerializablePath> = mapOf()) : TrackitObjec
     }
 
     override fun generateKey(): Hash {
-        val instantNow = Timestamp.from(Instant.now())
-        val hashData = Hash.parseText("${instantNow};${child.size};$child", 15)
+        val hashData = Hash.parseText("${child.size};$child", 15)
 
         return TREE.hash.plus(hashData)
     }

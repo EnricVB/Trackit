@@ -6,8 +6,6 @@ import dev.enric.core.TrackitObject
 import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
-import java.sql.Timestamp
-import java.time.Instant
 
 data class User(
     val name: String = "",
@@ -30,8 +28,7 @@ data class User(
     }
 
     override fun generateKey(): Hash {
-        val instantNow = Timestamp.from(Instant.now())
-        val hashData = Hash.parseText("${instantNow};${this.toString().length};$name$password$email$phone$role", 15)
+        val hashData = Hash.parseText("${this.toString().length};$name$password$email$phone$role", 15)
 
         return USER.hash.plus(hashData)
     }

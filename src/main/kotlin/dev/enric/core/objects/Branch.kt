@@ -6,8 +6,6 @@ import dev.enric.core.TrackitObject
 import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
-import java.sql.Timestamp
-import java.time.Instant
 
 data class Branch(
     val name : String = ""
@@ -25,8 +23,7 @@ data class Branch(
     }
 
     override fun generateKey(): Hash {
-        val instantNow = Timestamp.from(Instant.now())
-        val hashData = Hash.parseText("${instantNow};${name.length};$name", 15)
+        val hashData = Hash.parseText("${name.length};$name", 15)
 
         return BRANCH.hash.plus(hashData)
     }
