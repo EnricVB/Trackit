@@ -65,6 +65,15 @@ tasks.register<JavaExec>("tktStage") {
     args = listOf("stage", ".")
 }
 
+tasks.register<JavaExec>("tktUnstage") {
+    mainClass.set("dev.enric.Main")
+    workingDir = file("${project.rootDir}/tktFolder")
+    group = "execute"
+    classpath = project.sourceSets["main"].runtimeClasspath
+
+    args = listOf("unstage", ".")
+}
+
 tasks.register<JavaExec>("tktIgnore") {
     mainClass.set("dev.enric.Main")
     workingDir = file("${project.rootDir}/tktFolder")

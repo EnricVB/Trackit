@@ -28,6 +28,10 @@ data class Hash(val hash: String) : Serializable {
         return hash
     }
 
+    override fun equals(other: Any?): Boolean {
+        return other is Hash && hash == other.hash
+    }
+
     companion object {
         /**
          * Parses a text into a Hash object. The text is going to be hashed using the Blake3 algorithm.
@@ -52,6 +56,33 @@ data class Hash(val hash: String) : Serializable {
         fun parseText(hashData: String, length: Int): Hash {
             val hasher = Blake3.newInstance()
             hasher.update(hashData.toByteArray())
+
+            return Hash(hasher.hexdigest(length))
+        }
+
+        /**
+         * Parses a ByteArray into a Hash object. The ByteArray is going to be hashed using the Blake3 algorithm.
+         * @param hashData ByteArray that is going to be parsed into a Hash object.
+         * @return 16 length long Hash object that represents the hashed ByteArray.
+         */
+        @JvmStatic
+        fun parse(hashData: ByteArray): Hash {
+            val hasher = Blake3.newInstance()
+            hasher.update(hashData)
+
+            return Hash(hasher.hexdigest(16))
+        }
+
+        /**
+         * Parses a ByteArray into a Hash object. The ByteArray is going to be hashed using the Blake3 algorithm.
+         * @param hashData ByteArray that is going to be parsed into a Hash object.
+         * @param length Int that indicates the length of the Hash object.
+         * @return Hash object that represents the hashed ByteArray.
+         */
+        @JvmStatic
+        fun parse(hashData: ByteArray, length: Int): Hash {
+            val hasher = Blake3.newInstance()
+            hasher.update(hashData)
 
             return Hash(hasher.hexdigest(length))
         }

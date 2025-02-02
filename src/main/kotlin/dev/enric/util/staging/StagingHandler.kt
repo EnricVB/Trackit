@@ -24,10 +24,53 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
      */
     fun stage(content: Content, path: Path): Boolean {
         val hash = content.encode(true).first
-        if (checkIfStaged(hash, path)) return false
-
         val relativePath = SerializablePath.of(path).relativePath(RepositoryFolderManager().initFolder)
 
+        if(checkIfOutdated(hash, relativePath)) return replaceOutdatedFile(hash, relativePath)
+        if(!checkIfStaged(hash, relativePath)) return stageNewFile(hash, relativePath)
+
+        return false
+    }
+
+
+    private fun replaceOutdatedFile(hash: Hash, path: Path): Boolean {
+        val tempFile = Files.createTempFile("temp", ".temp")
+
+        return try {
+            Files.newBufferedReader(stagingIndex).use { reader ->
+                Files.newBufferedWriter(tempFile, StandardOpenOption.WRITE).use { writer ->
+                    reader.forEachLine { line ->
+                        val (lineHash, linePath) = line.split(" : ").let { Hash(it[0]) to Path.of(it[1]) }
+                        val changedHash = (lineHash != hash && linePath == path)
+                        val changedPath = (lineHash == hash && linePath != path)
+
+                        if (changedHash || changedPath) {
+                            writer.write("$hash : $path")
+                        } else {
+                            writer.write(line)
+                        }
+
+                        writer.newLine()
+                    }
+                }
+            }
+
+            Files.move(tempFile, stagingIndex, StandardCopyOption.REPLACE_EXISTING)
+            true
+        } catch (e: IOException) {
+            println("Error unstaging file $hash ${e.printStackTrace()}")
+            false
+        }
+    }
+
+    /**
+     * Stages a file to be committed.
+     * It writes the hash of the file and the path of the file to the staging index in this format:
+     * hash : path
+     * @param relativePath The path of the file to be staged
+     * @return True if the file was staged successfully, false otherwise
+     */
+    private fun stageNewFile(hash: Hash, relativePath: Path): Boolean {
         return try {
             Files.writeString(
                 stagingIndex,
@@ -37,7 +80,7 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
 
             true
         } catch (e: IOException) {
-            println("Error staging file $path ${e.printStackTrace()}")
+            println("Error staging file $relativePath ${e.printStackTrace()}")
             false
         }
     }
@@ -71,6 +114,32 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
         }
     }
 
+    fun unstage(unstagePath: Path): Boolean {
+        val tempFile = Files.createTempFile("temp", ".temp")
+        val relativeUnstagePath = SerializablePath.of(unstagePath).relativePath(RepositoryFolderManager().initFolder)
+
+        return try {
+            Files.newBufferedReader(stagingIndex).use { reader ->
+                Files.newBufferedWriter(tempFile, StandardOpenOption.WRITE).use { writer ->
+                    reader.forEachLine { line ->
+                        val linePath = Path.of(line.split(" : ")[1])
+
+                        if (!linePath.startsWith(relativeUnstagePath)) {
+                            writer.write(line)
+                            writer.newLine()
+                        }
+                    }
+                }
+            }
+
+            Files.move(tempFile, stagingIndex, StandardCopyOption.REPLACE_EXISTING)
+            true
+        } catch (e: IOException) {
+            println("Error unstaging file $unstagePath ${e.printStackTrace()}")
+            false
+        }
+    }
+
     fun getStatus(): String {
         val stagedFiles = getStagedFiles()
         var statusMessage = ""
@@ -94,10 +163,20 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
      * Checks if a file is staged to be committed.
      * @param hash The hash of the file to be checked
      * @param path The path of the file to be checked
-     * @return True if the staged file is present and has the same content, false otherwise
+     * @return True if the file is staged, false otherwise
      */
     private fun checkIfStaged(hash: Hash, path: Path): Boolean {
         return getStagedFiles().any { it.first == hash && it.second == path }
+    }
+
+    /**
+     * Checks if a file was modified or renamed and is staged to be committed.
+     * @param hash The hash of the file to be checked
+     * @param path The path of the file to be checked
+     * @return True if the staged file is present and has the same content, false otherwise
+     */
+    private fun checkIfOutdated(hash: Hash, path: Path): Boolean {
+        return getStagedFiles().any { (it.first != hash && it.second == path) || (it.first == hash && it.second != path) }
     }
 
     companion object {
@@ -114,8 +193,7 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
             try {
                 Files.newBufferedReader(stagingIndex).use { reader ->
                     reader.forEachLine { line ->
-                        val hash = Hash(line.split(" : ")[0])
-                        val path = Path.of(line.split(" : ")[1])
+                        val (hash, path) = line.split(" : ").let { Hash(it[0]) to Path.of(it[1]) }
 
                         stagedFiles.add(Pair(hash, path))
                     }

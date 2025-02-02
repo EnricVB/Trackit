@@ -21,9 +21,7 @@ class Content(val content: ByteArray = ByteArray(0)) : TrackitObject<Content>(),
     }
 
     override fun generateKey(): Hash {
-        val hashData = Hash.parseText("${content.size};$content", 15)
-
-        return COMMIT.hash.plus(hashData)
+        return COMMIT.hash.plus(Hash.parse(content, 15))
     }
 
     override fun compressContent(): ByteArray {
