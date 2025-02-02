@@ -32,7 +32,7 @@ class Stage : Callable<Int> {
         if(file.isDirectory()) {
             stageFolder(file)
         } else {
-            stagingHandler.stage(Content(Files.readString(file)), file)
+            stagingHandler.stage(Content(Files.readAllBytes(file)), file)
         }
 
         return 0
@@ -44,7 +44,7 @@ class Stage : Callable<Int> {
 
         getFilesToStage(path).forEach {
             val pathFile = repository.resolve(it)
-            stagingHandler.stage(Content(Files.readString(pathFile)), pathFile)
+            stagingHandler.stage(Content(Files.readAllBytes(pathFile)), pathFile)
         }
     }
 

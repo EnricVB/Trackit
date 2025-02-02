@@ -9,7 +9,7 @@ import java.io.Serializable
 import java.nio.file.Files
 import java.util.zip.Deflater
 
-class Content(private val content: String = "") : TrackitObject<Content>(), Serializable {
+class Content(val content: ByteArray = ByteArray(0)) : TrackitObject<Content>(), Serializable {
 
     override fun decode(hash: Hash): Content {
         val contentFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
@@ -17,21 +17,21 @@ class Content(private val content: String = "") : TrackitObject<Content>(), Seri
 
         val decompressedStringData = decompressContent(Files.readAllBytes(objectFile)) ?: return Content() // If the file is empty, return an empty content
 
-        return Content(String(decompressedStringData))
+        return Content(decompressedStringData)
     }
 
     override fun generateKey(): Hash {
-        val hashData = Hash.parseText("${content.length};$content", 15)
+        val hashData = Hash.parseText("${content.size};$content", 15)
 
         return COMMIT.hash.plus(hashData)
     }
 
     override fun compressContent(): ByteArray {
         val deflater = Deflater()
-        deflater.setInput(content.toByteArray())
+        deflater.setInput(content)
         deflater.finish() // Indicates that all data has been sent
 
-        val outputStream = ByteArrayOutputStream(content.toByteArray().size) // Stream to which is going to be sent the compressed data
+        val outputStream = ByteArrayOutputStream(content.size) // Stream to which is going to be sent the compressed data
         val buffer = ByteArray(1024)
 
         while (!deflater.finished()) {
