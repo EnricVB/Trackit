@@ -7,10 +7,7 @@ import picocli.CommandLine.*
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.Callable
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.PathWalkOption
-import kotlin.io.path.isDirectory
-import kotlin.io.path.walk
+import kotlin.io.path.*
 
 
 @Command(
@@ -24,35 +21,52 @@ class Stage : Callable<Int> {
     @Parameters(paramLabel = "pattern", description = ["The path of the file to be staged"])
     var path: String = ""
 
+    private val repositoryFolder = RepositoryFolderManager().initFolder
+    private val stagingHandler = StagingHandler(force)
+
+    /**
+     * Stage the file or folder. This will add the file to the staging index.
+     * If the file is a folder, it will stage all the files inside the folder.
+     * @return 0 if the file was staged successfully, 1 otherwise
+     */
     override fun call(): Int {
-        val repository = RepositoryFolderManager().initFolder
-        val stagingHandler = StagingHandler(force)
-        val file = repository.resolve(path)
+        val file = repositoryFolder.resolve(path)
 
         if(file.isDirectory()) {
             stageFolder(file)
         } else {
-            stagingHandler.stage(Content(Files.readAllBytes(file)), file)
+            stageFile(file)
         }
 
         return 0
     }
 
-    fun stageFolder(path: Path) {
-        val repository = RepositoryFolderManager().initFolder
-        val stagingHandler = StagingHandler(force)
-
-        getFilesToStage(path).forEach {
-            val pathFile = repository.resolve(it)
-            stagingHandler.stage(Content(Files.readAllBytes(pathFile)), pathFile)
-        }
+    /**
+     * Stage all the files inside the folder
+     * @param directory The folder to stage
+     * @see stageFile
+     */
+    fun stageFolder(directory: Path) {
+        getFilesToStage(directory).forEach { stageFile(it) }
     }
 
+    /**
+     * Stage a single file and his content
+     * @param file The file to stage
+     */
+    fun stageFile(file: Path) {
+        stagingHandler.stage(Content(Files.readAllBytes(file)), file)
+    }
+
+    /**
+     * Get all the files inside a folder to stage
+     * @param directory The folder to get the files from
+     * @return A list of all the files inside the folder
+     */
     @OptIn(ExperimentalPathApi::class)
-    fun getFilesToStage(directory: Path): List<String> {
+    fun getFilesToStage(directory: Path): List<Path> {
         return directory.walk(PathWalkOption.INCLUDE_DIRECTORIES)
-            .filter { !it.isDirectory() && !it.toFile().absolutePath.toString().contains(".trackit") }
-            .map { it.toString() }
+            .filter { !it.isDirectory() && !it.toFile().toString().contains(".trackit") }
             .toList()
     }
 }

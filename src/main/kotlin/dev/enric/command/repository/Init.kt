@@ -10,6 +10,10 @@ import java.util.concurrent.Callable
 )
 class Init : Callable<Int> {
 
+    /**
+     * Create a new repository folder in the current directory.
+     * @see RepositoryFolderManager.createRepositoryFolder
+     */
     override fun call(): Int {
         RepositoryFolderManager().createRepositoryFolder()
 

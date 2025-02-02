@@ -4,6 +4,9 @@ import java.io.Serializable
 import java.nio.file.Path
 import java.nio.file.Paths
 
+/**
+ * SerializablePath is a wrapper class for Path that allows it to be serialized.
+ */
 data class SerializablePath(val path: String) : Serializable {
     fun toPath(): Path = Paths.get(path)
 

@@ -8,36 +8,48 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
+import kotlin.io.path.Path
 
 data class StagingHandler(val force: Boolean = false) { // TODO: Implement force option
     private val repositoryFolderManager = RepositoryFolderManager()
     private val stagingIndex = repositoryFolderManager.getStagingIndexPath()
 
+    /**
+     * Stages a file to be committed.
+     * It writes the hash of the file and the path of the file to the staging index in this format:
+     * hash : path
+     * @param content The content of the file to be staged
+     * @param path The path of the file to be staged
+     * @return True if the file was staged successfully, false otherwise
+     */
     fun stage(content: Content, path: Path): Boolean {
         val hash = content.encode(true).first
-        val pathString = path.toString().replace("\\.\\", "\\")
+        if (checkIfStaged(hash, path)) return false
 
-        if(checkIfStaged(hash, path)) return false
-
-        try {
+        return try {
             Files.writeString(
-                stagingIndex.toAbsolutePath(),
-                "$hash : $pathString\n",
+                stagingIndex,
+                "$hash : ${relativePath(path)}\n",
                 StandardOpenOption.APPEND
             )
 
-            return true
+            true
         } catch (e: IOException) {
-            println("Error staging file $pathString ${e.printStackTrace()}")
+            println("Error staging file $path ${e.printStackTrace()}")
+            false
         }
-
-        return false
     }
 
+    /**
+     * Unstages a file that was previously staged.
+     * It removes the file from the staging index.
+     * @param hash The hash of the file to be unstaged
+     * @return True if the file was unstaged successfully, false otherwise
+     */
     fun unstage(hash: Hash): Boolean {
         val tempFile = Files.createTempFile("temp", ".temp")
 
-        try {
+        return try {
             Files.newBufferedReader(stagingIndex).use { reader ->
                 Files.newBufferedWriter(tempFile, StandardOpenOption.WRITE).use { writer ->
                     reader.forEachLine { line ->
@@ -50,11 +62,11 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
             }
 
             Files.move(tempFile, stagingIndex, StandardCopyOption.REPLACE_EXISTING)
+            true
         } catch (e: IOException) {
             println("Error unstaging file $hash ${e.printStackTrace()}")
+            false
         }
-
-        return false
     }
 
     fun getStatus(): String {
@@ -76,11 +88,29 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
         return "Showing differences"
     }
 
-    fun checkIfStaged(hash: Hash, path : Path): Boolean {
+    /**
+     * Checks if a file is staged to be committed.
+     * @param hash The hash of the file to be checked
+     * @param path The path of the file to be checked
+     * @return True if the staged file is present and has the same content, false otherwise
+     */
+    fun checkIfStaged(hash: Hash, path: Path): Boolean {
         return getStagedFiles().any { it.first == hash && it.second == path }
     }
 
+    /**
+     * @param file The file to get the relative path from
+     * @return The relative path of the file.
+     */
+    fun relativePath(file: Path): Path {
+        return Path(file.toString().replace(RepositoryFolderManager().initFolder.toString(), "").substring(1))
+    }
+
     companion object {
+        /**
+         * Gets the files that are staged to be committed.
+         * @return A list of pairs with the hash of the file and the path of the file
+         */
         @JvmStatic
         fun getStagedFiles(): List<Pair<Hash, Path>> {
             val repositoryFolderManager = RepositoryFolderManager()

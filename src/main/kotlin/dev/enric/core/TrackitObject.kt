@@ -8,12 +8,34 @@ import java.util.zip.DataFormatException
 import java.util.zip.Deflater
 import java.util.zip.Inflater
 
+/**
+ * This class is the base class for all the objects that are going to be stored in the repository.
+ *
+ * Provides the basic methods to encode and decode the objects, as well as compress and decompress them.
+ */
 abstract class TrackitObject<T : TrackitObject<T>> {
 
+    /**
+     * Encodes the object into a pair of a Hash and a ByteArray.
+     * The Hash is the key that is going to be used to store the object in the repository.
+     * The ByteArray is the compressed object.
+     * @return Pair<Hash, ByteArray> with the key and the compressed object.
+     * @see Hash
+     * @see encode(writeOnDisk: Boolean)
+     */
     open fun encode(): Pair<Hash, ByteArray> {
         return Pair(generateKey(), compressContent())
     }
 
+    /**
+     * Encodes the object into a pair of a Hash and a ByteArray.
+     * The Hash is the key that is going to be used to store the object in the repository.
+     * The ByteArray is the compressed object.
+     * If writeOnDisk is true, the object is going to be written in disk as a file named with the Hash and the compressed content.
+     * @param writeOnDisk Boolean that indicates if the object is going to be written in disk.
+     * @return Pair<Hash, ByteArray> with the key and the compressed object.
+     * @see Hash
+     */
     open fun encode(writeOnDisk: Boolean = false): Pair<Hash, ByteArray> {
         val encodedFile = encode()
 
@@ -28,10 +50,27 @@ abstract class TrackitObject<T : TrackitObject<T>> {
         return encodedFile
     }
 
+    /**
+     * Decodes the object from a Hash.
+     * The Hash is the key that is going to be used to retrieve the object from the repository.
+     * @param hash Hash that is going to be used to retrieve the object.
+     * @return T object type that is going to be decoded into.
+     */
     abstract fun decode(hash: Hash): T
 
+    /**
+     * Generates a Hash key for the object.
+     * The Hash is formed by the BLAKE3 hash of the compressed object and other metadata as the object type.
+     */
     abstract fun generateKey(): Hash
 
+    /**
+     * Compresses the object into a ByteArray.
+     *
+     * The object is serialized into a ByteArray and then compressed using the Deflater class.
+     * @return ByteArray with the compressed object.
+     * @see Deflater
+     */
     open fun compressContent(): ByteArray {
         val byteArrayOutputStream = ByteArrayOutputStream()
         val objectOStream = ObjectOutputStream(byteArrayOutputStream)
@@ -56,6 +95,11 @@ abstract class TrackitObject<T : TrackitObject<T>> {
         return outputStream.toByteArray()
     }
 
+    /**
+     * Inverse operation of compressContent.
+     * Decompresses the object from a ByteArray that can be cast to the object type.
+     * @param compressedData ByteArray with the compressed object.
+     */
     open fun decompressContent(compressedData: ByteArray): ByteArray? {
         val inflater = Inflater()
         inflater.setInput(compressedData)
@@ -80,7 +124,18 @@ abstract class TrackitObject<T : TrackitObject<T>> {
         return null
     }
 
+    /**
+     * Prints the object information.
+     * @return String with the object information.
+     */
     abstract fun printInfo(): String
 
+    /**
+     * Shows the differences between two objects of the same type.
+     * @param newer Hash of the newer object.
+     * @param oldest Hash of the oldest object.
+     * @return String with the differences between the two objects.
+     * @see Hash
+     */
     abstract fun showDifferences(newer: Hash, oldest: Hash): String
 }
