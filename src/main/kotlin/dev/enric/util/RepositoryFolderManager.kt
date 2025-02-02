@@ -32,6 +32,7 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
     }
 
     private val trackitFolder: Path by lazy { initFolder.resolve(TRACKIT_FOLDER) }
+    private val ignoreFile: Path by lazy { initFolder.resolve(".ignore") }
     private val logsFolder: Path by lazy { trackitFolder.resolve(LOGS_FOLDER) }
     private val objectsFolder: Path by lazy { trackitFolder.resolve(OBJECTS_FOLDER) }
     private val indexFolder: Path by lazy { trackitFolder.resolve(INDEX_FOLDER) }
@@ -47,6 +48,8 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
         logsFolder.toFile().mkdir()
         objectsFolder.toFile().mkdir()
         indexFolder.toFile().mkdir()
+
+        ignoreFile.toFile().createNewFile()
 
         getConfigFilePath().toFile().createNewFile()
         getStagingIndexPath().toFile().createNewFile()

@@ -3,12 +3,12 @@ package dev.enric.util.staging
 import dev.enric.core.Hash
 import dev.enric.core.objects.Content
 import dev.enric.util.RepositoryFolderManager
+import dev.enric.util.SerializablePath
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
-import kotlin.io.path.Path
 
 data class StagingHandler(val force: Boolean = false) { // TODO: Implement force option
     private val repositoryFolderManager = RepositoryFolderManager()
@@ -26,10 +26,12 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
         val hash = content.encode(true).first
         if (checkIfStaged(hash, path)) return false
 
+        val relativePath = SerializablePath.of(path).relativePath(RepositoryFolderManager().initFolder)
+
         return try {
             Files.writeString(
                 stagingIndex,
-                "$hash : ${relativePath(path)}\n",
+                "$hash : ${relativePath}\n",
                 StandardOpenOption.APPEND
             )
 
@@ -94,16 +96,8 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
      * @param path The path of the file to be checked
      * @return True if the staged file is present and has the same content, false otherwise
      */
-    fun checkIfStaged(hash: Hash, path: Path): Boolean {
+    private fun checkIfStaged(hash: Hash, path: Path): Boolean {
         return getStagedFiles().any { it.first == hash && it.second == path }
-    }
-
-    /**
-     * @param file The file to get the relative path from
-     * @return The relative path of the file.
-     */
-    fun relativePath(file: Path): Path {
-        return Path(file.toString().replace(RepositoryFolderManager().initFolder.toString(), "").substring(1))
     }
 
     companion object {
