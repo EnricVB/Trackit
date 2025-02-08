@@ -1,9 +1,12 @@
 package dev.enric.command.commit
 
-import dev.enric.util.commit.CommitHandler
+import dev.enric.core.handler.commit.CommitHandler
+import dev.enric.core.handler.staging.StagingHandler
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 import picocli.CommandLine.Parameters
+import java.sql.Timestamp
+import java.time.Instant
 import java.util.concurrent.Callable
 
 @Command(
@@ -21,7 +24,12 @@ class Commit : Callable<Int> {
     var stageAllFiles = false
 
     override fun call(): Int {
-        CommitHandler().createCommitTree()
+        val commit = dev.enric.core.objects.Commit(title = title, message = message, date = Timestamp.from(Instant.now()))
+
+        CommitHandler().processCommit(commit)
+        //CommitHandler().postProcessCommit(commit)
+
+        StagingHandler.clearStagingArea()
 
         return 0
     }

@@ -14,7 +14,7 @@ data class Hash(val hash: String) : Serializable {
      * Constructor that checks if the hash is 16 characters long.
      */
     init {
-        requireNotNull(hash.length == 32) { "Hash must have 16 characters" }
+        require(hash.length == 32) { "Hash must have 16 characters" }
     }
 
     /**
@@ -37,58 +37,26 @@ data class Hash(val hash: String) : Serializable {
     }
 
     companion object {
-        /**
-         * Parses a text into a Hash object. The text is going to be hashed using the Blake3 algorithm.
-         * @param hashData String that is going to be parsed into a Hash object.
-         * @return 16 length long Hash object that represents the hashed text.
-         */
-        @JvmStatic
-        fun parseText(hashData: String): Hash {
+        private fun blake3Hash(data: ByteArray, length: Int = 16): String {
             val hasher = Blake3.newInstance()
-            hasher.update(hashData.toByteArray())
-
-            return Hash(hasher.hexdigest(16))
+            hasher.update(data)
+            return hasher.hexdigest(length)
         }
 
         /**
-         * Parses a text into a Hash object. The text is going to be hashed using the Blake3 algorithm.
-         * @param hashData String that is going to be parsed into a Hash object.
-         * @param length Int that indicates the length of the Hash object.
-         * @return Hash object that represents the hashed text.
+         * Hashes a string using Blake3.
          */
         @JvmStatic
-        fun parseText(hashData: String, length: Int): Hash {
-            val hasher = Blake3.newInstance()
-            hasher.update(hashData.toByteArray())
-
-            return Hash(hasher.hexdigest(length))
+        fun parseText(text: String, length: Int = 16): Hash {
+            return Hash(blake3Hash(text.toByteArray(), length))
         }
 
         /**
-         * Parses a ByteArray into a Hash object. The ByteArray is going to be hashed using the Blake3 algorithm.
-         * @param hashData ByteArray that is going to be parsed into a Hash object.
-         * @return 16 length long Hash object that represents the hashed ByteArray.
+         * Hashes a byte array using Blake3.
          */
         @JvmStatic
-        fun parse(hashData: ByteArray): Hash {
-            val hasher = Blake3.newInstance()
-            hasher.update(hashData)
-
-            return Hash(hasher.hexdigest(16))
-        }
-
-        /**
-         * Parses a ByteArray into a Hash object. The ByteArray is going to be hashed using the Blake3 algorithm.
-         * @param hashData ByteArray that is going to be parsed into a Hash object.
-         * @param length Int that indicates the length of the Hash object.
-         * @return Hash object that represents the hashed ByteArray.
-         */
-        @JvmStatic
-        fun parse(hashData: ByteArray, length: Int): Hash {
-            val hasher = Blake3.newInstance()
-            hasher.update(hashData)
-
-            return Hash(hasher.hexdigest(length))
+        fun parse(data: ByteArray, length: Int = 16): Hash {
+            return Hash(blake3Hash(data, length))
         }
     }
 

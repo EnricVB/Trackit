@@ -1,4 +1,4 @@
-package dev.enric.util.staging
+package dev.enric.core.handler.staging
 
 import dev.enric.core.Hash
 import dev.enric.core.objects.Content
@@ -10,21 +10,24 @@ import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
 
+/**
+ * Manages the staging area in Trackit, handling the addition and removal of files before committing.
+ * It interacts with the staging index, which keeps track of staged files and their hashes.
+ * @param force If true, allows forcing changes in staging.
+ */
 data class StagingHandler(val force: Boolean = false) { // TODO: Implement force option
     private val repositoryFolderManager = RepositoryFolderManager()
     private val stagingIndex = repositoryFolderManager.getStagingIndexPath()
 
     /**
-     * Stages a file to be committed.
-     * It writes the hash of the file and the path of the file to the staging index in this format:
-     * hash : path
-     * @param content The content of the file to be staged
-     * @param path The path of the file to be staged
-     * @return True if the file was staged successfully, false otherwise
+     * Stages a file to be committed by storing its hash and path in the staging index.
+     * @param content The content of the file to be staged.
+     * @param path The absolute path of the file to be staged.
+     * @return True if the file was successfully staged, false otherwise.
      */
     fun stage(content: Content, path: Path): Boolean {
         val hash = content.encode(true).first
-        val relativePath = SerializablePath.of(path).relativePath(RepositoryFolderManager().initFolder)
+        val relativePath = SerializablePath.of(path).relativePath(repositoryFolderManager.initFolder)
 
         if (checkIfOutdated(hash, relativePath)) return replaceOutdatedFile(hash, relativePath)
         if (!checkIfStaged(hash, relativePath)) return stageNewFile(hash, relativePath)
@@ -33,11 +36,10 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
     }
 
     /**
-     * Replaces a file that was previously staged.
-     * It updates the path of the file in the staging index in case the file was renamed.
-     * If the file was modified, the hash is updated.
-     * @param hash The hash of the file to be replaced
-     * @param path The path of the file to be replaced
+     * Replaces a previously staged file if its hash or path has changed.
+     * @param hash The new hash of the file.
+     * @param path The updated path of the file.
+     * @return True if the replacement was successful, false otherwise.
      */
     private fun replaceOutdatedFile(hash: Hash, path: Path): Boolean {
         val tempFile = Files.createTempFile("temp", ".temp")
@@ -55,7 +57,6 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
                         } else {
                             writer.write(line)
                         }
-
                         writer.newLine()
                     }
                 }
@@ -64,38 +65,35 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
             Files.move(tempFile, stagingIndex, StandardCopyOption.REPLACE_EXISTING)
             true
         } catch (e: IOException) {
-            println("Error unstaging file $hash ${e.printStackTrace()}")
+            println("Error replacing outdated staged file $path: ${e.message}")
             false
         }
     }
 
     /**
-     * Stages a file to be committed.
-     * It writes the hash of the file and the path of the file to the staging index in this format:
-     * hash : path
-     * @param relativePath The path of the file to be staged
-     * @return True if the file was staged successfully, false otherwise
+     * Adds a new file to the staging index.
+     * @param hash The hash of the file.
+     * @param relativePath The relative path of the file.
+     * @return True if the file was successfully staged, false otherwise.
      */
     private fun stageNewFile(hash: Hash, relativePath: Path): Boolean {
         return try {
             Files.writeString(
                 stagingIndex,
-                "$hash : ${relativePath}\n",
+                "$hash : $relativePath\n",
                 StandardOpenOption.APPEND
             )
-
             true
         } catch (e: IOException) {
-            println("Error staging file $relativePath ${e.printStackTrace()}")
+            println("Error staging file $relativePath: ${e.message}")
             false
         }
     }
 
     /**
-     * Unstages a file that was previously staged.
-     * It removes the file from the staging index.
-     * @param hash The hash of the file to be unstaged
-     * @return True if the file was unstaged successfully, false otherwise
+     * Removes a file from the staging index.
+     * @param hash The hash of the file to be unstaged.
+     * @return True if the file was successfully unstaged, false otherwise.
      */
     fun unstage(hash: Hash): Boolean {
         val tempFile = Files.createTempFile("temp", ".temp")
@@ -115,11 +113,16 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
             Files.move(tempFile, stagingIndex, StandardCopyOption.REPLACE_EXISTING)
             true
         } catch (e: IOException) {
-            println("Error unstaging file $hash ${e.printStackTrace()}")
+            println("Error unstaging file $hash: ${e.message}")
             false
         }
     }
 
+    /**
+     * Removes a file from the staging index.
+     * @param unstagePath The path of the file to be unstaged.
+     * @return True if the file was successfully unstaged, false otherwise.
+     */
     fun unstage(unstagePath: Path): Boolean {
         val tempFile = Files.createTempFile("temp", ".temp")
         val relativeUnstagePath = SerializablePath.of(unstagePath).relativePath(RepositoryFolderManager().initFolder)
@@ -144,17 +147,6 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
             println("Error unstaging file $unstagePath ${e.printStackTrace()}")
             false
         }
-    }
-
-    fun getStatus(): String {
-        val stagedFiles = getStagedFiles()
-        var statusMessage = ""
-
-        stagedFiles.forEach { (hash, path) ->
-            statusMessage += "$hash : $path\n"
-        }
-
-        return statusMessage
     }
 
     fun getStatus(hash: Hash, hideUntracked: Boolean = false): String {

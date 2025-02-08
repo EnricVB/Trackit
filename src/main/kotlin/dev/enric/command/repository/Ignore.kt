@@ -1,7 +1,7 @@
 package dev.enric.command.repository
 
 import dev.enric.util.RepositoryFolderManager
-import dev.enric.util.ignore.IgnoreHandler
+import dev.enric.core.handler.ignore.IgnoreHandler
 import picocli.CommandLine.Command
 import picocli.CommandLine.Parameters
 import java.util.concurrent.Callable
@@ -18,7 +18,7 @@ class Ignore : Callable<Int> {
     private val repositoryFolder = RepositoryFolderManager().initFolder
 
     override fun call(): Int {
-        IgnoreHandler.ignore(repositoryFolder.resolve(path))
+        IgnoreHandler().ignore(repositoryFolder.resolve(path))
 
         return 0
     }

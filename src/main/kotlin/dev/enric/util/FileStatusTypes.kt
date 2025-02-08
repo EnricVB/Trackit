@@ -1,4 +1,4 @@
-package dev.enric.util.staging
+package dev.enric.util
 
 enum class FileStatusTypes(type: String) {
     NON_TRACKED("?"),

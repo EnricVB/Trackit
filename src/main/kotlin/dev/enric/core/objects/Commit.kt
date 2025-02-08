@@ -11,15 +11,15 @@ import java.sql.Timestamp
 import java.time.Instant
 
 data class Commit(
-    val previousCommit: Hash = Hash("0".repeat(32)),
-    val tree: List<Hash> = listOf(),
-    val branch: Hash = Hash("0".repeat(32)),
-    val autor: Hash = Hash("0".repeat(32)),
-    val confirmer: Hash = Hash("0".repeat(32)),
-    val date: Timestamp = Timestamp.from(Instant.now()),
-    val title: String = "",
-    val message: String = "",
-    val tag: String = ""
+    var previousCommit: Hash = Hash("0".repeat(32)),
+    var tree: List<Hash> = listOf(),
+    var branch: Hash = Hash("0".repeat(32)),
+    var autor: Hash = Hash("0".repeat(32)),
+    var confirmer: Hash = Hash("0".repeat(32)),
+    var date: Timestamp = Timestamp.from(Instant.now()),
+    var title: String = "",
+    var message: String = "",
+    var tag: String = ""
 ) : TrackitObject<Commit>(), Serializable {
 
     override fun decode(hash: Hash): Commit {

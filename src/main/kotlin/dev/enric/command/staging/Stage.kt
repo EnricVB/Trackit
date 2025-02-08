@@ -2,7 +2,7 @@ package dev.enric.command.staging
 
 import dev.enric.core.objects.Content
 import dev.enric.util.RepositoryFolderManager
-import dev.enric.util.staging.StagingHandler
+import dev.enric.core.handler.staging.StagingHandler
 import picocli.CommandLine.*
 import java.nio.file.Files
 import java.nio.file.Path
