@@ -32,6 +32,10 @@ data class Hash(val hash: String) : Serializable {
         return other is Hash && hash == other.hash
     }
 
+    override fun hashCode(): Int {
+        return hash.hashCode()
+    }
+
     companion object {
         /**
          * Parses a text into a Hash object. The text is going to be hashed using the Blake3 algorithm.

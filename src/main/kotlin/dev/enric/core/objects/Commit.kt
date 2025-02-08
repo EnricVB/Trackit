@@ -6,12 +6,13 @@ import dev.enric.core.TrackitObject
 import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
+import java.nio.file.Path
 import java.sql.Timestamp
 import java.time.Instant
 
 data class Commit(
     val previousCommit: Hash = Hash("0".repeat(32)),
-    val tree: Hash = Hash("0".repeat(32)),
+    val tree: List<Hash> = listOf(),
     val branch: Hash = Hash("0".repeat(32)),
     val autor: Hash = Hash("0".repeat(32)),
     val confirmer: Hash = Hash("0".repeat(32)),
@@ -36,6 +37,18 @@ data class Commit(
         val hashData = Hash.parseText("${this.toString().length};$this", 15)
 
         return COMMIT.hash.plus(hashData)
+    }
+
+    fun findFile(content: Content, path: Path): Tree? {
+        tree.forEach {
+            val tree = Tree.newInstance(it)
+
+            if (tree.serializablePath.pathString == path.toString() && tree.hash == content.generateKey()) {
+                return tree
+            }
+        }
+
+        return null
     }
 
     override fun printInfo(): String {

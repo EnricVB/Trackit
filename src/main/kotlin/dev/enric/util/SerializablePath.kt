@@ -8,11 +8,13 @@ import kotlin.io.path.Path
 /**
  * SerializablePath is a wrapper class for Path that allows it to be serialized.
  */
-data class SerializablePath(val path: String) : Serializable {
-    fun toPath(): Path = Paths.get(path)
+data class SerializablePath(val pathString: String) : Serializable {
+    constructor(path: Path) : this(path.toString())
+
+    fun toPath(): Path = Paths.get(pathString)
 
     override fun toString(): String {
-        return path
+        return pathString
     }
 
     /**
@@ -21,6 +23,18 @@ data class SerializablePath(val path: String) : Serializable {
      */
     fun relativePath(rootPath: Path): Path {
         return Path(toString().replace(rootPath.toString(), ""))
+    }
+
+    override fun hashCode(): Int {
+        return pathString.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return if (other is SerializablePath) {
+            pathString == other.pathString
+        } else {
+            false
+        }
     }
 
     companion object {

@@ -26,13 +26,19 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
         val hash = content.encode(true).first
         val relativePath = SerializablePath.of(path).relativePath(RepositoryFolderManager().initFolder)
 
-        if(checkIfOutdated(hash, relativePath)) return replaceOutdatedFile(hash, relativePath)
-        if(!checkIfStaged(hash, relativePath)) return stageNewFile(hash, relativePath)
+        if (checkIfOutdated(hash, relativePath)) return replaceOutdatedFile(hash, relativePath)
+        if (!checkIfStaged(hash, relativePath)) return stageNewFile(hash, relativePath)
 
         return false
     }
 
-
+    /**
+     * Replaces a file that was previously staged.
+     * It updates the path of the file in the staging index in case the file was renamed.
+     * If the file was modified, the hash is updated.
+     * @param hash The hash of the file to be replaced
+     * @param path The path of the file to be replaced
+     */
     private fun replaceOutdatedFile(hash: Hash, path: Path): Boolean {
         val tempFile = Files.createTempFile("temp", ".temp")
 
@@ -180,6 +186,7 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
     }
 
     companion object {
+
         /**
          * Gets the files that are staged to be committed.
          * @return A list of pairs with the hash of the file and the path of the file
@@ -203,6 +210,24 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
             }
 
             return stagedFiles
+        }
+
+        /**
+         * Clears the staging area.
+         * It removes all the files from the staging index.
+         */
+        @JvmStatic
+        fun clearStagingArea() {
+            val repositoryFolderManager = RepositoryFolderManager()
+            val stagingIndex = repositoryFolderManager.getStagingIndexPath()
+
+            try {
+                Files.newBufferedWriter(stagingIndex, StandardOpenOption.WRITE).use { writer ->
+                    writer.write("")
+                }
+            } catch (e: IOException) {
+                println("Error clearing staging area ${e.printStackTrace()}")
+            }
         }
     }
 }

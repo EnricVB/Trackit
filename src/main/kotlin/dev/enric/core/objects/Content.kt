@@ -1,7 +1,7 @@
 package dev.enric.core.objects
 
 import dev.enric.core.Hash
-import dev.enric.core.Hash.HashType.COMMIT
+import dev.enric.core.Hash.HashType.CONTENT
 import dev.enric.core.TrackitObject
 import dev.enric.util.RepositoryFolderManager
 import java.io.ByteArrayOutputStream
@@ -21,7 +21,7 @@ class Content(val content: ByteArray = ByteArray(0)) : TrackitObject<Content>(),
     }
 
     override fun generateKey(): Hash {
-        return COMMIT.hash.plus(Hash.parse(content, 15))
+        return CONTENT.hash.plus(Hash.parse(content, 15))
     }
 
     override fun compressContent(): ByteArray {

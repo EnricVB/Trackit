@@ -82,3 +82,12 @@ tasks.register<JavaExec>("tktIgnore") {
 
     args = listOf("ignore", "src")
 }
+
+tasks.register<JavaExec>("tktCommit") {
+    mainClass.set("dev.enric.Main")
+    workingDir = file("${project.rootDir}/tktFolder")
+    group = "execute"
+    classpath = project.sourceSets["main"].runtimeClasspath
+
+    args = listOf("commit", "Title", "Message")
+}
