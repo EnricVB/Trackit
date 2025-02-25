@@ -12,6 +12,19 @@ data class BranchPermission(
     val writePermission: Boolean = false
 ) : TrackitObject<BranchPermission>(), Permission, Serializable {
 
+    constructor(permissions: String) : this(
+        readPermission = when (permissions.getOrNull(0)) {
+            'r' -> true
+            '-' -> false
+            else -> throw IllegalArgumentException("Invalid read permission: ${permissions.getOrNull(0)}")
+        },
+        writePermission = when (permissions.getOrNull(1)) {
+            'w' -> true
+            '-' -> false
+            else -> throw IllegalArgumentException("Invalid write permission: ${permissions.getOrNull(1)}")
+        }
+    )
+
     override val permission: Int
         get() = if (writePermission) WRITE else if (readPermission) READ else READ
 

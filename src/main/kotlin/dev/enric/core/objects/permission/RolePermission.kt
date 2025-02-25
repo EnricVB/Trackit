@@ -9,11 +9,28 @@ import java.nio.file.Files
 
 
 data class RolePermission(
-    val addRolePermission: Boolean = false,
-    val modifyRolePermission: Boolean = false,
-    val assignRolePermission: Boolean = false,
-    val userOperationPermission: Boolean = false
+    var addRolePermission: Boolean = false,
+    var modifyRolePermission: Boolean = false,
+    var assignRolePermission: Boolean = false,
+    var userOperationPermission: Boolean = false
 ) : TrackitObject<RolePermission>(), Permission, Serializable {
+
+    constructor(permissions: String) : this() {
+        require(permissions.length >= 4) { "The permissions string must be at least 4 characters long." }
+
+        val validChars = listOf('m', 'u', 's', 'a')
+        val properties = listOf(::addRolePermission, ::modifyRolePermission, ::assignRolePermission, ::userOperationPermission)
+
+        permissions.take(4).forEachIndexed { index, char ->
+            properties[index].set(
+                when (char) {
+                    validChars[index] -> true
+                    '-' -> false
+                    else -> throw IllegalArgumentException("Invalid permission at position ${index + 1}: $char")
+                }
+            )
+        }
+    }
 
     override val permission: Int
         get() = if (addRolePermission) ADD_ROLE else if (modifyRolePermission) MODIFY_ROLE else if (assignRolePermission) ASSIGN_ROLE else if (userOperationPermission) USER_OPERATION else 0

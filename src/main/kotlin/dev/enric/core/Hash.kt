@@ -10,12 +10,6 @@ import java.io.Serializable
  * The Hash is 16 characters long string that is generated using the Blake3 algorithm.
  */
 data class Hash(val hash: String) : Serializable {
-    /**
-     * Constructor that checks if the hash is 16 characters long.
-     */
-    init {
-        require(hash.length == 32) { "Hash must have 16 characters" }
-    }
 
     /**
      * Operator that concatenates two Hash objects.

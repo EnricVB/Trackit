@@ -1,5 +1,6 @@
 package dev.enric.command.repository
 
+import dev.enric.core.handler.init.InitHandler
 import dev.enric.util.RepositoryFolderManager
 import picocli.CommandLine.Command
 import java.util.concurrent.Callable
@@ -15,7 +16,7 @@ class Init : Callable<Int> {
      * @see RepositoryFolderManager.createRepositoryFolder
      */
     override fun call(): Int {
-        RepositoryFolderManager().createRepositoryFolder()
+        InitHandler.init()
 
         return 0
     }

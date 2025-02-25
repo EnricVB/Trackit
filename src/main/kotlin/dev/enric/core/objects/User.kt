@@ -10,7 +10,7 @@ import java.nio.file.Files
 data class User(
     val name: String = "",
     val password: Hash = Hash("0".repeat(32)),
-    val email: String = "",
+    val mail: String = "",
     val phone: String = "",
     val role: Hash = Hash("0".repeat(32))
 ) : TrackitObject<User>(), Serializable {
@@ -28,13 +28,13 @@ data class User(
     }
 
     override fun generateKey(): Hash {
-        val hashData = Hash.parseText("${this.toString().length};$name$password$email$phone$role", 15)
+        val hashData = Hash.parseText("${this.toString().length};$name$password$mail$phone$role", 15)
 
         return USER.hash.plus(hashData)
     }
 
     override fun printInfo(): String {
-        return "User(name=$name, password=$password, email=$email, phone=$phone, role=$role)"
+        return "User(name=$name, password=$password, email=$mail, phone=$phone, role=$role)"
     }
 
     override fun showDifferences(newer: Hash, oldest: Hash): String {

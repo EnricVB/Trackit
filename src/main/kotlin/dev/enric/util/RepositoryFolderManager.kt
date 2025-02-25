@@ -74,8 +74,16 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
         Files.writeString(ignoreFile, "key.secret\n", StandardOpenOption.CREATE, StandardOpenOption.APPEND)
 
         // Assign permissions to the secret key file, so only the owner can read and write it.
-        val perms = PosixFilePermissions.fromString("rw-------")
-        Files.setPosixFilePermissions(secretKey, perms)
+        try {
+            if (Files.getFileStore(secretKey).supportsFileAttributeView("posix")) {
+                Files.setPosixFilePermissions(secretKey, PosixFilePermissions.fromString("rw-------"))
+            } else {
+                secretKey.toFile().setReadable(true, true)
+                secretKey.toFile().setWritable(true, true)
+            }
+        } catch (e: Exception) {
+            println("Error setting permissions: ${e.message}")
+        }
     }
 
     fun getRepositoryFolderPath(): Path {
