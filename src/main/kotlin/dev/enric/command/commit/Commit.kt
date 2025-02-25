@@ -14,19 +14,19 @@ import java.util.concurrent.Callable
     description = ["Commits the staged files"]
 )
 class Commit : Callable<Int> {
-    @Parameters(paramLabel = "title", description = ["The commit title"])
-    var title: String = ""
+    @Parameters(index = "0", paramLabel = "TITLE", description = ["The commit title"])
+    lateinit var title: String
 
-    @Parameters(paramLabel = "message", description = ["The commit message"])
-    var message: String = ""
+    @Parameters(index = "1", paramLabel = "MESSAGE", description = ["The commit message"])
+    lateinit var message: String
 
-    @Option(names = ["--all", "-A"], description = ["Add all files to the staging area"])
-    var stageAllFiles = false
+    @Option(names = ["--all", "-A"], description = ["Stage all modified and untracked files before committing"])
+    var stageAllFiles: Boolean = false
 
     override fun call(): Int {
-        val commit = dev.enric.core.objects.Commit(title = title, message = message, date = Timestamp.from(Instant.now()))
+        var commit = dev.enric.core.objects.Commit(title = title, message = message, date = Timestamp.from(Instant.now()))
 
-        CommitHandler().processCommit(commit)
+        commit = CommitHandler().processCommit(commit)
         //CommitHandler().postProcessCommit(commit)
 
         StagingHandler.clearStagingArea()

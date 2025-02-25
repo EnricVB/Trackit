@@ -15,7 +15,12 @@ data class SerializablePath(val pathString: String) : Serializable {
      * @param rootPath The root path to be removed from the path.
      * @return The relative path of the file.
      */
-    fun relativePath(rootPath: Path): Path = rootPath.normalize().relativize(toPath())
+    fun relativePath(rootPath: Path): Path {
+        val normalizedRoot = rootPath.toAbsolutePath().normalize()
+        val normalizedPath = toPath().toAbsolutePath().normalize()
+
+        return normalizedRoot.relativize(normalizedPath)
+    }
 
     fun toPath(): Path = Paths.get(pathString)
 

@@ -12,8 +12,8 @@ import java.util.concurrent.Callable
     description = ["Ignores a file from the repository from being tracked"]
 )
 class Ignore : Callable<Int> {
-    @Parameters(paramLabel = "path", description = ["The path of the file/directory to be ignored"])
-    var path: String = ""
+    @Parameters(index = "0", paramLabel = "path", description = ["The path of the file/directory to be ignored"])
+    lateinit var path: String
 
     private val repositoryFolder = RepositoryFolderManager().initFolder
 

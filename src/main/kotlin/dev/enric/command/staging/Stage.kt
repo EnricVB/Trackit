@@ -18,8 +18,8 @@ class Stage : Callable<Int> {
     @Option(names = ["--force"], description = ["Force the staging of files"])
     var force = false
 
-    @Parameters(paramLabel = "path", description = ["The path of the file/directory to be staged"])
-    var path: String = ""
+    @Parameters(index = "0", paramLabel = "path", description = ["The path of the file/directory to be staged"])
+    lateinit var path: String
 
     private val repositoryFolder = RepositoryFolderManager().initFolder
     private val stagingHandler = StagingHandler(force)

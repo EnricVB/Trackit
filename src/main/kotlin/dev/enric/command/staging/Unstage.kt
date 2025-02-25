@@ -14,8 +14,8 @@ import kotlin.io.path.*
     description = ["Remove a file from the staging area"]
 )
 class Unstage : Callable<Int> {
-    @Parameters(paramLabel = "path/hash", description = ["The path of the file/directory, or hash, to be unstaged"])
-    var file: String = ""
+    @Parameters(index = "0", paramLabel = "path/hash", description = ["The path of the file/directory, or hash, to be unstaged"])
+    lateinit var file: String
 
     private val repositoryFolder = RepositoryFolderManager().initFolder
     private val stagingHandler = StagingHandler()

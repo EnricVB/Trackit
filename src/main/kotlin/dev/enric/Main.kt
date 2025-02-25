@@ -1,5 +1,6 @@
 package dev.enric
 
+import dev.enric.command.administration.Config
 import dev.enric.command.commit.Commit
 import dev.enric.command.repository.Ignore
 import dev.enric.command.repository.Init
@@ -15,7 +16,7 @@ import kotlin.system.exitProcess
     mixinStandardHelpOptions = true,
     version = ["trackit 1.0"],
     description = ["Track your files"],
-    subcommands = [Init::class, Stage::class, Unstage::class, Ignore::class, Commit::class]
+    subcommands = [Init::class, Stage::class, Unstage::class, Ignore::class, Commit::class, Config::class]
 )
 class Main : Callable<Int> {
 

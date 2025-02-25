@@ -19,7 +19,7 @@ data class User(
         val treeFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
         val objectFile = treeFolder.resolve(hash.toString())
         val decompressedData = decompressContent(Files.readAllBytes(objectFile))
-            ?: return User() // If the file is empty, return an empty tree
+            ?: return User() // If the file is empty, return an empty user
 
         val byteArrayInputStream = decompressedData.inputStream()
         val objectIStream = java.io.ObjectInputStream(byteArrayInputStream)

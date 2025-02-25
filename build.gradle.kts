@@ -91,3 +91,12 @@ tasks.register<JavaExec>("tktCommit") {
 
     args = listOf("commit", "Title", "Message")
 }
+
+tasks.register<JavaExec>("tktKeepSession") {
+    mainClass.set("dev.enric.Main")
+    workingDir = file("${project.rootDir}/tktFolder")
+    group = "execute"
+    classpath = project.sourceSets["main"].runtimeClasspath
+
+    args = listOf("config", "-ks", "-u", "username", "-p", "password", "--global")
+}

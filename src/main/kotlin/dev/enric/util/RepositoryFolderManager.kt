@@ -1,6 +1,10 @@
 package dev.enric.util
 
+import dev.enric.core.handler.SecretKey
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption
+import java.nio.file.attribute.PosixFilePermissions
 
 /**
  * This class is responsible for managing the repository folder structure.
@@ -33,6 +37,7 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
 
     private val trackitFolder: Path by lazy { initFolder.resolve(TRACKIT_FOLDER) }
     private val ignoreFile: Path by lazy { initFolder.resolve(".ignore") }
+    private val secretKey: Path by lazy { initFolder.resolve("key.secret") }
     private val logsFolder: Path by lazy { trackitFolder.resolve(LOGS_FOLDER) }
     private val objectsFolder: Path by lazy { trackitFolder.resolve(OBJECTS_FOLDER) }
     private val indexFolder: Path by lazy { trackitFolder.resolve(INDEX_FOLDER) }
@@ -50,6 +55,7 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
         indexFolder.toFile().mkdir()
 
         ignoreFile.toFile().createNewFile()
+        secretKey.toFile().createNewFile()
 
         getConfigFilePath().toFile().createNewFile()
         getStagingIndexPath().toFile().createNewFile()
@@ -59,33 +65,76 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
         getBranchHeadPath().toFile().createNewFile()
         getTagIndexPath().toFile().createNewFile()
         getPermissionIndexPath().toFile().createNewFile()
+
+        assignSecretKey()
     }
 
-    fun getRepositoryFolderPath(): Path { return trackitFolder }
+    fun assignSecretKey() {
+        Files.writeString(secretKey, SecretKey.generateKey())
+        Files.writeString(ignoreFile, "key.secret\n", StandardOpenOption.CREATE, StandardOpenOption.APPEND)
 
-    fun getLogsFolderPath(): Path { return logsFolder }
+        // Assign permissions to the secret key file, so only the owner can read and write it.
+        val perms = PosixFilePermissions.fromString("rw-------")
+        Files.setPosixFilePermissions(secretKey, perms)
+    }
 
-    fun getObjectsFolderPath(): Path { return objectsFolder }
+    fun getRepositoryFolderPath(): Path {
+        return trackitFolder
+    }
 
-    fun getIndexFolderPath(): Path { return indexFolder }
+    fun getLogsFolderPath(): Path {
+        return logsFolder
+    }
 
-    fun getInitFolderPath(): Path { return initFolder }
+    fun getObjectsFolderPath(): Path {
+        return objectsFolder
+    }
 
-    fun getTrackitFolderPath(): Path { return getRepositoryFolderPath().resolve(TRACKIT_FOLDER) }
+    fun getIndexFolderPath(): Path {
+        return indexFolder
+    }
 
-    fun getConfigFilePath(): Path { return getRepositoryFolderPath().resolve(CONFIG_FILE) }
+    fun getInitFolderPath(): Path {
+        return initFolder
+    }
 
-    fun getStagingIndexPath(): Path { return getRepositoryFolderPath().resolve(STAGING_INDEX) }
+    fun getTrackitFolderPath(): Path {
+        return getRepositoryFolderPath().resolve(TRACKIT_FOLDER)
+    }
 
-    fun getCurrentCommitPath(): Path { return getIndexFolderPath().resolve(CURRENT_COMMIT) }
+    fun getConfigFilePath(): Path {
+        return getRepositoryFolderPath().resolve(CONFIG_FILE)
+    }
 
-    fun getRemotePointerPath(): Path { return getIndexFolderPath().resolve(REMOTE_POINTER) }
+    fun getStagingIndexPath(): Path {
+        return getRepositoryFolderPath().resolve(STAGING_INDEX)
+    }
 
-    fun getUserIndexPath(): Path { return getIndexFolderPath().resolve(USER_INDEX) }
+    fun getCurrentCommitPath(): Path {
+        return getIndexFolderPath().resolve(CURRENT_COMMIT)
+    }
 
-    fun getBranchHeadPath(): Path { return getIndexFolderPath().resolve(BRANCH_HEAD) }
+    fun getRemotePointerPath(): Path {
+        return getIndexFolderPath().resolve(REMOTE_POINTER)
+    }
 
-    fun getTagIndexPath(): Path { return getIndexFolderPath().resolve(TAG_INDEX) }
+    fun getUserIndexPath(): Path {
+        return getIndexFolderPath().resolve(USER_INDEX)
+    }
 
-    fun getPermissionIndexPath(): Path { return getIndexFolderPath().resolve(PERMISSION_INDEX) }
+    fun getBranchHeadPath(): Path {
+        return getIndexFolderPath().resolve(BRANCH_HEAD)
+    }
+
+    fun getTagIndexPath(): Path {
+        return getIndexFolderPath().resolve(TAG_INDEX)
+    }
+
+    fun getPermissionIndexPath(): Path {
+        return getIndexFolderPath().resolve(PERMISSION_INDEX)
+    }
+
+    fun getSecretKeyPath(): Path {
+        return secretKey
+    }
 }
