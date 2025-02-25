@@ -1,11 +1,13 @@
 package dev.enric.command.administration
 
 import dev.enric.core.handler.config.KeepSession
+import dev.enric.util.AuthUtil
 import dev.enric.util.RepositoryFolderManager
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 import java.io.File
 import java.util.concurrent.Callable
+import kotlin.io.path.ExperimentalPathApi
 
 @Command(
     name = "config",
@@ -28,10 +30,6 @@ class Config : Callable<Int> {
     @Option(names = ["--local"], description = ["Apply changes at repository level (default)"])
     var local: Boolean = true
 
-    private val localConfigPath = File(RepositoryFolderManager.CONFIG_FILE)
-    private val globalConfigPath = File(System.getProperty("user.home"), RepositoryFolderManager.CONFIG_FILE)
-
-
     override fun call(): Int {
         if(keepSession) {
             keepSession()
@@ -42,14 +40,15 @@ class Config : Callable<Int> {
 
     private fun keepSession() {
         val keepSession = KeepSession(username!!, password)
-        //TODO Check if user is correctly authenticated
+        if(!AuthUtil.authenticate(username!!, password!!)) {
+            println("User $username does not exist")
+            return
+        }
 
         if(global) {
             keepSession.globalSave()
         } else {
             keepSession.localSave()
         }
-
-        println(keepSession.getToken())
     }
 }

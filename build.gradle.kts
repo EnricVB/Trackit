@@ -36,6 +36,11 @@ tasks {
     }
 }
 
+// Para tareas específicas
+tasks.withType<JavaExec> {
+    standardInput = System.`in`
+    jvmArgs = listOf("-Djava.awt.headless=true")
+}
 
 // Ejecutar el programa con comandos
 tasks.register<JavaExec>("tktHelp") {

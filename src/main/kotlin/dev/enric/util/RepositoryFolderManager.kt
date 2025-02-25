@@ -61,7 +61,6 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
         getStagingIndexPath().toFile().createNewFile()
         getCurrentCommitPath().toFile().createNewFile()
         getRemotePointerPath().toFile().createNewFile()
-        getUserIndexPath().toFile().createNewFile()
         getBranchHeadPath().toFile().createNewFile()
         getTagIndexPath().toFile().createNewFile()
         getPermissionIndexPath().toFile().createNewFile()
@@ -124,10 +123,6 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
 
     fun getRemotePointerPath(): Path {
         return getIndexFolderPath().resolve(REMOTE_POINTER)
-    }
-
-    fun getUserIndexPath(): Path {
-        return getIndexFolderPath().resolve(USER_INDEX)
     }
 
     fun getBranchHeadPath(): Path {
