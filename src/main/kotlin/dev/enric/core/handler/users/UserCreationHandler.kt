@@ -3,6 +3,7 @@ package dev.enric.core.handler.users
 import dev.enric.core.Hash
 import dev.enric.core.objects.Role
 import dev.enric.core.objects.User
+import dev.enric.core.objects.permission.RolePermission
 import dev.enric.logger.Logger
 import dev.enric.util.AuthUtil
 import dev.enric.util.RoleUtil
@@ -17,7 +18,7 @@ class UserCreationHandler(
 ) {
 
     fun checkCanCreateUser(): Boolean {
-        if (AuthUtil.authenticate(name, password)) {
+        if (AuthUtil.userAlreadyExists(name)) {
             Logger.error("User already exists")
             return false
         }
@@ -29,11 +30,35 @@ class UserCreationHandler(
         }
 
         Logger.log("Logged user: ${sudo.name}")
-        return true
+
+        val canCreateUser = canCreateUser(sudo)
+        if(!canCreateUser) {
+            Logger.error("User does not have permission to create users")
+        }
+
+        return canCreateUser
     }
 
-    fun createUser() {
-        val roles: MutableList<Role> = roleNames.mapNotNull { RoleUtil.getRoleByName(it) }.toMutableList()
+    fun canCreateUser(user: User) : Boolean {
+        user.roles.map { Role.newInstance(it) }.forEach {
+            return RolePermission.newInstance(it.permissions).userOperationPermission
+        }
+
+        return false
+    }
+
+    fun createUser(sudo: User) {
+        val roles: MutableList<Role> = roleNames.mapNotNull { RoleUtil.getRoleByName(it) }.filter {
+            val canAddRole = it.permissionLevel <= sudo.roles.map { sudoRoles -> Role.newInstance(sudoRoles) }.maxOf { sudoRole -> sudoRole.permissionLevel }
+
+            if(!canAddRole) {
+                Logger.error("User does not have permission to add role ${it.name}. The role has a higher permission level than the user")
+                Logger.error("Skipping role ${it.name}")
+            }
+
+            return@filter canAddRole
+        }.toMutableList()
+
         if (roles.isEmpty()) {
             Logger.error("No roles found, adding default role")
             roles.add(RoleUtil.UNDEFINED_ROLE)
