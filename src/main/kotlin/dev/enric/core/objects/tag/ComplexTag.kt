@@ -30,7 +30,7 @@ data class ComplexTag(
     }
 
     override fun generateKey(): Hash {
-        val hashData = Hash.parseText("${this.toString().length};$name", 15)
+        val hashData = Hash.parseText("${this.toString().length};$name$date$user", 15)
 
         return COMPLEX_TAG.hash.plus(hashData)
     }

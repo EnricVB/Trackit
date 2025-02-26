@@ -24,7 +24,7 @@ data class Role(val name: String = "", val permissionLevel: Int = -1, val permis
     }
 
     override fun generateKey(): Hash {
-        val hashData = Hash.parseText("${toString().length};$name$permissionLevel$permissions", 15)
+        val hashData = Hash.parseText(name, 15)
 
         return ROLE.hash.plus(hashData)
     }
