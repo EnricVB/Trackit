@@ -19,7 +19,6 @@ object Logger {
         System.err.println(message)
     }
 
-
     enum class LogLevel {
         INFO,
         ERRORS,

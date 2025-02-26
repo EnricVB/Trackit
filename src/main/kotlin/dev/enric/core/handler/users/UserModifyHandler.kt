@@ -41,7 +41,7 @@ class UserModifyHandler(
         }
 
         if (newRoleNames.isNotEmpty()) {
-            val sudo = AuthUtil.getLoggedUser() ?: AuthUtil.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "")!!
+            val sudo = AuthUtil.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "") ?: AuthUtil.getLoggedUser()!!
             val roles = assignRoles(sudo)
 
             if (deletePreviousRoles) {
@@ -67,7 +67,7 @@ class UserModifyHandler(
             return false
         }
 
-        val sudo = AuthUtil.getLoggedUser() ?: AuthUtil.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "")
+        val sudo = AuthUtil.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "") ?: AuthUtil.getLoggedUser()
         if (sudo == null) {
             Logger.error("Sudo user not found. Please login first or use --sudo with proper credentials")
             return false
@@ -93,7 +93,7 @@ class UserModifyHandler(
 
     fun assignRoles(sudo: User): MutableList<Role> {
         return newRoleNames.mapNotNull { RoleUtil.getRoleByName(it) }.filter {
-            val canAddRole = it.permissionLevel <= sudo.roles.map { sudoRoles -> Role.newInstance(sudoRoles) }
+            val canAddRole = it.permissionLevel > sudo.roles.map { sudoRoles -> Role.newInstance(sudoRoles) }
                 .maxOf { sudoRole -> sudoRole.permissionLevel }
 
             if (!canAddRole) {

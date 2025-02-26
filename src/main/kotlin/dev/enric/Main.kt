@@ -10,6 +10,7 @@ import dev.enric.command.staging.Unstage
 import dev.enric.command.users.UserCreation
 import dev.enric.command.users.UserList
 import dev.enric.command.users.UserModify
+import dev.enric.logger.Logger
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import kotlin.system.exitProcess
@@ -26,7 +27,15 @@ class Main : TrackitCommand() {
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            val exitCode = CommandLine(Main()).execute(*args)
+            val cmd = CommandLine(Main())
+            cmd.setParameterExceptionHandler { ex: CommandLine.ParameterException, _ ->
+                Logger.error(ex.message.toString())
+
+                ex.commandLine.usage(System.err)
+                exitProcess(1)
+            }
+
+            val exitCode = cmd.execute(*args)
             exitProcess(exitCode)
         }
     }

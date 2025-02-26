@@ -23,7 +23,7 @@ class UserCreationHandler(
             return false
         }
 
-        val sudo = AuthUtil.getLoggedUser() ?: AuthUtil.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "")
+        val sudo = AuthUtil.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "") ?: AuthUtil.getLoggedUser()
         if (sudo == null) {
             Logger.error("Sudo user not found. Please login first or use --sudo with proper credentials")
             return false
@@ -48,7 +48,7 @@ class UserCreationHandler(
     }
 
     fun createUser() {
-        val sudo = AuthUtil.getLoggedUser() ?: AuthUtil.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "")!!
+        val sudo = AuthUtil.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "") ?: AuthUtil.getLoggedUser()!!
         val roles = assignRoles(sudo)
 
         if (roles.isEmpty()) {
@@ -69,7 +69,7 @@ class UserCreationHandler(
 
     fun assignRoles(sudo: User): MutableList<Role> {
         return roleNames.mapNotNull { RoleUtil.getRoleByName(it) }.filter {
-            val canAddRole = it.permissionLevel <= sudo.roles.map { sudoRoles -> Role.newInstance(sudoRoles) }
+            val canAddRole = it.permissionLevel > sudo.roles.map { sudoRoles -> Role.newInstance(sudoRoles) }
                 .maxOf { sudoRole -> sudoRole.permissionLevel }
 
             if (!canAddRole) {

@@ -1,9 +1,8 @@
 package dev.enric.command.users
 
 import dev.enric.command.TrackitCommand
+import dev.enric.core.commandconsumer.SudoArgsParameterConsumer
 import dev.enric.core.handler.users.UserCreationHandler
-import dev.enric.logger.Logger
-import dev.enric.util.AuthUtil
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 
@@ -12,17 +11,18 @@ import picocli.CommandLine.Option
     description = ["Creates a new user"]
 )
 class UserCreation : TrackitCommand() {
-    @Option(names = ["--name", "-n"], description = ["User name."])
-    lateinit var name: String
 
-    @Option(names = ["--password", "-p"], description = ["User password."])
-    lateinit var password: String
+    @Option(names = ["--name", "-n"], description = ["User name."], required = true)
+    var name: String = ""
 
-    @Option(names = ["--mail", "-m"], description = ["User mail contact"])
-    lateinit var mail: String
+    @Option(names = ["--password", "-p"], description = ["User password."], required = true)
+    var password: String = ""
 
-    @Option(names = ["--phone", "-P"], description = ["User phone contact"])
-    lateinit var phone: String
+    @Option(names = ["--mail", "-m"], description = ["User mail contact"], required = false)
+    var mail: String = ""
+
+    @Option(names = ["--phone", "-P"], description = ["User phone contact"], required = false)
+    var phone: String = ""
 
     @Option(
         names = ["--role", "-r"],
@@ -34,6 +34,7 @@ class UserCreation : TrackitCommand() {
     @Option(
         names = ["--sudo", "-s"],
         description = ["Execute command as user"],
+        parameterConsumer = SudoArgsParameterConsumer::class,
         arity = "2"
     )
     var sudoArgs: Array<String>? = null
@@ -50,7 +51,7 @@ class UserCreation : TrackitCommand() {
             sudoArgs
         )
 
-        if(!handler.checkCanCreateUser()) {
+        if (!handler.checkCanCreateUser()) {
             return 1
         }
 

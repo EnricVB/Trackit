@@ -6,6 +6,7 @@ import dev.enric.logger.Logger
 import dev.enric.util.AuthUtil
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
+import java.io.Console
 
 @Command(
     name = "config",
@@ -13,46 +14,86 @@ import picocli.CommandLine.Option
 )
 class Config : TrackitCommand() {
 
-    @Option(names = ["--username", "-u"], description = ["Define the username to configure"])
+    /**
+     * Username to authenticate the user
+     */
+    @Option(names = ["--username", "-u"], description = ["Define the username to configure"], required = true)
     var username: String? = null
 
-    @Option(names = ["--password", "-p"], description = ["Define the password of the user"])
+    /**
+     * Password to authenticate the user
+     *
+     * If the password is not provided, the user will be prompted to enter it
+     */
+    @Option(names = ["--password", "-p"], description = ["Define the password of the user"], interactive = true)
     var password: String? = null
 
-    @Option(names = ["--keep-session", "-ks"], description = ["Keep session open after closing the terminal"])
+    /**
+     * Keep the session open after closing the terminal
+     */
+    @Option(names = ["--keep-session", "-ks"], description = ["Keep session open after closing the terminal"], required = false)
     var keepSession: Boolean = false
 
-    @Option(names = ["--global"], description = ["Apply changes at system level"])
+    /**
+     * Apply changes at system level saving it on the user's environment variables
+     */
+    @Option(names = ["--global"], description = ["Apply changes at system level"], required = false)
     var global: Boolean = false
 
-    @Option(names = ["--local"], description = ["Apply changes at repository level (default)"])
+    /**
+     * Apply changes at repository level saving it on the repository's configuration
+     */
+    @Option(names = ["--local"], description = ["Apply changes at repository level (default)"], required = false)
     var local: Boolean = true
 
     override fun call(): Int {
         super.call()
 
         if (keepSession) {
-            keepSession()
+            if (!validateCredentials()) {
+                Logger.error("Invalid credentials")
+                return 1
+            }
+            saveSession()
         }
 
         return 0
     }
 
-    private fun keepSession() {
-        val keepSession = KeepSession(username!!, password)
-        if (!AuthUtil.authenticate(username!!, password!!)) {
-            Logger.error("Invalid credentials")
-            return
+    /**
+     * Validate the credentials provided by the user
+     */
+    private fun validateCredentials(): Boolean {
+        if (username.isNullOrBlank()) {
+            Logger.error("Username is required for authentication")
+            return false
         }
 
+        if (password.isNullOrBlank()) {
+            val console: Console? = System.console()
+            if (console != null) {
+                password = String(console.readPassword("Enter password: "))
+            } else {
+                Logger.error("Password is required but cannot be read in this environment")
+                return false
+            }
+        }
+
+        return AuthUtil.authenticate(username!!, password!!)
+    }
+
+    /**
+     * Save the session in the system or repository
+     */
+    private fun saveSession() {
+        val session = KeepSession(username!!, password!!)
         if (global) {
             Logger.log("Saving session at system level")
-            keepSession.globalSave()
+            session.globalSave()
         } else {
             Logger.log("Saving session at repository level")
-            keepSession.localSave()
+            session.localSave()
         }
-
         Logger.log("Session saved")
     }
 }

@@ -16,6 +16,14 @@ import kotlin.io.path.*
     description = ["Remove a file from the staging area"]
 )
 class Unstage : TrackitCommand() {
+
+    /**
+     * The path of the file/directory, or hash, to be unstaged.
+     *
+     * The path can be a file or a directory. If it is a directory, all the files inside it will be unstaged.
+     *
+     * The path can also be a hash. In this case, the file with the hash will be unstaged.
+     */
     @Parameters(
         index = "0",
         paramLabel = "path/hash",

@@ -1,17 +1,16 @@
 package dev.enric.command.staging
 
 import dev.enric.command.TrackitCommand
+import dev.enric.core.handler.ignore.IgnoreHandler
 import dev.enric.core.handler.staging.StagingHandler
 import dev.enric.core.objects.Content
 import dev.enric.logger.Logger
 import dev.enric.util.RepositoryFolderManager
+import dev.enric.util.SerializablePath
 import picocli.CommandLine.*
 import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.PathWalkOption
-import kotlin.io.path.isDirectory
-import kotlin.io.path.walk
+import kotlin.io.path.*
 
 
 @Command(
@@ -19,9 +18,19 @@ import kotlin.io.path.walk
     description = ["Stage files to be committed"]
 )
 class Stage : TrackitCommand() {
+    /**
+     * Force the staging of files, even if they are being ignored. This will override the ignore rules.
+     */
     @Option(names = ["--force"], description = ["Force the staging of files"])
-    var force = false // TODO: Implement force option
+    var force = false
 
+    /**
+     * The path of the file/directory to be staged, relative to the repository folder.
+     *
+     * If the file is a folder, all the files inside the folder will be staged.
+     *
+     * If the file is being ignored, it will not be staged unless the --force flag is used.
+     */
     @Parameters(index = "0", paramLabel = "path", description = ["The path of the file/directory to be staged"])
     lateinit var path: String
 
@@ -46,6 +55,10 @@ class Stage : TrackitCommand() {
         return 0
     }
 
+    fun stageAllFiles() {
+        stageFolder(repositoryFolder)
+    }
+
     /**
      * Stage all the files inside the folder
      * @param directory The folder to stage
@@ -62,8 +75,17 @@ class Stage : TrackitCommand() {
      * @param file The file to stage
      */
     fun stageFile(file: Path) {
-        Logger.log("Staging file: $file")
+        if(IgnoreHandler.isIgnored(file) && !force) {
+            val paramFile = repositoryFolder.resolve(path)
 
+            if(file == paramFile) {
+                Logger.error("The file is being ignored")
+            }
+
+            return
+        }
+
+        Logger.log("Staging file: ${SerializablePath.of(file).relativePath(repositoryFolder)}")
         stagingHandler.stage(Content(Files.readAllBytes(file)), file)
     }
 

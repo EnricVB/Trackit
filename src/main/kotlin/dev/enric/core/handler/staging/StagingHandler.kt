@@ -15,7 +15,7 @@ import java.nio.file.StandardOpenOption
  * It interacts with the staging index, which keeps track of staged files and their hashes.
  * @param force If true, allows forcing changes in staging.
  */
-data class StagingHandler(val force: Boolean = false) { // TODO: Implement force option
+data class StagingHandler(val force: Boolean = false) {
     private val repositoryFolderManager = RepositoryFolderManager()
     private val stagingIndex = repositoryFolderManager.getStagingIndexPath()
 
@@ -214,9 +214,7 @@ data class StagingHandler(val force: Boolean = false) { // TODO: Implement force
             val stagingIndex = repositoryFolderManager.getStagingIndexPath()
 
             try {
-                Files.newBufferedWriter(stagingIndex, StandardOpenOption.WRITE).use { writer ->
-                    writer.write("")
-                }
+                Files.write(stagingIndex, byteArrayOf())
             } catch (e: IOException) {
                 println("Error clearing staging area ${e.printStackTrace()}")
             }

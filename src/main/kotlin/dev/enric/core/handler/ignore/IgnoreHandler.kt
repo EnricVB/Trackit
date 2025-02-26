@@ -8,7 +8,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
-class IgnoreHandler {
+object IgnoreHandler {
     private val repositoryFolderManager = RepositoryFolderManager()
     private val ignoreFile = repositoryFolderManager.initFolder.resolve(".ignore")
 
