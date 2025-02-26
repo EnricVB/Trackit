@@ -29,7 +29,7 @@ data class User(
     }
 
     override fun generateKey(): Hash {
-        val hashData = Hash.parseText("${this.toString().length};$name$password$mail$phone$roles", 15)
+        val hashData = Hash.parseText("${this.toString().length};$name", 15)
 
         return USER.hash.plus(hashData)
     }
