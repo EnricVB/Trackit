@@ -12,8 +12,9 @@ import java.time.Instant
 
 @Command(
     name = "commit",
-    description = ["Commits the staged files"]
-)
+    description = ["Commits the staged files"],
+    mixinStandardHelpOptions = true,
+    )
 class Commit : TrackitCommand() {
 
     /**

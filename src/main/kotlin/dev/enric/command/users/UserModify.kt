@@ -8,7 +8,8 @@ import picocli.CommandLine.Option
 
 @Command(
     name = "user-modify",
-    description = ["Modifies an existing user"]
+    description = ["Modifies an existing user"],
+    mixinStandardHelpOptions = true,
 )
 class UserModify : TrackitCommand() {
     @Option(names = ["--name", "-n"], description = ["Name of the user to modify"], required = true)

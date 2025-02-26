@@ -13,7 +13,8 @@ import kotlin.io.path.*
 
 @Command(
     name = "unstage",
-    description = ["Remove a file from the staging area"]
+    description = ["Remove a file from the staging area"],
+    mixinStandardHelpOptions = true,
 )
 class Unstage : TrackitCommand() {
 

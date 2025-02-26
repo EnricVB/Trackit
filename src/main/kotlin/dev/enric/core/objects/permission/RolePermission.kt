@@ -33,7 +33,13 @@ data class RolePermission(
     }
 
     override val permission: Int
-        get() = if (createRolePermission) CREATE_ROLE else if (modifyRolePermission) MODIFY_ROLE else if (assignRolePermission) ASSIGN_ROLE else if (userOperationPermission) USER_OPERATION else 0
+        get() = when {
+            createRolePermission -> CREATE_ROLE
+            modifyRolePermission -> MODIFY_ROLE
+            assignRolePermission -> ASSIGN_ROLE
+            userOperationPermission -> USER_OPERATION
+            else -> 0
+        }
 
     override fun decode(hash: Hash): RolePermission {
         val commitFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))

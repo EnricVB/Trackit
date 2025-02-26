@@ -8,7 +8,8 @@ import picocli.CommandLine.Command
 
 @Command(
     name = "init",
-    description = ["Initialize a new repository"]
+    description = ["Initialize a new repository"],
+    mixinStandardHelpOptions = true,
 )
 class Init : TrackitCommand() {
 

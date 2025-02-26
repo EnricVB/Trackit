@@ -15,7 +15,8 @@ import kotlin.io.path.*
 
 @Command(
     name = "stage",
-    description = ["Stage files to be committed"]
+    description = ["Stage files to be committed"],
+    mixinStandardHelpOptions = true,
 )
 class Stage : TrackitCommand() {
     /**

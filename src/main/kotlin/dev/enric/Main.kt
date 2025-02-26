@@ -10,7 +10,6 @@ import dev.enric.command.staging.Unstage
 import dev.enric.command.users.UserCreation
 import dev.enric.command.users.UserList
 import dev.enric.command.users.UserModify
-import dev.enric.logger.Logger
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import kotlin.system.exitProcess
@@ -18,7 +17,7 @@ import kotlin.system.exitProcess
 @Command(
     name = "trackit",
     mixinStandardHelpOptions = true,
-    version = ["trackit 1.0"],
+    version = ["Trackit 1.0"],
     description = ["Track your files"],
     subcommands = [Init::class, Stage::class, Unstage::class, Ignore::class, Commit::class, Config::class, UserCreation::class, UserModify::class, UserList::class]
 )
@@ -28,15 +27,16 @@ class Main : TrackitCommand() {
         @JvmStatic
         fun main(args: Array<String>) {
             val cmd = CommandLine(Main())
-            cmd.setParameterExceptionHandler { ex: CommandLine.ParameterException, _ ->
-                Logger.error(ex.message.toString())
+            try {
+                val exitCode = cmd.execute(*args)
+                exitProcess(exitCode)
+            } catch (ex: Exception) {
+                println("ASDA")
 
-                ex.commandLine.usage(System.err)
+                System.err.println(ex.message)
+                cmd.usage(System.err)
                 exitProcess(1)
             }
-
-            val exitCode = cmd.execute(*args)
-            exitProcess(exitCode)
         }
     }
 

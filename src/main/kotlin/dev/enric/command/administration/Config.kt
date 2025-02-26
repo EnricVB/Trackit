@@ -11,7 +11,8 @@ import java.io.Console
 @Command(
     name = "config",
     description = ["Configure common settings for the repository or whole system"],
-)
+    mixinStandardHelpOptions = true,
+    )
 class Config : TrackitCommand() {
 
     /**

@@ -8,7 +8,8 @@ import picocli.CommandLine.Option
 
 @Command(
     name = "user-create",
-    description = ["Creates a new user"]
+    description = ["Creates a new user"],
+    mixinStandardHelpOptions = true,
 )
 class UserCreation : TrackitCommand() {
 

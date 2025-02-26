@@ -10,8 +10,9 @@ import picocli.CommandLine.Parameters
 
 @Command(
     name = "ignore",
-    description = ["Ignores a file from the repository from being tracked"]
-)
+    description = ["Ignores a file from the repository from being tracked"],
+    mixinStandardHelpOptions = true,
+    )
 class Ignore : TrackitCommand() {
 
     /**
