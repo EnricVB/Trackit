@@ -60,6 +60,10 @@ object AuthUtil {
         return Hash.parseText("$username:$passwordHash:$secretKeyContent").toString()
     }
 
+    fun userAlreadyExists(username: String): Boolean {
+        return getAllUsers().any { User.newInstance(it).name == username }
+    }
+
     @OptIn(ExperimentalPathApi::class)
     fun getAllUsers(): List<Hash> {
         val usersFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(USER.hash.toString())

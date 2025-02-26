@@ -9,17 +9,17 @@ import java.nio.file.Files
 
 
 data class RolePermission(
-    var addRolePermission: Boolean = false,
-    var modifyRolePermission: Boolean = false,
-    var assignRolePermission: Boolean = false,
-    var userOperationPermission: Boolean = false
+    var createRolePermission: Boolean = false, // Create roles if role level is lower
+    var modifyRolePermission: Boolean = false, // Modify role permissions if role level is lower
+    var assignRolePermission: Boolean = false, // Assign roles to other users if role level is lower
+    var userOperationPermission: Boolean = false // Create, modify and delete users if role level is lower
 ) : TrackitObject<RolePermission>(), Permission, Serializable {
 
     constructor(permissions: String) : this() {
         require(permissions.length >= 4) { "The permissions string must be at least 4 characters long." }
 
         val validChars = listOf('m', 'u', 's', 'a')
-        val properties = listOf(::addRolePermission, ::modifyRolePermission, ::assignRolePermission, ::userOperationPermission)
+        val properties = listOf(::createRolePermission, ::modifyRolePermission, ::assignRolePermission, ::userOperationPermission)
 
         permissions.take(4).forEachIndexed { index, char ->
             properties[index].set(
@@ -33,7 +33,7 @@ data class RolePermission(
     }
 
     override val permission: Int
-        get() = if (addRolePermission) ADD_ROLE else if (modifyRolePermission) MODIFY_ROLE else if (assignRolePermission) ASSIGN_ROLE else if (userOperationPermission) USER_OPERATION else 0
+        get() = if (createRolePermission) CREATE_ROLE else if (modifyRolePermission) MODIFY_ROLE else if (assignRolePermission) ASSIGN_ROLE else if (userOperationPermission) USER_OPERATION else 0
 
     override fun decode(hash: Hash): RolePermission {
         val commitFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
@@ -51,7 +51,7 @@ data class RolePermission(
         val hashData = Hash.parseText(
             """
             ${toString().length};
-            $addRolePermission;
+            $createRolePermission;
             $modifyRolePermission;
             $assignRolePermission;
             $userOperationPermission
@@ -67,7 +67,7 @@ data class RolePermission(
         message += if (modifyRolePermission) "m" else "-"
         message += if (userOperationPermission) "u" else "-"
         message += if (assignRolePermission) "s" else "-"
-        message += if (addRolePermission) "a" else "-"
+        message += if (createRolePermission) "a" else "-"
         message += ")"
 
         return message
@@ -78,7 +78,7 @@ data class RolePermission(
     }
 
     companion object {
-        const val ADD_ROLE = 1 shl 0
+        const val CREATE_ROLE = 1 shl 0
         const val MODIFY_ROLE = 1 shl 1
         const val ASSIGN_ROLE = 1 shl 2
         const val USER_OPERATION = 1 shl 3

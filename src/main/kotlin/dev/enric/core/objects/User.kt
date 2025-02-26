@@ -10,10 +10,10 @@ import java.util.*
 
 data class User(
     val name: String = "",
-    val password: Hash = Hash("0".repeat(32)),
-    val mail: String = "",
-    val phone: String = "",
-    val roles: List<Hash> = mutableListOf()
+    var password: Hash = Hash("0".repeat(32)),
+    var mail: String = "",
+    var phone: String = "",
+    val roles: MutableList<Hash> = mutableListOf()
 ) : TrackitObject<User>(), Serializable {
 
     override fun decode(hash: Hash): User {
@@ -56,7 +56,7 @@ data class User(
             val mail: String
             val phone: String
             val password: String
-            val rolesHash = roles.map { it.encode().first }
+            val rolesHash = roles.map { it.encode().first }.toMutableList()
 
             if (console != null) { // This is running in a terminal
                 username = console.readLine("Enter username: ")
