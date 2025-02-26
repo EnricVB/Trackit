@@ -7,6 +7,9 @@ import dev.enric.command.repository.Ignore
 import dev.enric.command.repository.Init
 import dev.enric.command.staging.Stage
 import dev.enric.command.staging.Unstage
+import dev.enric.command.users.UserCreation
+import dev.enric.command.users.UserList
+import dev.enric.core.handler.users.UserListHandler
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import kotlin.system.exitProcess
@@ -16,7 +19,7 @@ import kotlin.system.exitProcess
     mixinStandardHelpOptions = true,
     version = ["trackit 1.0"],
     description = ["Track your files"],
-    subcommands = [Init::class, Stage::class, Unstage::class, Ignore::class, Commit::class, Config::class]
+    subcommands = [Init::class, Stage::class, Unstage::class, Ignore::class, Commit::class, Config::class, UserCreation::class, UserList::class]
 )
 class Main : TrackitCommand() {
 

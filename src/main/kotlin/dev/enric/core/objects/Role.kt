@@ -3,11 +3,12 @@ package dev.enric.core.objects
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.ROLE
 import dev.enric.core.TrackitObject
+import dev.enric.core.objects.permission.RolePermission
 import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
 
-data class Role(val name: String = "", val permissionLevel: Int = -1, val permissions: MutableList<Hash> = mutableListOf()) : TrackitObject<Role>(),
+data class Role(val name: String = "", val permissionLevel: Int = -1, val permissions: Hash = Hash("0".repeat(32))) : TrackitObject<Role>(),
     Serializable {
 
     override fun decode(hash: Hash): Role {
@@ -29,7 +30,7 @@ data class Role(val name: String = "", val permissionLevel: Int = -1, val permis
     }
 
     override fun printInfo(): String {
-        return "Role(name=$name, permissionLevel=$permissionLevel, permissions=$permissions)"
+        return "Role(name=$name, permissionLevel=$permissionLevel, permissions=${RolePermission.newInstance(permissions).printInfo()})"
     }
 
     override fun showDifferences(newer: Hash, oldest: Hash): String {

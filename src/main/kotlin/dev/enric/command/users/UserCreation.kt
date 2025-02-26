@@ -1,6 +1,9 @@
 package dev.enric.command.users
 
 import dev.enric.command.TrackitCommand
+import dev.enric.core.handler.users.UserCreationHandler
+import dev.enric.logger.Logger
+import dev.enric.util.AuthUtil
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 
@@ -28,18 +31,30 @@ class UserCreation : TrackitCommand() {
     )
     var roles: Array<String> = emptyArray()
 
-    @Option(names = ["--reassign-password", "-A"], description = ["Reassign user password"])
-    var reassignPassword: Boolean = false
-
     @Option(
         names = ["--sudo", "-s"],
         description = ["Execute command as user"],
         arity = "2"
     )
-    var sudo: Array<String>? = null
+    var sudoArgs: Array<String>? = null
 
     override fun call(): Int {
         super.call()
+
+        val handler = UserCreationHandler(
+            name,
+            password,
+            mail,
+            phone,
+            roles,
+            sudoArgs
+        )
+
+        if(!handler.checkCanCreateUser()) {
+            return 1
+        }
+
+        handler.createUser()
 
         return 0
     }

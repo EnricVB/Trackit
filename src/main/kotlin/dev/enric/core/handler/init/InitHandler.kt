@@ -5,7 +5,6 @@ import dev.enric.core.objects.Role
 import dev.enric.core.objects.User
 import dev.enric.core.objects.permission.RolePermission
 import dev.enric.util.RepositoryFolderManager
-import java.util.*
 
 object InitHandler {
 
@@ -26,38 +25,14 @@ object InitHandler {
         val projectManagerPermissions = RolePermission("musa").encode(true).first
         val undefinedPermissions = RolePermission("----").encode(true).first
 
-        val owner = Role("owner", 1, mutableListOf(ownerPermissions)).encode(true).first
-        Role("projectManager", 2, mutableListOf(projectManagerPermissions)).encode(true).first
-        Role("undefined", Int.MAX_VALUE, mutableListOf(undefinedPermissions)).encode(true).first
+        val owner = Role("owner", 1, ownerPermissions).encode(true).first
+        Role("projectManager", 2, projectManagerPermissions).encode(true).first
+        Role("undefined", Int.MAX_VALUE, undefinedPermissions).encode(true).first
 
         return Role.newInstance(owner)
     }
 
     private fun createUser(owner: Role): Hash {
-        val console = System.console()
-
-        val username: String
-        val mail: String
-        val phone: String
-        val password: String
-
-        if (console != null) { // This is running in a terminal
-            username = console.readLine("Enter username: ")
-            mail = console.readLine("Enter mail: ")
-            phone = console.readLine("Enter phone: ")
-            password = String(console.readPassword("Enter password: "))
-        } else { // This is running in an IDE
-            val scanner = Scanner(System.`in`)
-            println("Enter username: ")
-            username = scanner.nextLine()
-            println("Enter mail: ")
-            mail = scanner.nextLine()
-            println("Enter phone: ")
-            phone = scanner.nextLine()
-            println("Enter password: ")
-            password = scanner.nextLine()
-        }
-
-        return User(username, Hash.parseText(password), mail, phone, owner.encode().first).encode(true).first
+        return User.createUser(mutableListOf(owner)).encode(true).first
     }
 }

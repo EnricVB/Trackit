@@ -103,5 +103,23 @@ tasks.register<JavaExec>("tktKeepSession") {
     group = "execute"
     classpath = project.sourceSets["main"].runtimeClasspath
 
-    args = listOf("config", "-ks", "-u", "username", "-p", "password", "--global")
+    args = listOf("config", "-ks", "-u", "username", "-p", "password", "--local")
+}
+
+tasks.register<JavaExec>("tktUserCreate") {
+    mainClass.set("dev.enric.Main")
+    workingDir = file("${project.rootDir}/tktFolder")
+    group = "execute"
+    classpath = project.sourceSets["main"].runtimeClasspath
+
+    args = listOf("user-create", "-n", "Usuario Prueba", "-p", "Password Prueba", "-m", "mail@gmail.com", "-P", "123456789")
+}
+
+tasks.register<JavaExec>("tktUserList") {
+    mainClass.set("dev.enric.Main")
+    workingDir = file("${project.rootDir}/tktFolder")
+    group = "execute"
+    classpath = project.sourceSets["main"].runtimeClasspath
+
+    args = listOf("user-list")
 }
