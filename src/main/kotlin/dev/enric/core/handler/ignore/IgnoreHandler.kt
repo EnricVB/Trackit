@@ -1,5 +1,6 @@
 package dev.enric.core.handler.ignore
 
+import dev.enric.logger.Logger
 import dev.enric.util.RepositoryFolderManager
 import dev.enric.util.SerializablePath
 import java.io.IOException
@@ -21,9 +22,14 @@ class IgnoreHandler {
     fun ignore(path: Path) {
         val relativePath = SerializablePath.of(path).relativePath(repositoryFolderManager.initFolder)
 
-        if(isIgnored(relativePath)) return
+        if(isIgnored(relativePath)) {
+            Logger.log("The file or directory is already being ignored")
+            return
+        }
 
         try {
+            Logger.log("Ignoring $relativePath")
+
             Files.writeString(ignoreFile, "$relativePath\n", StandardOpenOption.CREATE, StandardOpenOption.APPEND)
         } catch (e: IOException) {
             e.printStackTrace()

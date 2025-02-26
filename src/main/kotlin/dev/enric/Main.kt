@@ -1,5 +1,6 @@
 package dev.enric
 
+import dev.enric.command.TrackitCommand
 import dev.enric.command.administration.Config
 import dev.enric.command.commit.Commit
 import dev.enric.command.repository.Ignore
@@ -8,7 +9,6 @@ import dev.enric.command.staging.Stage
 import dev.enric.command.staging.Unstage
 import picocli.CommandLine
 import picocli.CommandLine.Command
-import java.util.concurrent.Callable
 import kotlin.system.exitProcess
 
 @Command(
@@ -18,7 +18,7 @@ import kotlin.system.exitProcess
     description = ["Track your files"],
     subcommands = [Init::class, Stage::class, Unstage::class, Ignore::class, Commit::class, Config::class]
 )
-class Main : Callable<Int> {
+class Main : TrackitCommand() {
 
     companion object {
         @JvmStatic

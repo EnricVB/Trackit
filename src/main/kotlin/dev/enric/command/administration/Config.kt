@@ -1,19 +1,17 @@
 package dev.enric.command.administration
 
+import dev.enric.command.TrackitCommand
 import dev.enric.core.handler.config.KeepSession
+import dev.enric.logger.Logger
 import dev.enric.util.AuthUtil
-import dev.enric.util.RepositoryFolderManager
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
-import java.io.File
-import java.util.concurrent.Callable
-import kotlin.io.path.ExperimentalPathApi
 
 @Command(
     name = "config",
     description = ["Configure common settings for the repository or whole system"],
 )
-class Config : Callable<Int> {
+class Config : TrackitCommand() {
 
     @Option(names = ["--username", "-u"], description = ["Define the username to configure"])
     var username: String? = null
@@ -31,7 +29,9 @@ class Config : Callable<Int> {
     var local: Boolean = true
 
     override fun call(): Int {
-        if(keepSession) {
+        super.call()
+
+        if (keepSession) {
             keepSession()
         }
 
@@ -40,15 +40,19 @@ class Config : Callable<Int> {
 
     private fun keepSession() {
         val keepSession = KeepSession(username!!, password)
-        if(!AuthUtil.authenticate(username!!, password!!)) {
-            println("User $username does not exist")
+        if (!AuthUtil.authenticate(username!!, password!!)) {
+            Logger.error("Invalid credentials")
             return
         }
 
-        if(global) {
+        if (global) {
+            Logger.log("Saving session at system level")
             keepSession.globalSave()
         } else {
+            Logger.log("Saving session at repository level")
             keepSession.localSave()
         }
+
+        Logger.log("Session saved")
     }
 }

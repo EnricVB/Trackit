@@ -1,22 +1,26 @@
 package dev.enric.command.staging
 
-import dev.enric.core.objects.Content
-import dev.enric.util.RepositoryFolderManager
+import dev.enric.command.TrackitCommand
 import dev.enric.core.handler.staging.StagingHandler
+import dev.enric.core.objects.Content
+import dev.enric.logger.Logger
+import dev.enric.util.RepositoryFolderManager
 import picocli.CommandLine.*
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.concurrent.Callable
-import kotlin.io.path.*
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.PathWalkOption
+import kotlin.io.path.isDirectory
+import kotlin.io.path.walk
 
 
 @Command(
     name = "stage",
     description = ["Stage files to be committed"]
 )
-class Stage : Callable<Int> {
+class Stage : TrackitCommand() {
     @Option(names = ["--force"], description = ["Force the staging of files"])
-    var force = false
+    var force = false // TODO: Implement force option
 
     @Parameters(index = "0", paramLabel = "path", description = ["The path of the file/directory to be staged"])
     lateinit var path: String
@@ -30,9 +34,10 @@ class Stage : Callable<Int> {
      * @return 0 if the file was staged successfully, 1 otherwise
      */
     override fun call(): Int {
+        super.call()
         val file = repositoryFolder.resolve(path)
 
-        if(file.isDirectory()) {
+        if (file.isDirectory()) {
             stageFolder(file)
         } else {
             stageFile(file)
@@ -47,6 +52,8 @@ class Stage : Callable<Int> {
      * @see stageFile
      */
     fun stageFolder(directory: Path) {
+        Logger.log("Staging folder: $directory")
+
         getFilesToStage(directory).forEach { stageFile(it) }
     }
 
@@ -55,6 +62,8 @@ class Stage : Callable<Int> {
      * @param file The file to stage
      */
     fun stageFile(file: Path) {
+        Logger.log("Staging file: $file")
+
         stagingHandler.stage(Content(Files.readAllBytes(file)), file)
     }
 

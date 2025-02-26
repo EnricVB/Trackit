@@ -1,11 +1,13 @@
 package dev.enric.command.staging
 
+import dev.enric.command.TrackitCommand
 import dev.enric.core.Hash
-import dev.enric.util.RepositoryFolderManager
 import dev.enric.core.handler.staging.StagingHandler
-import picocli.CommandLine.*
+import dev.enric.logger.Logger
+import dev.enric.util.RepositoryFolderManager
+import picocli.CommandLine.Command
+import picocli.CommandLine.Parameters
 import java.nio.file.Path
-import java.util.concurrent.Callable
 import kotlin.io.path.*
 
 
@@ -13,8 +15,12 @@ import kotlin.io.path.*
     name = "unstage",
     description = ["Remove a file from the staging area"]
 )
-class Unstage : Callable<Int> {
-    @Parameters(index = "0", paramLabel = "path/hash", description = ["The path of the file/directory, or hash, to be unstaged"])
+class Unstage : TrackitCommand() {
+    @Parameters(
+        index = "0",
+        paramLabel = "path/hash",
+        description = ["The path of the file/directory, or hash, to be unstaged"]
+    )
     lateinit var file: String
 
     private val repositoryFolder = RepositoryFolderManager().initFolder
@@ -25,6 +31,7 @@ class Unstage : Callable<Int> {
      * @return 0 if the file was unstaged successfully, 1 otherwise
      */
     override fun call(): Int {
+        super.call()
         val filePath = repositoryFolder.resolve(file)
 
         if (filePath.exists()) {
@@ -43,8 +50,15 @@ class Unstage : Callable<Int> {
      */
     fun unstageFile(file: Path) {
         when {
-            file.isDirectory() -> unstageFolder(file)
-            else -> stagingHandler.unstage(file)
+            file.isDirectory() -> {
+                Logger.log("Unstaging folder: $file")
+                unstageFolder(file)
+            }
+
+            else -> {
+                Logger.log("Unstaging file: $file")
+                stagingHandler.unstage(file)
+            }
         }
     }
 
@@ -62,6 +76,8 @@ class Unstage : Callable<Int> {
      * @param hash The hash of the file to unstage
      */
     fun unstageHash(hash: Hash) {
+        Logger.log("Staging file with hash: $hash")
+
         stagingHandler.unstage(hash)
     }
 

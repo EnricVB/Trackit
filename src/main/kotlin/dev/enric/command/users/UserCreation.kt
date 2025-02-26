@@ -1,14 +1,14 @@
 package dev.enric.command.users
 
+import dev.enric.command.TrackitCommand
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
-import java.util.concurrent.Callable
 
 @Command(
     name = "user-create",
     description = ["Creates a new user"]
 )
-class UserCreation : Callable<Int> {
+class UserCreation : TrackitCommand() {
     @Option(names = ["--name", "-n"], description = ["User name."])
     lateinit var name: String
 
@@ -39,7 +39,7 @@ class UserCreation : Callable<Int> {
     var sudo: Array<String>? = null
 
     override fun call(): Int {
-
+        super.call()
 
         return 0
     }
