@@ -33,12 +33,10 @@ class UserCreationHandler(
     }
 
     fun createUser() {
-        val roles : MutableList<Role> = roleNames.mapNotNull { RoleUtil.getRoleByName(it) }.toMutableList()
-        if(roles.isEmpty()) {
+        val roles: MutableList<Role> = roleNames.mapNotNull { RoleUtil.getRoleByName(it) }.toMutableList()
+        if (roles.isEmpty()) {
             Logger.error("No roles found, adding default role")
             roles.add(RoleUtil.UNDEFINED_ROLE)
-
-            return
         }
 
         User(
