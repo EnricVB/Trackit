@@ -41,6 +41,7 @@ class Main : TrackitCommand() {
                 .commands(Ansi.Style.bold, Ansi.Style.fg_green)
                 .options(Ansi.Style.bold, Ansi.Style.fg_cyan)
                 .parameters(Ansi.Style.bold, Ansi.Style.fg_blue)
+                .optionParams(Ansi.Style.italic, Ansi.Style.fg_white)
                 .stackTraces(Ansi.Style.bold, Ansi.Style.fg_red)
                 .build())
 
