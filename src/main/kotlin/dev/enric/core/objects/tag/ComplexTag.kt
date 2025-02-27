@@ -3,6 +3,7 @@ package dev.enric.core.objects.tag
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.COMPLEX_TAG
 import dev.enric.core.TrackitObject
+import dev.enric.util.ColorUtil
 import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
@@ -36,8 +37,26 @@ data class ComplexTag(
     }
 
     override fun printInfo(): String {
-        return "SimpleTag(name=$name, hash=$commit)"
+        return buildString {
+            appendLine(ColorUtil.title("Complex Tag Details"))
+
+            append(ColorUtil.label("  Name: "))
+            appendLine(if (name.isNotEmpty()) ColorUtil.text(name) else ColorUtil.message("No name assigned"))
+
+            append(ColorUtil.label("  Commit: "))
+            appendLine(commit?.let { ColorUtil.text(it.toString()) } ?: ColorUtil.message("No commit assigned"))
+
+            append(ColorUtil.label("  User: "))
+            appendLine(ColorUtil.text(user.toString()))
+
+            append(ColorUtil.label("  Date: "))
+            appendLine(ColorUtil.text(date.toString()))
+
+            append(ColorUtil.label("  Message: "))
+            appendLine(if (message.isNotEmpty()) ColorUtil.text(message) else ColorUtil.message("No message assigned"))
+        }
     }
+
 
     override fun showDifferences(newer: Hash, oldest: Hash): String {
         TODO("Not yet implemented")
