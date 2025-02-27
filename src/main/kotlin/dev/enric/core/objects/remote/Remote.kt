@@ -3,6 +3,7 @@ package dev.enric.core.objects.remote
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.REMOTE
 import dev.enric.core.TrackitObject
+import dev.enric.util.ColorUtil
 import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
@@ -30,8 +31,17 @@ data class Remote(
     }
 
     override fun printInfo(): String {
-        return "Remote(protocol=$protocol, type=$type)"
+        return buildString {
+            appendLine(ColorUtil.title("Remote Details"))
+
+            append(ColorUtil.label("  Protocol: "))
+            appendLine(protocol?.let { ColorUtil.text(it.toString()) } ?: ColorUtil.message("No protocol assigned"))
+
+            append(ColorUtil.label("  Type: "))
+            appendLine(type?.let { ColorUtil.text(it.toString()) } ?: ColorUtil.message("No type assigned"))
+        }
     }
+
 
     override fun showDifferences(newer: Hash, oldest: Hash): String {
         TODO("Not yet implemented")
