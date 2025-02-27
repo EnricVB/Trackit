@@ -3,6 +3,7 @@ package dev.enric.core.objects
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.TREE
 import dev.enric.core.TrackitObject
+import dev.enric.util.ColorUtil
 import dev.enric.util.RepositoryFolderManager
 import dev.enric.util.SerializablePath
 import java.io.Serializable
@@ -34,7 +35,21 @@ data class Tree(
     }
 
     override fun printInfo(): String {
-        return "Tree: $serializablePath $hash"
+        return buildString {
+            appendLine(ColorUtil.title("Tree Details"))
+
+            append(ColorUtil.label("  Path: "))
+            appendLine(
+                if (serializablePath.toString().isNotEmpty()) ColorUtil.text(serializablePath.toString())
+                else ColorUtil.message("No path assigned")
+            )
+
+            append(ColorUtil.label("  Hash: "))
+            appendLine(
+                if (hash.toString().isNotEmpty()) ColorUtil.text(hash.toString())
+                else ColorUtil.message("No hash assigned")
+            )
+        }
     }
 
     override fun showDifferences(newer: Hash, oldest: Hash): String {
