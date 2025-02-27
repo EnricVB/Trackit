@@ -13,7 +13,7 @@ data class User(
     var password: Hash = Hash("0".repeat(32)),
     var mail: String = "",
     var phone: String = "",
-    val roles: List<Hash> = listOf()
+    val roles: MutableList<Hash> = mutableListOf()
 ) : TrackitObject<User>(), Serializable {
 
     override fun decode(hash: Hash): User {
@@ -49,7 +49,7 @@ data class User(
         }
 
         @JvmStatic
-        fun createUser(roles: MutableList<Role>): User {
+        fun createUser(roles: List<Role>): User {
             val console = System.console()
 
             val username: String

@@ -3,8 +3,10 @@ package dev.enric.command.users
 import dev.enric.command.TrackitCommand
 import dev.enric.core.commandconsumer.SudoArgsParameterConsumer
 import dev.enric.core.handler.users.UserCreationHandler
+import dev.enric.logger.Logger
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
+import java.io.Console
 
 @Command(
     name = "user-create",
@@ -16,8 +18,8 @@ class UserCreation : TrackitCommand() {
     @Option(names = ["--name", "-n"], description = ["User name."], required = true)
     var name: String = ""
 
-    @Option(names = ["--password", "-p"], description = ["User password."], required = true)
-    var password: String = ""
+    @Option(names = ["--password", "-p"], description = ["User password."], interactive = true)
+    var password: String? = null
 
     @Option(names = ["--mail", "-m"], description = ["User mail contact"], required = false)
     var mail: String = ""
@@ -43,9 +45,11 @@ class UserCreation : TrackitCommand() {
     override fun call(): Int {
         super.call()
 
+        password = assignInteractivePassword() ?: return 1
+
         val handler = UserCreationHandler(
             name,
-            password,
+            password!!,
             mail,
             phone,
             roles,
@@ -59,5 +63,20 @@ class UserCreation : TrackitCommand() {
         handler.createUser()
 
         return 0
+    }
+
+    fun assignInteractivePassword() : String? {
+        if (password.isNullOrBlank()) {
+            val console: Console? = System.console()
+
+            if (console != null) {
+                return String(console.readPassword("Enter password: "))
+            } else {
+                Logger.error("Password is required but cannot be read in this environment")
+                return null
+            }
+        }
+
+        return null
     }
 }
