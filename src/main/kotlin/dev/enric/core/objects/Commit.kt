@@ -3,6 +3,7 @@ package dev.enric.core.objects
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.COMMIT
 import dev.enric.core.TrackitObject
+import dev.enric.util.ColorUtil
 import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
@@ -52,8 +53,42 @@ data class Commit(
     }
 
     override fun printInfo(): String {
-        return "Commit(previousCommit=$previousCommit, tree=$tree, branch=$branch, autor=$autor, confirmer=$confirmer, date=$date, title='$title', message='$message', tag=$tag)"
+        return buildString {
+            appendLine(ColorUtil.title("Commit Details"))
+
+            append(ColorUtil.label("  Previous Commit: "))
+            appendLine(ColorUtil.text(previousCommit.toString()))
+
+            append(ColorUtil.label("  Tree Hashes: "))
+            if (tree.isNotEmpty()) {
+                tree.forEach { appendLine("    - " + ColorUtil.text(it.toString())) }
+            } else {
+                appendLine(ColorUtil.message("No tree objects assigned"))
+            }
+
+            append(ColorUtil.label("  Branch: "))
+            appendLine(ColorUtil.text(branch.toString()))
+
+            append(ColorUtil.label("  Author: "))
+            appendLine(ColorUtil.text(autor.toString()))
+
+            append(ColorUtil.label("  Confirmer: "))
+            appendLine(ColorUtil.text(confirmer.toString()))
+
+            append(ColorUtil.label("  Date: "))
+            appendLine(ColorUtil.text(date.toString()))
+
+            append(ColorUtil.label("  Title: "))
+            appendLine(if (title.isNotEmpty()) ColorUtil.text(title) else ColorUtil.message("No title assigned"))
+
+            append(ColorUtil.label("  Message: "))
+            appendLine(if (message.isNotEmpty()) ColorUtil.text(message) else ColorUtil.message("No message assigned"))
+
+            append(ColorUtil.label("  Tag: "))
+            appendLine(if (tag.isNotEmpty()) ColorUtil.text(tag) else ColorUtil.message("No tag assigned"))
+        }
     }
+
 
     override fun showDifferences(newer: Hash, oldest: Hash): String {
         TODO("Not yet implemented")
