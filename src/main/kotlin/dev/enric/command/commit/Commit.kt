@@ -39,7 +39,6 @@ class Commit : TrackitCommand() {
         super.call()
 
         if(stageAllFiles) {
-            Logger.log("Staging all files before committing")
             stageAllFiles()
         }
 
@@ -50,7 +49,14 @@ class Commit : TrackitCommand() {
     }
 
     fun stageAllFiles() {
-        Stage().stageAllFiles()
+        Logger.log("Staging all files before committing")
+
+        val stageCommand = Stage()
+
+        stageCommand.path = "."
+        stageCommand.force = false
+
+        stageCommand.call()
     }
 
     fun createCommit(title: String, message: String) {
