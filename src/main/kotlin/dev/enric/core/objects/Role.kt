@@ -4,6 +4,7 @@ import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.ROLE
 import dev.enric.core.TrackitObject
 import dev.enric.core.objects.permission.RolePermission
+import dev.enric.util.ColorUtil
 import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
@@ -30,7 +31,28 @@ data class Role(val name: String = "", val permissionLevel: Int = -1, val permis
     }
 
     override fun printInfo(): String {
-        return "Role(name=$name, permissionLevel=$permissionLevel, permissions=${RolePermission.newInstance(permissions).printInfo()})"
+        return buildString {
+            appendLine(ColorUtil.title("Role Details"))
+
+            append(ColorUtil.label("  Name: "))
+            appendLine(
+                if (name.isNotEmpty()) ColorUtil.text(name)
+                else ColorUtil.message("No name assigned")
+            )
+
+            append(ColorUtil.label("  Permission Level: "))
+            appendLine(
+                if (permissionLevel >= 0) ColorUtil.text(permissionLevel.toString())
+                else ColorUtil.message("No permission level assigned")
+            )
+
+            append(ColorUtil.label("  Permissions: "))
+            val permissionsInfo = RolePermission.newInstance(permissions).printInfo()
+            appendLine(
+                if (permissionsInfo.isNotEmpty()) ColorUtil.text(permissionsInfo)
+                else ColorUtil.message("No permissions assigned")
+            )
+        }
     }
 
     override fun showDifferences(newer: Hash, oldest: Hash): String {
