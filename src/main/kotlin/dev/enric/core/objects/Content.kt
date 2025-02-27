@@ -3,6 +3,7 @@ package dev.enric.core.objects
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.CONTENT
 import dev.enric.core.TrackitObject
+import dev.enric.util.ColorUtil
 import dev.enric.util.RepositoryFolderManager
 import java.io.ByteArrayOutputStream
 import java.io.Serializable
@@ -15,7 +16,8 @@ class Content(val content: ByteArray = ByteArray(0)) : TrackitObject<Content>(),
         val contentFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
         val objectFile = contentFolder.resolve(hash.toString())
 
-        val decompressedStringData = decompressContent(Files.readAllBytes(objectFile)) ?: return Content() // If the file is empty, return an empty content
+        val decompressedStringData = decompressContent(Files.readAllBytes(objectFile))
+            ?: return Content() // If the file is empty, return an empty content
 
         return Content(decompressedStringData)
     }
@@ -29,7 +31,8 @@ class Content(val content: ByteArray = ByteArray(0)) : TrackitObject<Content>(),
         deflater.setInput(content)
         deflater.finish() // Indicates that all data has been sent
 
-        val outputStream = ByteArrayOutputStream(content.size) // Stream to which is going to be sent the compressed data
+        val outputStream =
+            ByteArrayOutputStream(content.size) // Stream to which is going to be sent the compressed data
         val buffer = ByteArray(1024)
 
         while (!deflater.finished()) {
@@ -44,8 +47,13 @@ class Content(val content: ByteArray = ByteArray(0)) : TrackitObject<Content>(),
     }
 
     override fun printInfo(): String {
-        return "Content(content=$content)"
+        return buildString {
+            appendLine(ColorUtil.title("Content Details"))
+
+            appendLine(ColorUtil.text(String(content)))
+        }
     }
+
 
     override fun showDifferences(newer: Hash, oldest: Hash): String {
         val newerContent = decode(newer)
@@ -56,7 +64,7 @@ class Content(val content: ByteArray = ByteArray(0)) : TrackitObject<Content>(),
 
     companion object {
         @JvmStatic
-        fun newInstance(hash : Hash) : Content {
+        fun newInstance(hash: Hash): Content {
             return Content().decode(hash)
         }
     }
