@@ -10,9 +10,14 @@ import dev.enric.command.staging.Unstage
 import dev.enric.command.users.UserCreation
 import dev.enric.command.users.UserList
 import dev.enric.command.users.UserModify
+import org.fusesource.jansi.AnsiConsole
 import picocli.CommandLine
 import picocli.CommandLine.Command
+import picocli.CommandLine.Help.Ansi
 import kotlin.system.exitProcess
+import picocli.CommandLine.Help.ColorScheme
+
+
 
 @Command(
     name = "trackit",
@@ -26,7 +31,18 @@ class Main : TrackitCommand() {
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
+            System.setProperty("picocli.ansi", "true")
+            AnsiConsole.systemInstall()
+
             val cmd = CommandLine(Main())
+
+            cmd.setColorScheme(ColorScheme.Builder()
+                .errors(Ansi.Style.bold, Ansi.Style.fg_red)
+                .commands(Ansi.Style.bold, Ansi.Style.fg_green)
+                .options(Ansi.Style.bold, Ansi.Style.fg_cyan)
+                .parameters(Ansi.Style.bold, Ansi.Style.fg_blue)
+                .stackTraces(Ansi.Style.bold, Ansi.Style.fg_red)
+                .build())
 
             cmd.isCaseInsensitiveEnumValuesAllowed = true
             cmd.isStopAtPositional = false
@@ -38,6 +54,7 @@ class Main : TrackitCommand() {
 
             val exitCode = cmd.execute(*args)
 
+            AnsiConsole.systemUninstall()
             exitProcess(exitCode)
         }
     }
