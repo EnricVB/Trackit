@@ -1,11 +1,10 @@
 package dev.enric.core.commandconsumer
 
-import dev.enric.logger.Logger
 import picocli.CommandLine
 import picocli.CommandLine.IParameterConsumer
 import picocli.CommandLine.ParameterException
 import java.io.Console
-import java.util.Stack
+import java.util.*
 
 class SudoArgsParameterConsumer : IParameterConsumer {
     override fun consumeParameters(
@@ -14,12 +13,15 @@ class SudoArgsParameterConsumer : IParameterConsumer {
         commandSpec: CommandLine.Model.CommandSpec?
     ) {
         if (args == null || option == null || commandSpec == null) {
-            throw ParameterException(commandSpec?.commandLine(), "There was an error while reading the parameters, two parameters are required")
+            throw ParameterException(
+                commandSpec?.commandLine(),
+                "There was an error while reading the parameters, two parameters are required"
+            )
         }
 
         val values = mutableListOf<String>()
-        var username = if(args.isNotEmpty()) args.pop() else ""
-        var password = if(args.isNotEmpty()) args.pop() else ""
+        var username = if (args.isNotEmpty()) args.pop() else ""
+        var password = if (args.isNotEmpty()) args.pop() else ""
 
         if (username.isNotBlank()) {
             values.add(args.pop())

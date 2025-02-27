@@ -1,4 +1,4 @@
-package dev.enric.command.users
+package dev.enric.command.gestion.users
 
 import dev.enric.command.TrackitCommand
 import dev.enric.core.commandconsumer.SudoArgsParameterConsumer

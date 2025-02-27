@@ -7,9 +7,9 @@ import dev.enric.command.repository.Ignore
 import dev.enric.command.repository.Init
 import dev.enric.command.staging.Stage
 import dev.enric.command.staging.Unstage
-import dev.enric.command.users.UserCreation
-import dev.enric.command.users.UserList
-import dev.enric.command.users.UserModify
+import dev.enric.command.gestion.users.UserCreation
+import dev.enric.command.gestion.users.UserList
+import dev.enric.command.gestion.users.UserModify
 import org.fusesource.jansi.AnsiConsole
 import picocli.CommandLine
 import picocli.CommandLine.Command
