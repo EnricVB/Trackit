@@ -3,6 +3,7 @@ package dev.enric.core.objects.tag
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.SIMPLE_TAG
 import dev.enric.core.TrackitObject
+import dev.enric.util.ColorUtil
 import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
@@ -31,8 +32,17 @@ data class SimpleTag(
     }
 
     override fun printInfo(): String {
-        return "SimpleTag(name=$name, hash=$commit)"
+        return buildString {
+            appendLine(ColorUtil.title("Simple Tag Details"))
+
+            append(ColorUtil.label("  Name: "))
+            appendLine(if (name.isNotEmpty()) ColorUtil.text(name) else ColorUtil.message("No name assigned"))
+
+            append(ColorUtil.label("  Commit: "))
+            appendLine(commit?.let { ColorUtil.text(it.toString()) } ?: ColorUtil.message("No commit assigned"))
+        }
     }
+
 
     override fun showDifferences(newer: Hash, oldest: Hash): String {
         TODO("Not yet implemented")
