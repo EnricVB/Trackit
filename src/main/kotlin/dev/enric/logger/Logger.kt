@@ -1,5 +1,7 @@
 package dev.enric.logger
 
+import dev.enric.util.ColorUtil
+
 object Logger {
     var logLevel: LogLevel = LogLevel.INFO
 
@@ -10,13 +12,13 @@ object Logger {
     fun log(message: String) {
         if(logLevel != LogLevel.INFO) return
 
-        println(message)
+        println(ColorUtil.message(message))
     }
 
     fun error(message: String) {
         if(logLevel == LogLevel.QUIET) return
 
-        System.err.println(message)
+        System.err.println(ColorUtil.error(message))
     }
 
     enum class LogLevel {
