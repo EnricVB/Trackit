@@ -3,6 +3,7 @@ package dev.enric.core.objects.permission
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.BRANCH_PERMISSION
 import dev.enric.core.TrackitObject
+import dev.enric.util.ColorUtil
 import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
@@ -69,15 +70,21 @@ data class RolePermission(
     }
 
     override fun printInfo(): String {
-        var message = "RolePermission("
-        message += if (modifyRolePermission) "m" else "-"
-        message += if (userOperationPermission) "u" else "-"
-        message += if (assignRolePermission) "s" else "-"
-        message += if (createRolePermission) "a" else "-"
-        message += ")"
+        return buildString {
+            appendLine(ColorUtil.title("Role Permission Details"))
 
-        return message
+            append(ColorUtil.label("  Permissions: "))
+            appendLine(
+                ColorUtil.text(
+                    (if (modifyRolePermission) "m" else "-") +
+                            (if (userOperationPermission) "u" else "-") +
+                            (if (assignRolePermission) "s" else "-") +
+                            (if (createRolePermission) "a" else "-")
+                )
+            )
+        }
     }
+
 
     override fun showDifferences(newer: Hash, oldest: Hash): String {
         TODO("Not yet implemented")
