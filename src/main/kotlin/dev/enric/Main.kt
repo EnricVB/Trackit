@@ -27,18 +27,21 @@ class Main : TrackitCommand() {
         @JvmStatic
         fun main(args: Array<String>) {
             val cmd = CommandLine(Main())
-            try {
-                val exitCode = cmd.execute(*args)
-                exitProcess(exitCode)
-            } catch (ex: Exception) {
-                println("ASDA")
 
-                System.err.println(ex.message)
-                cmd.usage(System.err)
-                exitProcess(1)
+            cmd.isCaseInsensitiveEnumValuesAllowed = true
+            cmd.isStopAtPositional = false
+
+            cmd.setExecutionExceptionHandler { ex, _, _ ->
+                System.err.println("Error: ${ex.message}")
+                return@setExecutionExceptionHandler 1
             }
+
+            val exitCode = cmd.execute(*args)
+
+            exitProcess(exitCode)
         }
     }
+
 
     override fun call(): Int {
         CommandLine.usage(this, System.out)
