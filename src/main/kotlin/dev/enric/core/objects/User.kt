@@ -3,6 +3,7 @@ package dev.enric.core.objects
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.USER
 import dev.enric.core.TrackitObject
+import dev.enric.util.ColorUtil
 import dev.enric.util.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
@@ -35,7 +36,36 @@ data class User(
     }
 
     override fun printInfo(): String {
-        return "User(name=$name, email=$mail, phone=$phone, roles=${roles.map { Role.newInstance(it).printInfo() }})"
+        val userDetails = buildString {
+            appendLine(ColorUtil.title("User Details"))
+
+            append(ColorUtil.label("  Name: "))
+            appendLine(
+                if (name.isNotEmpty()) ColorUtil.text(name)
+                else ColorUtil.message("No name assigned")
+            )
+
+            append(ColorUtil.label("  Mail: "))
+            appendLine(
+                if (mail.isNotEmpty()) ColorUtil.text(mail)
+                else ColorUtil.message("No mail assigned")
+            )
+
+            append(ColorUtil.label("  Phone: "))
+            appendLine(
+                if (phone.isNotEmpty()) ColorUtil.text(phone)
+                else ColorUtil.message("No phone assigned")
+            )
+
+            append(ColorUtil.label("  Roles: "))
+            appendLine(
+                roles.takeIf { it.isNotEmpty() }
+                    ?.joinToString(", ") { ColorUtil.text(Role.newInstance(it).printInfo()) }
+                    ?: ColorUtil.message("No roles assigned")
+            )
+        }
+
+        return userDetails
     }
 
     override fun showDifferences(newer: Hash, oldest: Hash): String {
