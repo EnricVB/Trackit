@@ -98,7 +98,7 @@ class CommitHandler {
         return try {
             FileChannel.open(file.toPath(), StandardOpenOption.READ).use { channel ->
                 val buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size())
-                Content(ByteArray(buffer.remaining()).apply { buffer.get(this) })
+                Content(ByteArray(buffer.remaining()).apply { buffer[this] })
             }
         } catch (exception: Exception) {
             null
