@@ -1,6 +1,6 @@
 package dev.enric.logger
 
-import dev.enric.util.ColorUtil
+import dev.enric.util.common.ColorUtil
 
 object Logger {
     var logLevel: LogLevel = LogLevel.INFO

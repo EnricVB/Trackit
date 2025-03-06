@@ -1,6 +1,6 @@
 package dev.enric.core
 
-import dev.enric.util.RepositoryFolderManager
+import dev.enric.util.repository.RepositoryFolderManager
 import java.io.ByteArrayOutputStream
 import java.io.ObjectOutputStream
 import java.nio.file.Files

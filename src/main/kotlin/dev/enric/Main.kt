@@ -2,14 +2,14 @@ package dev.enric
 
 import dev.enric.command.TrackitCommand
 import dev.enric.command.administration.Config
-import dev.enric.command.commit.Commit
-import dev.enric.command.repository.Ignore
-import dev.enric.command.repository.Init
-import dev.enric.command.staging.Stage
-import dev.enric.command.staging.Unstage
-import dev.enric.command.gestion.users.UserCreation
-import dev.enric.command.gestion.users.UserList
-import dev.enric.command.gestion.users.UserModify
+import dev.enric.command.repo.commit.Commit
+import dev.enric.command.repo.repository.Ignore
+import dev.enric.command.repo.repository.Init
+import dev.enric.command.repo.staging.Stage
+import dev.enric.command.repo.staging.Unstage
+import dev.enric.command.management.users.UserCreation
+import dev.enric.command.management.users.UserList
+import dev.enric.command.management.users.UserModify
 import org.fusesource.jansi.AnsiConsole
 import picocli.CommandLine
 import picocli.CommandLine.Command

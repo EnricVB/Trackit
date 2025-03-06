@@ -1,9 +1,9 @@
 package dev.enric.command.administration
 
 import dev.enric.command.TrackitCommand
-import dev.enric.core.handler.config.KeepSession
+import dev.enric.core.security.config.KeepSession
 import dev.enric.logger.Logger
-import dev.enric.util.AuthUtil
+import dev.enric.core.security.AuthUtil
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 import java.io.Console

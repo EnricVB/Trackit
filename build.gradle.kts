@@ -14,10 +14,13 @@ repositories {
 
 dependencies {
     implementation("io.github.rctcwyvrn:blake3:1.3")             // Blake3 hash function
+    implementation("com.lambdapioneer.argon2kt:argon2kt:1.6.0")  // Argon2 password hashing
+
     implementation("org.tukaani:xz:1.8")                         // ZLib compression algorithm
     implementation("info.picocli:picocli:4.7.6")                 // Command line interface
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.21")  // Standard library
     implementation("org.fusesource.jansi:jansi:2.4.0")           // ANSI escape codes
+
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.21")  // Standard library
 
     testImplementation(kotlin("test"))
 }
