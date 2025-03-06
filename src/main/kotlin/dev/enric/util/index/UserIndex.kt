@@ -2,6 +2,7 @@ package dev.enric.util.index
 
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.USER
+import dev.enric.core.security.PasswordHash
 import dev.enric.domain.User
 import dev.enric.util.repository.RepositoryFolderManager
 import kotlin.io.path.ExperimentalPathApi
@@ -11,10 +12,9 @@ import kotlin.io.path.walk
 
 object UserIndex {
     fun getUser(username: String, password: String): User? {
-        val hashPassword = Hash.parseText(password)
-
         getAllUsers().forEach {
             val user = User.newInstance(it)
+            val hashPassword = PasswordHash.hash(password, user.salt)
 
             if(user.name == username && user.password == hashPassword) {
                 return user

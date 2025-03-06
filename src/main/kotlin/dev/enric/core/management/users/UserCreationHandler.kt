@@ -1,11 +1,10 @@
 package dev.enric.core.management.users
 
-import dev.enric.core.Hash
+import dev.enric.core.security.AuthUtil
 import dev.enric.domain.Role
 import dev.enric.domain.User
 import dev.enric.domain.permission.RolePermission
 import dev.enric.logger.Logger
-import dev.enric.core.security.AuthUtil
 import dev.enric.util.index.RoleIndex
 import dev.enric.util.index.UserIndex
 
@@ -57,13 +56,7 @@ class UserCreationHandler(
             roles.add(RoleIndex.UNDEFINED_ROLE)
         }
 
-        User(
-            name = name,
-            password = Hash.parseText(password),
-            mail = mail ?: "",
-            phone = phone ?: "",
-            roles = roles.map { it.encode().first }.toMutableList()
-        ).encode(true)
+        User.createUser(name, password, mail ?: "", phone ?: "", roles).encode(true)
 
         Logger.log("User $name created")
     }
