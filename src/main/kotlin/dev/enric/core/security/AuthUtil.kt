@@ -14,7 +14,11 @@ object AuthUtil {
     private val configFile: Path = repositoryManager.getConfigFilePath()
 
     fun authenticate(username: String, password: String): Boolean {
-        return UserIndex.getUser(username, password) != null
+        UserIndex.getUser(username).let {
+            val salt = it?.salt ?: return false
+
+            return PasswordHash.hash(password, salt) == it.password
+        }
     }
 
     fun getLoggedUser(): User? {

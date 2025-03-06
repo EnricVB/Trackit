@@ -17,17 +17,12 @@ object PasswordHash {
         val generator = Argon2BytesGenerator()
         val builder = Argon2Parameters.Builder()
 
-        val pepper = ByteArray(16)
-        SecureRandom.getInstanceStrong().nextBytes(salt)
-        SecureRandom.getInstanceStrong().nextBytes(pepper)
-
         val hash = ByteArray(128)
 
         builder.withIterations(3)
         builder.withMemoryAsKB(2048000)
         builder.withParallelism(4)
         builder.withSalt(salt)
-        builder.withSecret(pepper)
         builder.withVersion(1)
 
         val parameters = builder.build()

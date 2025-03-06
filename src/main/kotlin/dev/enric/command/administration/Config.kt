@@ -27,7 +27,7 @@ class Config : TrackitCommand() {
      *
      * If the password is not provided, the user will be prompted to enter it
      */
-    @Option(names = ["--password", "-p"], description = ["Define the password of the user"], interactive = true)
+    @Option(names = ["--password", "-p"], description = ["Define the password of the user"], required = true)
     var password: String? = null
 
     /**
