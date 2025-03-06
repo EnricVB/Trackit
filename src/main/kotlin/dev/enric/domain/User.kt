@@ -3,6 +3,7 @@ package dev.enric.domain
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.USER
 import dev.enric.core.TrackitObject
+import dev.enric.core.security.PasswordHash
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.Serializable
@@ -11,7 +12,8 @@ import java.util.*
 
 data class User(
     val name: String = "",
-    var password: Hash = Hash("0".repeat(32)),
+    var password: String = "",
+    var salt: ByteArray? = null,
     var mail: String = "",
     var phone: String = "",
     val roles: MutableList<Hash> = mutableListOf()
@@ -72,6 +74,35 @@ data class User(
         TODO("Not yet implemented")
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as User
+
+        if (name != other.name) return false
+        if (password != other.password) return false
+        if (salt != null) {
+            if (other.salt == null) return false
+            if (!salt.contentEquals(other.salt)) return false
+        } else if (other.salt != null) return false
+        if (mail != other.mail) return false
+        if (phone != other.phone) return false
+        if (roles != other.roles) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + password.hashCode()
+        result = 31 * result + (salt?.contentHashCode() ?: 0)
+        result = 31 * result + mail.hashCode()
+        result = 31 * result + phone.hashCode()
+        result = 31 * result + roles.hashCode()
+        return result
+    }
+
     companion object {
         @JvmStatic
         fun newInstance(hash: Hash): User {
@@ -87,6 +118,7 @@ data class User(
             val phone: String
             val password: String
             val rolesHash = roles.map { it.encode().first }.toMutableList()
+            val salt = PasswordHash.generateSalt()
 
             if (console != null) { // This is running in a terminal
                 username = console.readLine("Enter username: ")
@@ -105,7 +137,15 @@ data class User(
                 password = scanner.nextLine()
             }
 
-            return User(username, Hash.parseText(password), mail, phone, rolesHash)
+            return User(username, PasswordHash.hash(password, salt), salt, mail, phone, rolesHash)
+        }
+
+        @JvmStatic
+        fun createUser(username: String, password: String, mail: String, phone: String, roles: List<Role>): User {
+            val rolesHash = roles.map { it.encode().first }.toMutableList()
+            val salt = PasswordHash.generateSalt()
+
+            return User(username, PasswordHash.hash(password, salt), salt, mail, phone, rolesHash)
         }
     }
 }

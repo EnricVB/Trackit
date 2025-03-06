@@ -4,6 +4,7 @@ import dev.enric.command.TrackitCommand
 import dev.enric.core.security.config.KeepSession
 import dev.enric.logger.Logger
 import dev.enric.core.security.AuthUtil
+import dev.enric.util.index.UserIndex
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 import java.io.Console
@@ -55,6 +56,7 @@ class Config : TrackitCommand() {
                 Logger.error("Invalid credentials")
                 return 1
             }
+
             saveSession()
         }
 
@@ -87,7 +89,10 @@ class Config : TrackitCommand() {
      * Save the session in the system or repository
      */
     private fun saveSession() {
-        val session = KeepSession(username!!, password!!)
+        val salt = UserIndex.getUser(username ?: "")?.salt
+
+        val session = KeepSession(username ?: "", password ?: "", salt)
+
         if (global) {
             Logger.log("Saving session at system level")
             session.globalSave()

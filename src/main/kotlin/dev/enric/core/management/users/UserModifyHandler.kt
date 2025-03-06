@@ -1,11 +1,11 @@
 package dev.enric.core.management.users
 
-import dev.enric.core.Hash
+import dev.enric.core.security.AuthUtil
+import dev.enric.core.security.PasswordHash
 import dev.enric.domain.Role
 import dev.enric.domain.User
 import dev.enric.domain.permission.RolePermission
 import dev.enric.logger.Logger
-import dev.enric.core.security.AuthUtil
 import dev.enric.util.index.RoleIndex
 import dev.enric.util.index.UserIndex
 
@@ -25,7 +25,7 @@ class UserModifyHandler(
 
         if (!newPassword.isNullOrEmpty()) {
             if (newPassword != password) {
-                user.password = Hash.parseText(newPassword)
+                user.password = PasswordHash.hash(newPassword, user.salt)
             } else {
                 Logger.error("New password is empty or the same as the old one")
             }
