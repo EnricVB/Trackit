@@ -9,25 +9,25 @@ import java.io.Serializable
  * This class represents a Hash that is going to be used to store the objects in the repository.
  * The Hash is 16 characters long string that is generated using the Blake3 algorithm.
  */
-data class Hash(val hash: String) : Serializable {
+data class Hash(val string: String) : Serializable {
 
     /**
      * Operator that concatenates two Hash objects.
      */
     operator fun plus(other: Hash): Hash {
-        return Hash(hash + other.hash)
+        return Hash(string + other.string)
     }
 
     override fun toString(): String {
-        return hash
+        return string
     }
 
     override fun equals(other: Any?): Boolean {
-        return other is Hash && hash == other.hash
+        return other is Hash && string == other.string
     }
 
     override fun hashCode(): Int {
-        return hash.hashCode()
+        return string.hashCode()
     }
 
     companion object {

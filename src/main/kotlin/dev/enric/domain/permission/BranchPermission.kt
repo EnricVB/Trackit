@@ -3,6 +3,7 @@ package dev.enric.domain.permission
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.BRANCH_PERMISSION
 import dev.enric.core.TrackitObject
+import dev.enric.domain.Branch
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.Serializable
@@ -10,10 +11,11 @@ import java.nio.file.Files
 
 data class BranchPermission(
     val readPermission: Boolean = false,
-    val writePermission: Boolean = false
+    val writePermission: Boolean = false,
+    val branch: Hash = Hash("0".repeat(40))
 ) : TrackitObject<BranchPermission>(), Permission, Serializable {
 
-    constructor(permissions: String) : this(
+    constructor(permissions: String, branch: Hash) : this(
         readPermission = when (permissions.getOrNull(0)) {
             'r' -> true
             '-' -> false
@@ -23,7 +25,8 @@ data class BranchPermission(
             'w' -> true
             '-' -> false
             else -> throw IllegalArgumentException("Invalid write permission: ${permissions.getOrNull(1)}")
-        }
+        },
+        branch = branch
     )
 
     override val permission: Int
@@ -49,6 +52,8 @@ data class BranchPermission(
     override fun printInfo(): String {
         return buildString {
             appendLine(ColorUtil.title("Branch Permission Details"))
+            append(ColorUtil.label("  Branch: "))
+            appendLine(ColorUtil.text(Branch.newInstance(branch).name))
 
             append(ColorUtil.label("  Permissions: "))
             appendLine(
@@ -58,7 +63,6 @@ data class BranchPermission(
             )
         }
     }
-
 
     override fun showDifferences(newer: Hash, oldest: Hash): String {
         TODO("Not yet implemented")
