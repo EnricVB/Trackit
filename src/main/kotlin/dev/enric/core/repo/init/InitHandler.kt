@@ -1,6 +1,7 @@
 package dev.enric.core.repo.init
 
 import dev.enric.core.Hash
+import dev.enric.domain.Branch
 import dev.enric.domain.Role
 import dev.enric.domain.User
 import dev.enric.domain.permission.RolePermission
@@ -13,6 +14,7 @@ object InitHandler {
 
         val owner = createDefaultRoles()
         createUser(owner)
+        createMainBranch()
     }
 
     /**
@@ -25,14 +27,18 @@ object InitHandler {
         val projectManagerPermissions = RolePermission("musa").encode(true).first
         val undefinedPermissions = RolePermission("----").encode(true).first
 
-        val owner = Role("owner", 1, ownerPermissions).encode(true).first
-        Role("projectManager", 2, projectManagerPermissions).encode(true).first
-        Role("undefined", Int.MAX_VALUE, undefinedPermissions).encode(true).first
+        val owner = Role("owner", 1, mutableListOf(ownerPermissions)).encode(true).first
+        Role("projectManager", 2, mutableListOf(projectManagerPermissions)).encode(true).first
+        Role("undefined", Int.MAX_VALUE, mutableListOf(undefinedPermissions)).encode(true).first
 
         return Role.newInstance(owner)
     }
 
     private fun createUser(owner: Role): Hash {
         return User.createUser(mutableListOf(owner)).encode(true).first
+    }
+
+    private fun createMainBranch() {
+        Branch("main").encode(true)
     }
 }
