@@ -77,6 +77,7 @@ class RoleCreationHandler(
 
         for ((index, expected) in positions.withIndex()) {
             val (char, validChar) = expected
+
             if (char != validChar && char != '-') {
                 Logger.error("Invalid permission at position ${index + 1}: '$char'. Expected '$validChar' or '-'.")
                 return false
@@ -102,7 +103,7 @@ class RoleCreationHandler(
             }
         }
 
-        return hasCreateRolePermission && level < userHighestRoleLevel
+        return hasCreateRolePermission && level <= userHighestRoleLevel
     }
 
     fun createRole() {
@@ -113,6 +114,8 @@ class RoleCreationHandler(
         assignBranchPermissions(role, branchPermissionsMap)
 
         Logger.log("Role created")
+
+        role.encode(true)
     }
 
     /**
@@ -140,14 +143,15 @@ class RoleCreationHandler(
     fun assignBranchPermissions(role: Role, branchPermissionsMap: Map<String, String>) {
         for((branchName, branchPermissionString) in branchPermissionsMap) {
             val branch = BranchIndex.getBranch(branchName) ?: throw IllegalArgumentException("Branch $branchName does not exist")
+            val updatedBranchPermissionString = branchPermissionString.replace("'", "")
 
-            if(!validateBranchPermissionsString(branchPermissionString)) {
+            if(!validateBranchPermissionsString(updatedBranchPermissionString)) {
                 throw IllegalArgumentException("Invalid branch permissions string for branch $branchName")
             }
 
             val branchPermission =
-                BranchPermissionIndex.getRolePermission(branchPermissionString, branchName)?.encode(true)?.first ?:
-                BranchPermission(branchPermissionString, branch.encode().first).encode(true).first
+                BranchPermissionIndex.getBranchPermission(updatedBranchPermissionString, branchName)?.encode(true)?.first ?:
+                BranchPermission(updatedBranchPermissionString, branch.encode().first).encode(true).first
 
             role.permissions.add(branchPermission)
         }

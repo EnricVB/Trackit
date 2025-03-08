@@ -31,10 +31,11 @@ class RoleCreation : TrackitCommand() {
     var rolePermissions: String = "----"
 
     @Option(
-        names = ["--branch-permission", "-p"],
-        description = ["Assign branch permissions in the format: --branch-permission <branch> <permission>"],
+        names = ["--branch-permission", "-b"],
+        description = ["Assign branch permissions. Format: --branch-permission <branch> <permission>. \n" +
+                "  In case you want to asssign a empty permission, use '--' between ' '."],
+        split = " ",
         arity = "2",
-        required = false
     )
     var branchPermissions: MutableList<String> = mutableListOf()
 

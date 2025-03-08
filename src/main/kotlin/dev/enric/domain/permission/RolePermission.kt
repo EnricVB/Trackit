@@ -2,6 +2,7 @@ package dev.enric.domain.permission
 
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.BRANCH_PERMISSION
+import dev.enric.core.Hash.HashType.ROLE_PERMISSION
 import dev.enric.core.TrackitObject
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
@@ -66,7 +67,7 @@ data class RolePermission(
             15
         )
 
-        return BRANCH_PERMISSION.hash.plus(hashData)
+        return ROLE_PERMISSION.hash.plus(hashData)
     }
 
     override fun printInfo(): String {

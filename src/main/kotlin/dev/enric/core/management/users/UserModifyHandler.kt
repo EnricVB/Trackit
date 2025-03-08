@@ -1,5 +1,6 @@
 package dev.enric.core.management.users
 
+import dev.enric.core.Hash.HashType.ROLE_PERMISSION
 import dev.enric.core.security.AuthUtil
 import dev.enric.core.security.PasswordHash
 import dev.enric.domain.Role
@@ -86,7 +87,15 @@ class UserModifyHandler(
 
     fun canModifyUsers(user: User): Boolean {
         user.roles.map { Role.newInstance(it) }.forEach {
-            return RolePermission.newInstance(it.permissions).userOperationPermission
+            it.permissions.filter { permissionHash ->
+                permissionHash.string.startsWith(ROLE_PERMISSION.hash.string)
+            }.forEach { permissionHash ->
+                val permission = RolePermission.newInstance(permissionHash)
+
+                if (permission.userOperationPermission) {
+                    return true
+                }
+            }
         }
 
         return false

@@ -59,7 +59,6 @@ data class User(
                 else ColorUtil.message("No phone assigned")
             )
 
-            append(ColorUtil.label("  Roles: "))
             appendLine(
                 roles.takeIf { it.isNotEmpty() }
                     ?.joinToString(", ") { ColorUtil.text(Role.newInstance(it).printInfo()) }
