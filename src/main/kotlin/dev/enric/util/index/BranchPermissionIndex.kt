@@ -5,44 +5,31 @@ import dev.enric.core.Hash.HashType.BRANCH_PERMISSION
 import dev.enric.core.Hash.HashType.ROLE_PERMISSION
 import dev.enric.domain.Branch
 import dev.enric.domain.permission.BranchPermission
-import dev.enric.domain.permission.RolePermission
 import dev.enric.util.repository.RepositoryFolderManager
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.PathWalkOption
 import kotlin.io.path.isDirectory
 import kotlin.io.path.walk
+import kotlin.reflect.KProperty0
 
 object BranchPermissionIndex {
 
-    fun getRolePermission(permissions: String, branchName: String): RolePermission? {
+    fun getBranchPermission(permissions: String, branchName: String): BranchPermission? {
         getBranchPermissionsByBranch(branchName).forEach {
-            val rolePermission = RolePermission.newInstance(it)
+            val branchPermissions = BranchPermission.newInstance(it)
 
-            val permissionString = permissions.take(4)
-            val validChars = listOf('r', 'w')
-
-            val properties = listOf(
-                rolePermission::createRolePermission,
-                rolePermission::modifyRolePermission,
-                rolePermission::assignRolePermission,
-                rolePermission::userOperationPermission
-            )
-
-            permissionString.forEachIndexed { index, char ->
-                when (char) {
-                    validChars[index] -> properties[index].set(true)
-                    '-' -> properties[index].set(false)
-                    else -> throw IllegalArgumentException("Invalid permission at position ${index + 1}: $char")
-                }
+            if (permissions.length != 2 || permissions.any { ch -> ch !in listOf('r', 'w', '-') }) {
+                throw IllegalArgumentException("Invalid permission format. Use 'r', 'w' or '-' in a 2-character string.")
             }
 
-            if (rolePermission.toString().take(4) == permissions) {
-                return rolePermission
+            if (branchPermissions.toString().take(2) == permissions) {
+                return branchPermissions
             }
         }
 
         return null
     }
+
 
 
     @OptIn(ExperimentalPathApi::class)
