@@ -1,15 +1,20 @@
 package dev.enric.domain
 
 import dev.enric.core.Hash
-import dev.enric.core.Hash.HashType.ROLE
+import dev.enric.core.Hash.HashType.*
 import dev.enric.core.TrackitObject
+import dev.enric.domain.permission.BranchPermission
 import dev.enric.domain.permission.RolePermission
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
 
-data class Role(val name: String = "", val permissionLevel: Int = -1, val permissions: Hash = Hash("0".repeat(32))) : TrackitObject<Role>(),
+data class Role(
+    val name: String = "",
+    val permissionLevel: Int = -1,
+    val permissions: MutableList<Hash> = mutableListOf()
+) : TrackitObject<Role>(),
     Serializable {
 
     override fun decode(hash: Hash): Role {
@@ -30,6 +35,18 @@ data class Role(val name: String = "", val permissionLevel: Int = -1, val permis
         return ROLE.hash.plus(hashData)
     }
 
+    fun getRolePermissions(): List<RolePermission> {
+        return permissions
+            .filter { it.string.substring(2) == ROLE_PERMISSION.hash.string }
+            .map { RolePermission.newInstance(it) }
+    }
+
+    fun getBranchPermissions(): List<BranchPermission> {
+        return permissions
+            .filter { it.string.substring(2) == BRANCH_PERMISSION.hash.string }
+            .map { BranchPermission.newInstance(it) }
+    }
+
     override fun printInfo(): String {
         return buildString {
             appendLine(ColorUtil.title("Role Details"))
@@ -46,12 +63,11 @@ data class Role(val name: String = "", val permissionLevel: Int = -1, val permis
                 else ColorUtil.message("No permission level assigned")
             )
 
-            append(ColorUtil.label("  Permissions: "))
-            val permissionsInfo = RolePermission.newInstance(permissions).printInfo()
-            appendLine(
-                if (permissionsInfo.isNotEmpty()) ColorUtil.text(permissionsInfo)
-                else ColorUtil.message("No permissions assigned")
-            )
+            append(ColorUtil.label("  Role Permissions: "))
+            getRolePermissions().forEach(RolePermission::printInfo)
+
+            append(ColorUtil.label("  Branch Permissions: "))
+            getBranchPermissions().forEach(BranchPermission::printInfo)
         }
     }
 
