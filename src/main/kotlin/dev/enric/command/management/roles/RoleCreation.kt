@@ -2,6 +2,7 @@ package dev.enric.command.management.roles
 
 import dev.enric.command.TrackitCommand
 import dev.enric.core.commandconsumer.SudoArgsParameterConsumer
+import dev.enric.core.management.roles.RoleCreationHandler
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 
@@ -30,13 +31,12 @@ class RoleCreation : TrackitCommand() {
     var rolePermissions: String = "----"
 
     @Option(
-        names = ["--branch-permission", "-b"],
-        description = ["Assign branch permissions. The permissions are: \n" +
-                "  - r: Read the content of the branch, as clone it into your local\n" +
-                "  - w: Write commits into the branch\n" +
-                "  - '-': To specify role has not the permission"]
+        names = ["--branch-permission", "-p"],
+        description = ["Assign branch permissions in the format: --branch-permission <branch> <permission>"],
+        arity = "2",
+        required = false
     )
-    var branchPermissions: String = "--"
+    var branchPermissions: MutableList<String> = mutableListOf()
 
     @Option(
         names = ["--sudo", "-s"],
@@ -48,6 +48,20 @@ class RoleCreation : TrackitCommand() {
 
     override fun call(): Int {
         super.call()
+
+        val handler = RoleCreationHandler(
+            name,
+            level,
+            rolePermissions,
+            branchPermissions,
+            sudoArgs
+        )
+
+        if (!handler.checkCanCreateRole()) {
+            return 1
+        }
+
+        handler.createRole()
 
         return 0
     }
