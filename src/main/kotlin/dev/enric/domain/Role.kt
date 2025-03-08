@@ -37,13 +37,13 @@ data class Role(
 
     fun getRolePermissions(): List<RolePermission> {
         return permissions
-            .filter { it.string.substring(2) == ROLE_PERMISSION.hash.string }
+            .filter { it.string.startsWith(ROLE_PERMISSION.hash.string) }
             .map { RolePermission.newInstance(it) }
     }
 
     fun getBranchPermissions(): List<BranchPermission> {
         return permissions
-            .filter { it.string.substring(2) == BRANCH_PERMISSION.hash.string }
+            .filter { it.string.startsWith(BRANCH_PERMISSION.hash.string) }
             .map { BranchPermission.newInstance(it) }
     }
 
@@ -63,11 +63,8 @@ data class Role(
                 else ColorUtil.message("No permission level assigned")
             )
 
-            append(ColorUtil.label("  Role Permissions: "))
-            getRolePermissions().forEach(RolePermission::printInfo)
-
-            append(ColorUtil.label("  Branch Permissions: "))
-            getBranchPermissions().forEach(BranchPermission::printInfo)
+            getRolePermissions().forEach { appendLine(it.printInfo()) }
+            getBranchPermissions().forEach { appendLine(it.printInfo()) }
         }
     }
 
