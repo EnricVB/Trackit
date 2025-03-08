@@ -14,6 +14,10 @@ object RoleIndex {
     val PROJECT_MANAGER_ROLE = getRoleByName("projectManager")!!
     val OWNER_ROLE = getRoleByName("owner")!!
 
+    fun roleAlreadyExists(name: String): Boolean {
+        return getRoleByName(name) != null
+    }
+
     fun getRoleByName(name: String): Role? {
         getAllRoles().forEach {
             val role = Role.newInstance(it)
