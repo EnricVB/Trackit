@@ -2,6 +2,8 @@ package dev.enric
 
 import dev.enric.command.TrackitCommand
 import dev.enric.command.administration.Config
+import dev.enric.command.management.roles.RoleCreation
+import dev.enric.command.management.roles.RoleList
 import dev.enric.command.repo.commit.Commit
 import dev.enric.command.repo.repository.Ignore
 import dev.enric.command.repo.repository.Init
@@ -24,7 +26,7 @@ import picocli.CommandLine.Help.ColorScheme
     mixinStandardHelpOptions = true,
     version = ["Trackit 1.0"],
     description = ["Track your files"],
-    subcommands = [Init::class, Stage::class, Unstage::class, Ignore::class, Commit::class, Config::class, UserCreation::class, UserModify::class, UserList::class]
+    subcommands = [Init::class, Stage::class, Unstage::class, Ignore::class, Commit::class, Config::class, UserCreation::class, UserModify::class, UserList::class, RoleCreation::class, RoleList::class]
 )
 class Main : TrackitCommand() {
 
@@ -49,6 +51,7 @@ class Main : TrackitCommand() {
             cmd.isStopAtPositional = false
 
             cmd.setExecutionExceptionHandler { ex, _, _ ->
+                ex.printStackTrace()
                 System.err.println("Error: ${ex.message}")
                 return@setExecutionExceptionHandler 1
             }

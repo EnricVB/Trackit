@@ -127,3 +127,21 @@ tasks.register<JavaExec>("tktUserList") {
 
     args = listOf("user-list")
 }
+
+tasks.register<JavaExec>("tktRoleCreate") {
+    mainClass.set("dev.enric.Main")
+    workingDir = file("${project.rootDir}/tktFolder")
+    group = "execute"
+    classpath = project.sourceSets["main"].runtimeClasspath
+
+    args = listOf("role-create", "-n", "Rol Prueba 3", "-l", "1", "-r", "----", "-b", "main", "'--'")
+}
+
+tasks.register<JavaExec>("tktRoleList") {
+    mainClass.set("dev.enric.Main")
+    workingDir = file("${project.rootDir}/tktFolder")
+    group = "execute"
+    classpath = project.sourceSets["main"].runtimeClasspath
+
+    args = listOf("role-list")
+}

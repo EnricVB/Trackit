@@ -1,5 +1,6 @@
 package dev.enric.core.management.users
 
+import dev.enric.core.Hash.HashType.ROLE_PERMISSION
 import dev.enric.core.security.AuthUtil
 import dev.enric.domain.Role
 import dev.enric.domain.User
@@ -41,7 +42,15 @@ class UserCreationHandler(
 
     fun canCreateUser(user: User): Boolean {
         user.roles.map { Role.newInstance(it) }.forEach {
-            return RolePermission.newInstance(it.permissions).userOperationPermission
+            it.permissions.filter { permissionHash ->
+                permissionHash.string.startsWith(ROLE_PERMISSION.hash.string)
+            }.forEach { permissionHash ->
+                val permission = RolePermission.newInstance(permissionHash)
+
+                if (permission.createRolePermission) {
+                    return true
+                }
+            }
         }
 
         return false
