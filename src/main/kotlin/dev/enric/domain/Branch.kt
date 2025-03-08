@@ -10,7 +10,7 @@ import dev.enric.util.repository.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
 
-class Branch(val branchName: String = "") : TrackitObject<Branch>(), Serializable {
+class Branch(val name: String = "") : TrackitObject<Branch>(), Serializable {
 
     override fun decode(hash: Hash): Branch {
         val branchFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
@@ -25,7 +25,7 @@ class Branch(val branchName: String = "") : TrackitObject<Branch>(), Serializabl
     }
 
     override fun generateKey(): Hash {
-        return BRANCH.hash.plus(Hash.parseText(branchName, 15))
+        return BRANCH.hash.plus(Hash.parseText(name, 15))
     }
 
     override fun printInfo(): String {
@@ -34,7 +34,7 @@ class Branch(val branchName: String = "") : TrackitObject<Branch>(), Serializabl
 
             append(ColorUtil.label("  Branch Name: "))
             appendLine(
-                if (branchName.isNotEmpty()) ColorUtil.text(branchName)
+                if (name.isNotEmpty()) ColorUtil.text(name)
                 else ColorUtil.message("No branch name assigned")
             )
 
@@ -49,11 +49,11 @@ class Branch(val branchName: String = "") : TrackitObject<Branch>(), Serializabl
         val newerContent = decode(newer)
         val oldestContent = decode(oldest)
 
-        return "Newer content: ${newerContent.branchName}\nOldest content: ${oldestContent.branchName}" // TODO: Implement a better way to show differences
+        return "Newer content: ${newerContent.name}\nOldest content: ${oldestContent.name}" // TODO: Implement a better way to show differences
     }
 
     fun getPermissions(): List<BranchPermission> {
-        return BranchPermissionIndex.getBranchPermissionsByBranch(branchName).map { BranchPermission.newInstance(it) }
+        return BranchPermissionIndex.getBranchPermissionsByBranch(name).map { BranchPermission.newInstance(it) }
     }
 
     companion object {
