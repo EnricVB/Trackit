@@ -2,6 +2,9 @@ package dev.enric.util.common
 
 import picocli.CommandLine.Help.Ansi
 
+/**
+ * Utility class to colorize text in the console
+ */
 object ColorUtil {
 
     fun title(title : String): String {

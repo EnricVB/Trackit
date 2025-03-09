@@ -149,10 +149,27 @@ data class StagingHandler(val force: Boolean = false) {
         }
     }
 
+    /**
+     * Get the status of the staging area.
+     * For each file in the staging area, it checks if the file is :
+     * - Untracked: The file is not in the staging area.
+     * - Unmodified: The file is in the staging area and has the same hash.
+     * - Modified: The file is in the staging area but has a different hash.
+     * - Ready to be committed: The file is in the staging area and has the same hash.
+     * - Staged: The file is in the staging area and has the same hash.
+     *
+     * @param hash The hash of the file to be checked
+     * @param hideUntracked If true, hides untracked files from the status
+     * @return A string with the status of the staging area
+     */
     fun getStatus(hash: Hash, hideUntracked: Boolean = false): String {
         return "Getting staged files for hash $hash"
     }
 
+    /**
+     * Shows the differences between the working directory and the staging area.
+     * @return A string with the differences between the working directory and the staging area
+     */
     fun showDifferences(): String {
         return "Showing differences"
     }

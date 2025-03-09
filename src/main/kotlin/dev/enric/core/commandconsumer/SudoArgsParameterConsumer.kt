@@ -6,12 +6,28 @@ import picocli.CommandLine.ParameterException
 import java.io.Console
 import java.util.*
 
+/**
+ * Custom parameter consumer for the --sudo option
+ *
+ * This consumer will read the username and password from the console if they are not provided as arguments
+ *
+ * @see IParameterConsumer
+ */
 class SudoArgsParameterConsumer : IParameterConsumer {
+
+    /**
+     * Consume the parameters for the --sudo option
+     *
+     * @param args the stack of arguments
+     * @param option the option to consume
+     * @param commandSpec the command spec
+     */
     override fun consumeParameters(
         args: Stack<String>?,
         option: CommandLine.Model.ArgSpec?,
         commandSpec: CommandLine.Model.CommandSpec?
     ) {
+        // In case of missing parameters, throw an exception
         if (args == null || option == null || commandSpec == null) {
             throw ParameterException(
                 commandSpec?.commandLine(),
@@ -23,6 +39,7 @@ class SudoArgsParameterConsumer : IParameterConsumer {
         var username = if (args.isNotEmpty()) args.pop() else ""
         var password = if (args.isNotEmpty()) args.pop() else ""
 
+        // If the username is not provided, read it from the console
         if (username.isNotBlank()) {
             values.add(args.pop())
         } else {
@@ -38,6 +55,7 @@ class SudoArgsParameterConsumer : IParameterConsumer {
             }
         }
 
+        // If the password is not provided, read it from the console
         if (password.isNotBlank()) {
             values.add(args.pop())
         } else {
@@ -53,6 +71,7 @@ class SudoArgsParameterConsumer : IParameterConsumer {
             }
         }
 
+        // Set the values for the option
         option.setValue(values.toTypedArray())
     }
 }

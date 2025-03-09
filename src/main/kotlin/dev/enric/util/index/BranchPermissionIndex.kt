@@ -10,10 +10,19 @@ import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.PathWalkOption
 import kotlin.io.path.isDirectory
 import kotlin.io.path.walk
-import kotlin.reflect.KProperty0
 
+/**
+ * This object is responsible for managing the branch permissions index.
+ * It allows to get all the branch permissions, check if a branch permission already exists and get a branch permission by its name.
+ */
 object BranchPermissionIndex {
 
+    /**
+     * Retrieves a branch permission by its name.
+     *
+     * @param branchName The name of the branch to retrieve.
+     * @return A [BranchPermission] object if found, or `null` if no branch permission with the given name exists.
+     */
     fun getBranchPermission(permissions: String, branchName: String): BranchPermission? {
         getBranchPermissionsByBranch(branchName).forEach {
             val branchPermissions = BranchPermission.newInstance(it)
@@ -30,8 +39,11 @@ object BranchPermissionIndex {
         return null
     }
 
-
-
+    /**
+     * Retrieves all the branch permissions in the repository.
+     *
+     * @return A list of [Hash] objects representing the branch permissions.
+     */
     @OptIn(ExperimentalPathApi::class)
     fun getAllBranchPermissions(): List<Hash> {
         val branchPermissionFolder =
@@ -44,6 +56,12 @@ object BranchPermissionIndex {
         }.toList()
     }
 
+    /**
+     * Retrieves all the branch permissions for a specific branch by its name.
+     *
+     * @param branchName The name of the branch to retrieve permissions for.
+     * @return A list of [Hash] objects representing the branch permissions for the given branch.
+     */
     @OptIn(ExperimentalPathApi::class)
     fun getBranchPermissionsByBranch(branchName: String): List<Hash> {
         val branchPermissionFolder =

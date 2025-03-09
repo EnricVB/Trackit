@@ -6,8 +6,13 @@ import dev.enric.util.common.SerializablePath
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 
+/**
+ * Class that handles the .ignore file in the repository.
+ * It allows to ignore files and directories from being tracked.
+ */
 object IgnoreHandler {
     private val repositoryFolderManager = RepositoryFolderManager()
     private val ignoreFile = repositoryFolderManager.initFolder.resolve(".ignore")
@@ -48,21 +53,15 @@ object IgnoreHandler {
     }
 
     /**
-     * Gets the list of files and directories that are being ignored.
-     * @return List of files and directories that are being ignored
+     * Gets the list of ignored files and directories from the .ignore file.
+     * @return List of ignored files and directories
      */
     fun getIgnoredFiles(): List<Path> {
-        val ignore = repositoryFolderManager.initFolder.resolve(".ignore")
-        val ignoredPaths = mutableListOf<Path>()
-
-        try {
-            Files.newBufferedReader(ignore).use { reader ->
-                reader.forEachLine { ignoredPaths.add(Path.of(it)) }
-            }
+        return try {
+            Files.lines(ignoreFile).map { Paths.get(it) }.toList().sortedDescending()
         } catch (e: IOException) {
-            e.printStackTrace()
+            Logger.error("Error while reading .ignore file: ${e.message}")
+            emptyList()
         }
-
-        return ignoredPaths.sortedByDescending { Files.isDirectory(it) }
     }
 }

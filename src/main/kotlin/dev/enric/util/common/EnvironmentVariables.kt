@@ -1,6 +1,23 @@
 package dev.enric.util.common
 
+/**
+ * Utility object to manage environment variables across different operating systems.
+ * It allows setting and retrieving environment variables for Windows, Linux, and macOS.
+ *
+ * It supports:
+ * - Setting environment variables globally on Windows, Linux, and macOS.
+ * - Retrieving environment variables from the system environment.
+ *
+ * The set environment variables are applied globally, affecting future sessions or processes.
+ */
 object EnvironmentVariables {
+
+    /**
+     * Sets an environment variable globally based on the operating system.
+     *
+     * @param key The environment variable name.
+     * @param value The value of the environment variable to set.
+     */
     fun setEnv(key: String, value: String) {
         val os = detectOS()
 
@@ -14,6 +31,13 @@ object EnvironmentVariables {
         }
     }
 
+    /**
+     * Sets the environment variable globally on Windows.
+     * It uses the `setx` command to persist the environment variable across sessions.
+     *
+     * @param key The environment variable name.
+     * @param value The value of the environment variable to set.
+     */
     fun setEnvGlobal(key: String, value: String) {
         try {
             ProcessBuilder("cmd", "/c", "setx $key \"$value\"").start().waitFor()
@@ -22,6 +46,13 @@ object EnvironmentVariables {
         }
     }
 
+    /**
+     * Sets the environment variable globally on Linux.
+     * It appends the export statement to the user's `~/.bashrc` file for future sessions.
+     *
+     * @param key The environment variable name.
+     * @param value The value of the environment variable to set.
+     */
     fun setEnvGlobalUnix(key: String, value: String) {
         try {
             ProcessBuilder("bash", "-c", "echo 'export $key=\"$value\"' >> ~/.bashrc").start().waitFor()
@@ -30,6 +61,13 @@ object EnvironmentVariables {
         }
     }
 
+    /**
+     * Sets the environment variable globally on macOS.
+     * It appends the export statement to the `/etc/profile` file, which affects all users.
+     *
+     * @param key The environment variable name.
+     * @param value The value of the environment variable to set.
+     */
     fun setEnvGlobalMac(key: String, value: String) {
         try {
             ProcessBuilder("sudo", "sh", "-c", "echo 'export $key=\"$value\"' >> /etc/profile").start().waitFor()
@@ -38,10 +76,21 @@ object EnvironmentVariables {
         }
     }
 
+    /**
+     * Retrieves the value of an environment variable from the system environment.
+     *
+     * @param key The environment variable name.
+     * @return The value of the environment variable, or `null` if not found.
+     */
     fun getEnv(key: String): String? {
         return System.getenv(key)
     }
 
+    /**
+     * Detects the current operating system.
+     *
+     * @return The operating system type (Windows, Linux, macOS, or Unknown).
+     */
     private fun detectOS(): OS {
         val osName = System.getProperty("os.name").lowercase()
         return when {

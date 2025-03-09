@@ -56,9 +56,7 @@ class Main : TrackitCommand() {
             cmd.isCaseInsensitiveEnumValuesAllowed = true
             cmd.isStopAtPositional = false
 
-            cmd.setExecutionExceptionHandler { ex, _, _ ->
-                ex.printStackTrace()
-                System.err.println("Error: ${ex.message}")
+            cmd.setExecutionExceptionHandler { _, _, _ ->
                 return@setExecutionExceptionHandler 1
             }
 

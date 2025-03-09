@@ -10,7 +10,19 @@ import kotlin.io.path.PathWalkOption
 import kotlin.io.path.isDirectory
 import kotlin.io.path.walk
 
+/**
+ * This object is responsible for managing the users index.
+ * It allows to get all the users, check if a user already exists and get a user by its name.
+ */
 object UserIndex {
+
+    /**
+     * Retrieves a user by its name and validates the password.
+     *
+     * @param username The name of the user to retrieve.
+     * @param password The password to validate.
+     * @return A [User] object if the username and password match, or `null` if no matching user is found.
+     */
     fun getUser(username: String, password: String): User? {
         getAllUsers().forEach {
             val user = User.newInstance(it)
@@ -24,6 +36,12 @@ object UserIndex {
         return null
     }
 
+    /**
+     * Retrieves a user by its name.
+     *
+     * @param username The name of the user to retrieve.
+     * @return A [User] object if the user is found, or `null` if no user with the given name exists.
+     */
     fun getUser(username: String): User? {
         getAllUsers().forEach {
             val user = User.newInstance(it)
@@ -36,10 +54,21 @@ object UserIndex {
         return null
     }
 
+    /**
+     * Checks if a user with the given name already exists.
+     *
+     * @param username The name of the user to check.
+     * @return `true` if a user with the given name exists, `false` otherwise.
+     */
     fun userAlreadyExists(username: String): Boolean {
         return getAllUsers().any { User.newInstance(it).name == username }
     }
 
+    /**
+     * Retrieves all the users.
+     *
+     * @return A list of [Hash] objects representing the users.
+     */
     @OptIn(ExperimentalPathApi::class)
     fun getAllUsers(): List<Hash> {
         val usersFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(USER.hash.toString())

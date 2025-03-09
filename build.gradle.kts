@@ -134,7 +134,7 @@ tasks.register<JavaExec>("tktRoleCreate") {
     group = "execute"
     classpath = project.sourceSets["main"].runtimeClasspath
 
-    args = listOf("role-create", "-n", "Rol Prueba 3", "-l", "1", "-r", "----", "-b", "main", "'--'")
+    args = listOf("role-create", "-n", "Rol Prueba 3", "-l", "1", "-r", "usma", "-b", "main", "'--'")
 }
 
 tasks.register<JavaExec>("tktRoleModify") {

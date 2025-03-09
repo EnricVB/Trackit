@@ -5,11 +5,29 @@ import dev.enric.domain.Role
 import dev.enric.domain.User
 import dev.enric.domain.permission.BranchPermission
 import dev.enric.domain.permission.RolePermission
-import dev.enric.exceptions.BranchNotFoundException
-import dev.enric.exceptions.InvalidBranchPermissionException
+import dev.enric.exceptions.*
 import dev.enric.logger.Logger
 import dev.enric.util.index.*
 
+/**
+ * RoleCreationHandler is a class that handles the creation of roles.
+ *
+ * It ensures that the role to be created has valid permissions and branch permissions.
+ * And that the user has the necessary permissions to create the role.
+ *
+ * @property name The name of the role to be created.
+ * @property level The level of the role to be created. 1 being the highest level.
+ * @property rolePermissions A 4-character string representing the permissions of the role.
+ * Each character represents a permission:
+ * m (modify roles), u (user operations), s (assign new roles), a (add new roles).
+ *
+ * @property branchPermissions A list of branch permissions where each element contains:
+ * 1. branch name
+ * 2. a 2-character string representing branch permissions:
+ * r (read), w (write).
+ *
+ * @property sudoArgs The arguments of the sudo user.
+ */
 class RoleCreationHandler(
     val name: String,
     val level: Int,
@@ -18,95 +36,170 @@ class RoleCreationHandler(
     val sudoArgs: Array<String>? = null
 ) {
 
+    /**
+     * Checks if the role can be created by verifying several conditions:
+     * - Whether the role already exists.
+     * - Whether the role permissions are valid.
+     * - Whether the branch permissions are valid.
+     * - Whether the user has the necessary permissions to create a role.
+     *
+     * @return True if the role can be created, false otherwise.
+     * @throws InvalidPermissionException If the role already exists or if the permissions are invalid.
+     * @throws BranchNotFoundException If a specified branch does not exist.
+     * @throws UserNotFoundException If the sudo user is not found.
+     */
     fun checkCanCreateRole(): Boolean {
-        return when {
-            roleExists() -> false
-            !isValidRolePermissions() -> false
-            !isValidBranchPermissions() -> false
-            !isValidSudoUser() -> false
-            !canCreateRole() -> false
-            else -> true
-        }
+        roleExists()
+        isValidRolePermissions()
+        isValidBranchPermissions()
+        canCreateRole(isValidSudoUser())
+
+        return true
     }
 
-    private fun roleExists(): Boolean {
+    /**
+     * Verifies if the role already exists.
+     *
+     * @throws InvalidPermissionException If the role already exists.
+     */
+    private fun roleExists() {
         if (RoleIndex.roleAlreadyExists(name)) {
-            Logger.error("Role already exists")
-            return true
+            throw InvalidPermissionException("Role already exists. Try a different name.")
         }
-        return false
     }
 
-    private fun isValidRolePermissions(): Boolean {
+    /**
+     * Validates the role permissions string format.
+     *
+     * @throws InvalidPermissionException If the role permissions string is invalid.
+     */
+    private fun isValidRolePermissions() {
         if (!validateRolePermissionsString(rolePermissions)) {
-            Logger.error("Invalid role permissions string")
-            return false
+            throw InvalidPermissionException("Invalid role permissions string. " +
+                                             "Must be a 4-character string with only 'm', 'u', 's', 'a' or '-' characters.")
         }
-
-        return true
     }
 
-    private fun isValidBranchPermissions(): Boolean {
+    /**
+     * Validates the branch permissions list format.
+     *
+     * @throws IllegalArgumentValueException If the branch permissions list is invalid.
+     */
+    private fun isValidBranchPermissions() {
         if (branchPermissions.size % 2 != 0) {
-            Logger.error("Each --branch-permission must have exactly two arguments: <branch> <permission>")
-            return false
+            throw IllegalArgumentValueException("Invalid branch permissions list. " +
+                                                "Each branch permission must have a branch name and a 2-character string with only 'r', 'w' or '-' characters.")
         }
-        return true
     }
 
-    private fun isValidSudoUser(): Boolean {
+    /**
+     * Verifies if the user is logged in or if the sudo user exists.
+     *
+     * @throws UserNotFoundException If the sudo user is not found.
+     */
+    private fun isValidSudoUser(): User {
         val sudo = UserIndex.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "") ?: AuthUtil.getLoggedUser()
-        return if (sudo == null) {
-            Logger.error("Sudo user not found. Please login first or use --sudo with proper credentials")
-            false
+
+        if (sudo == null) {
+            throw UserNotFoundException("Sudo user not found. Please login first or use --sudo with proper credentials.")
         } else {
             Logger.log("Logged user: ${sudo.name}")
-            true
         }
+
+        return sudo
     }
 
-    private fun canCreateRole(): Boolean {
-        val sudo = UserIndex.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "") ?: AuthUtil.getLoggedUser()!!
+    /**
+     * Verifies if the user has the necessary permissions to create a role.
+     *
+     * @return True if the user has the necessary permissions, false otherwise.
+     * @throws InvalidPermissionException If the user does not have the necessary permissions.
+     */
+    private fun canCreateRole(sudo: User): Boolean {
         val hasCreateRolePermission = hasCreateRolePermission(sudo)
         val hasEnoughLevel = level >= getHighestRoleLevel(sudo)
 
         if(!hasCreateRolePermission) {
-            Logger.error("User does not have permission to create roles.")
+            throw InvalidPermissionException("User does not have permission to create roles.")
         }
 
         if(!hasEnoughLevel) {
-            Logger.error("User does not have enough level to create roles. Required level: $level, user level: ${getHighestRoleLevel(sudo)}")
+            throw InvalidPermissionException("User does not have enough level to create roles. " +
+                                             "\nRequired level: $level, user level: ${getHighestRoleLevel(sudo)}")
         }
 
-        return hasCreateRolePermission && hasEnoughLevel
+        return true
     }
 
+    /**
+     * Checks if the user has the permission to create roles looking at the role permissions.
+     *
+     * @param user The user to check the permissions.
+     * @return True if the user has the permission to create roles, false otherwise.
+     */
     private fun hasCreateRolePermission(user: User): Boolean {
         return user.roles.map { Role.newInstance(it) }.any { role ->
             role.getRolePermissions().any { it.createRolePermission }
         }
     }
 
+    /**
+     * Gets the highest role level of the user between all his roles.
+     *
+     * @param user The user to get the highest role level.
+     * @return The highest role level of the user.
+     */
     private fun getHighestRoleLevel(user: User): Int {
         return user.roles.map { Role.newInstance(it) }
             .maxOfOrNull { it.permissionLevel } ?: 0
     }
 
+    /**
+     * Creates the role with the specified name, level, and permissions.
+     * - Assigns role permissions.
+     * - Assigns branch permissions.
+     * - Saves the role to the system.
+     *
+     *  @throws BranchNotFoundException If a specified branch does not exist.
+     */
     fun createRole() {
         val role = Role(name, level, mutableListOf())
-        assignRolePermissions(role, rolePermissions)
         val branchPermissionsMap = branchPermissions.chunked(2).associate { it[0] to it[1] }
+
+        // Assign role permissions
+        assignRolePermissions(role, rolePermissions)
         assignBranchPermissions(role, branchPermissionsMap)
+
+        // Save role
         Logger.log("Role created")
         role.encode(true)
     }
 
+    /**
+     * Assigns the role permissions to the given role.
+     *
+     * In case the role permissions already exist, it assigns the existing role permissions.
+     *
+     * Otherwise, it creates a new role permission and assigns it.
+     *
+     * @param role The role to which the permissions are being assigned.
+     * @param rolePermissions The role permissions string to be assigned.
+     */
     fun assignRolePermissions(role: Role, rolePermissions: String) {
         val rolePermission = RolePermissionIndex.getRolePermission(rolePermissions)?.encode(true)?.first
             ?: RolePermission(rolePermissions).encode(true).first
+
         role.permissions.add(rolePermission)
     }
 
+    /**
+     * Assigns the branch permissions to the given role.
+     *
+     * @param role The role to which the branch permissions are being assigned.
+     * @param branchPermissionsMap The branch permissions map to be assigned.
+     * @throws BranchNotFoundException If a specified branch does not exist.
+     * @throws IllegalArgumentValueException If the branch permissions string is invalid.
+     */
     fun assignBranchPermissions(role: Role, branchPermissionsMap: Map<String, String>) {
         branchPermissionsMap.forEach { (branchName, branchPermissionString) ->
             val branch = BranchIndex.getBranch(branchName)
@@ -114,7 +207,7 @@ class RoleCreationHandler(
             val updatedBranchPermissionString = branchPermissionString.replace("'", "")
 
             if (!validateBranchPermissionsString(updatedBranchPermissionString)) {
-                throw InvalidBranchPermissionException("Invalid branch permissions string for branch $branchName")
+                throw IllegalArgumentValueException("Invalid branch permissions string for branch $branchName")
             }
 
             val branchPermission = BranchPermissionIndex
@@ -126,6 +219,14 @@ class RoleCreationHandler(
         }
     }
 
+    /**
+     * Validates the role permissions string format.
+     *
+     * Must be a 4-character string with only 'm', 'u', 's', 'a' or '-' characters.
+     *
+     * @param permissions The role permissions string to be validated.
+     * @return True if the role permissions string is valid, false otherwise.
+     */
     fun validateRolePermissionsString(permissions: String): Boolean {
         return permissions.length == 4 && permissions.toList().allIndexed { index, char ->
             val validChars = listOf('m', 'u', 's', 'a')
@@ -134,6 +235,14 @@ class RoleCreationHandler(
         }
     }
 
+    /**
+     * Validates the branch permissions string format.
+     *
+     * Must be a 2-character string with only 'r', 'w' or '-' characters.
+     *
+     * @param permissions The branch permissions string to be validated.
+     * @return True if the branch permissions string is valid, false otherwise.
+     */
     fun validateBranchPermissionsString(permissions: String): Boolean {
         return permissions.length == 2 && permissions.toList().allIndexed { index, char ->
             val validChars = listOf('r', 'w')
@@ -143,6 +252,12 @@ class RoleCreationHandler(
     }
 }
 
+/**
+ * Checks if all elements in the iterable satisfy the predicate.
+ *
+ * @param predicate The predicate to be satisfied.
+ * @return True if all elements satisfy the predicate, false otherwise.
+ */
 private inline fun <T> Iterable<T>.allIndexed(predicate: (Int, T) -> Boolean): Boolean {
     return this.withIndex().all { (index, item) -> predicate(index, item) }
 }

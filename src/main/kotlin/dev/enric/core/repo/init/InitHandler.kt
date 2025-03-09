@@ -7,8 +7,22 @@ import dev.enric.domain.User
 import dev.enric.domain.permission.RolePermission
 import dev.enric.util.repository.RepositoryFolderManager
 
+
+/**
+ * InitHandler is an object that handles the initialization of a new repository.
+ * It is responsible for creating the necessary repository folders, default roles, the first user, and the main branch.
+ */
 object InitHandler {
 
+
+    /**
+     * Initializes a new repository.
+     * The following actions are performed:
+     * - Creates the repository folder.
+     * - Creates the default roles.
+     * - Creates the first user with the owner role.
+     * - Creates the main branch of the repository.
+     */
     fun init() {
         RepositoryFolderManager().createRepositoryFolder()
 
@@ -18,9 +32,11 @@ object InitHandler {
     }
 
     /**
-     * Create the default roles for the repository.
-     * @see Role
-     * @return The owner role so it can be used in the creation of the first user.
+     * Creates the default roles needed for the repository.
+     * This includes the 'owner', 'projectManager', and 'undefined' roles.
+     * The permissions for each role are defined in the [RolePermission] class.
+     *
+     * @return The 'owner' role, which is used in the creation of the first user.
      */
     private fun createDefaultRoles(): Role {
         val ownerPermissions = RolePermission("musa").encode(true).first
@@ -34,10 +50,19 @@ object InitHandler {
         return Role.newInstance(owner)
     }
 
+    /**
+     * Creates the first user with the provided role.
+     *
+     * @param owner The role to assign to the new user.
+     * @return The hash of the created user.
+     */
     private fun createUser(owner: Role): Hash {
         return User.createUser(mutableListOf(owner)).encode(true).first
     }
 
+    /**
+     * Creates the main branch 'main' in the repository.
+     */
     private fun createMainBranch() {
         Branch("main").encode(true)
     }
