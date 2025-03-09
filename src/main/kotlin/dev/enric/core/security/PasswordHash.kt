@@ -8,8 +8,11 @@ import java.security.SecureRandom
 import java.security.Security
 import java.util.*
 
-
 object PasswordHash {
+    const val ITERATIONS = 2    // Lower values increase the speed of the hash          // TODO: Allow this to be configurable
+    const val MEMORY = 512000   // Lower values increase the speed of the hash          // TODO: Allow this to be configurable
+    const val PARALLELISM = 8   // Higher values increase the speed of the hash         // TODO: Allow this to be configurable
+    const val SALT_LENGTH = 16  // Bytes of the salt
 
     @Throws(NoSuchAlgorithmException::class)
     fun hash(password: String, salt: ByteArray?): String {
@@ -19,11 +22,10 @@ object PasswordHash {
 
         val hash = ByteArray(128)
 
-        builder.withIterations(3)
-        builder.withMemoryAsKB(2048000)
-        builder.withParallelism(4)
+        builder.withIterations(ITERATIONS)
+        builder.withMemoryAsKB(MEMORY)
+        builder.withParallelism(PARALLELISM)
         builder.withSalt(salt)
-        builder.withVersion(1)
 
         val parameters = builder.build()
 
@@ -33,8 +35,9 @@ object PasswordHash {
     }
 
     fun generateSalt(): ByteArray {
-        val salt = ByteArray(16) // 128 bits
+        val salt = ByteArray(SALT_LENGTH)
         SecureRandom().nextBytes(salt)
+
         return salt
     }
 }
