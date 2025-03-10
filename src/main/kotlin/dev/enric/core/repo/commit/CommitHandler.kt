@@ -6,6 +6,7 @@ import dev.enric.domain.Content
 import dev.enric.domain.Tree
 import dev.enric.util.common.SerializablePath
 import dev.enric.core.repo.staging.StagingHandler
+import dev.enric.util.index.CommitIndex
 import java.io.File
 import java.nio.channels.FileChannel
 import java.nio.file.Files
@@ -28,7 +29,16 @@ class CommitHandler {
     fun processCommit(commit: Commit): Commit {
         val commitTree = createCommitTree()
         commit.tree = commitTree.map { it.encode(true).first }
+
         return commit
+    }
+
+    /**
+     * Does all the post commit operations as save into indexes the new commit hash, or replace the branch.
+     * @param commit The commit object that has been created.
+     */
+    fun postCommit(commit: Commit) {
+        CommitIndex.setCurrentCommit(commit.encode().first)
     }
 
     /**
@@ -37,34 +47,6 @@ class CommitHandler {
      */
     private fun createCommitTree(): List<Tree> {
         return mapStagedFilesToTree(StagingHandler.getStagedFiles())
-    }
-
-    /**
-     * Checks out a specific commit by its hash, restoring its state.
-     * @param commitHash The hash of the commit to check out.
-     */
-    fun checkout(commitHash: Hash) {
-        checkout(Commit.newInstance(commitHash))
-    }
-
-    /**
-     * Checks out a specific commit by restoring its tree structure and content.
-     * @param commit The commit object to restore.
-     */
-    fun checkout(commit: Commit) {
-        commit.tree.forEach {
-            val tree = Tree.newInstance(it)
-            Path.of(tree.serializablePath.pathString).parent.toFile().mkdirs()
-
-            if (!tree.serializablePath.toPath().toFile().exists()) {
-                Files.writeString(
-                    tree.serializablePath.toPath(),
-                    String(Content.newInstance(tree.hash).content),
-                    StandardOpenOption.CREATE_NEW,
-                    StandardOpenOption.WRITE
-                )
-            }
-        }
     }
 
     /**
