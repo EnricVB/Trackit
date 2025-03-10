@@ -60,7 +60,14 @@ class Commit : TrackitCommand() {
     }
 
     fun createCommit(title: String, message: String) {
+        val commitHandler = CommitHandler()
         val commit = Commit(title = title, message = message, date = Timestamp.from(Instant.now()))
+
+        // TODO: Check if can do a commit in specified branch.
+        // if (!commitHandler.canDoCommit(commit, branch) {
+        //     return 1
+        // }
+
         CommitHandler().processCommit(commit)
     }
 }
