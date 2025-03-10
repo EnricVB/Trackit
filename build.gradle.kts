@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
     implementation("io.github.rctcwyvrn:blake3:1.3")             // Blake3 hash function
-    implementation("org.bouncycastle:bcprov-jdk18on:1.76")  // Argon2 password hashing
+    implementation("org.bouncycastle:bcprov-jdk18on:1.76")       // Argon2 password hashing
 
     implementation("org.tukaani:xz:1.8")                         // ZLib compression algorithm
     implementation("info.picocli:picocli:4.7.6")                 // Command line interface
@@ -23,6 +23,10 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.21")  // Standard library
 
     testImplementation(kotlin("test"))
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(22))
 }
 
 tasks {
@@ -153,4 +157,13 @@ tasks.register<JavaExec>("tktRoleList") {
     classpath = project.sourceSets["main"].runtimeClasspath
 
     args = listOf("role-list")
+}
+
+tasks.register<JavaExec>("tktCheckout") {
+    mainClass.set("dev.enric.Main")
+    workingDir = file("${project.rootDir}/tktFolder")
+    group = "execute"
+    classpath = project.sourceSets["main"].runtimeClasspath
+
+    args = listOf("checkout", "") // Second parameter must be the hash
 }
