@@ -51,9 +51,9 @@ object BranchIndex {
      */
     @OptIn(ExperimentalPathApi::class)
     fun getAllBranches(): List<Hash> {
-        val usersFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(BRANCH.hash.toString())
+        val branchFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(BRANCH.hash.toString())
 
-        return usersFolder.walk(PathWalkOption.INCLUDE_DIRECTORIES).filter {
+        return branchFolder.walk(PathWalkOption.INCLUDE_DIRECTORIES).filter {
             !it.isDirectory()
         }.map {
             Hash(it.toString().substringAfterLast("\\" + USER.hash + "\\"))
