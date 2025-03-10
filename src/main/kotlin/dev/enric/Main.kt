@@ -57,7 +57,8 @@ class Main : TrackitCommand() {
             cmd.isCaseInsensitiveEnumValuesAllowed = true
             cmd.isStopAtPositional = false
 
-            cmd.setExecutionExceptionHandler { _, _, _ ->
+            cmd.setExecutionExceptionHandler { ex, _, _ ->
+                ex.printStackTrace()
                 return@setExecutionExceptionHandler 1
             }
 

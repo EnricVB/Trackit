@@ -68,6 +68,8 @@ class Commit : TrackitCommand() {
         //     return 1
         // }
 
-        CommitHandler().processCommit(commit)
+        val processedCommit = CommitHandler().processCommit(commit)
+
+        CommitHandler().postCommit(processedCommit)
     }
 }
