@@ -61,16 +61,16 @@ data class Hash(val string: String) : Serializable {
      * Each HashType is computed using the Blake3 algorithm the same way as the Hash object.
      */
     enum class HashType(val hash: Hash) {
-        CONTENT(parseText("Content", 1)),
-        TREE(parseText("Tree", 1)),
-        COMMIT(parseText("Commit", 1)),
-        SIMPLE_TAG(parseText("SimpleTag", 1)),
-        COMPLEX_TAG(parseText("ComplexTag", 1)),
-        USER(parseText("User", 1)),
-        BRANCH(parseText("Branch", 1)),
-        REMOTE(parseText("Remote", 1)),
-        ROLE(parseText("Role", 1)),
-        BRANCH_PERMISSION(parseText("BranchPermission", 1)),
-        ROLE_PERMISSION(parseText("RolePermission", 1))
+        CONTENT(parseText("Content", 1)),                   // cd
+        TREE(parseText("Tree", 1)),                         // 89
+        COMMIT(parseText("Commit", 1)),                     // c0
+        SIMPLE_TAG(parseText("SimpleTag", 1)),              //
+        COMPLEX_TAG(parseText("ComplexTag", 1)),            //
+        USER(parseText("User", 1)),                         // 7b
+        BRANCH(parseText("Branch", 1)),                     // 21
+        REMOTE(parseText("Remote", 1)),                     //
+        ROLE(parseText("Role", 1)),                         // d4
+        BRANCH_PERMISSION(parseText("BranchPermission", 1)),//
+        ROLE_PERMISSION(parseText("RolePermission", 1))     // 8d
     }
 }
