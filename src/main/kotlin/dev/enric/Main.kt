@@ -13,6 +13,7 @@ import dev.enric.command.repo.staging.Unstage
 import dev.enric.command.management.users.UserCreation
 import dev.enric.command.management.users.UserList
 import dev.enric.command.management.users.UserModify
+import dev.enric.command.repo.commit.Checkout
 import org.fusesource.jansi.AnsiConsole
 import picocli.CommandLine
 import picocli.CommandLine.Command
@@ -30,7 +31,7 @@ import picocli.CommandLine.Help.ColorScheme
     subcommands = [Init::class,
         Stage::class, Unstage::class,
         Ignore::class,
-        Commit::class, Config::class,
+        Commit::class, Checkout::class, Config::class,
         UserCreation::class, UserModify::class, UserList::class,
         RoleCreation::class, RoleModify::class, RoleList::class]
 )
