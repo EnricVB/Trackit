@@ -38,6 +38,7 @@ class CommitHandler {
      * @param commit The commit object that has been created.
      */
     fun postCommit(commit: Commit) {
+        commit.encode(true)
         CommitIndex.setCurrentCommit(commit.encode().first)
     }
 
