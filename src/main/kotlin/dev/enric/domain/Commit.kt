@@ -16,7 +16,7 @@ data class Commit(
     var previousCommit: Hash = Hash("0".repeat(32)),
     var tree: List<Hash> = listOf(),
     var branch: Hash = Hash("0".repeat(32)),
-    var autor: Hash = Hash("0".repeat(32)),
+    var author: Hash = Hash("0".repeat(32)),
     var confirmer: Hash = Hash("0".repeat(32)),
     var date: Timestamp = Timestamp.from(Instant.now()),
     var title: String = "",
@@ -75,7 +75,7 @@ data class Commit(
             appendLine(ColorUtil.text(branch.toString()))
 
             append(ColorUtil.label("  Author: "))
-            appendLine(ColorUtil.text(autor.toString()))
+            appendLine(ColorUtil.text(author.toString()))
 
             append(ColorUtil.label("  Confirmer: "))
             appendLine(ColorUtil.text(confirmer.toString()))
