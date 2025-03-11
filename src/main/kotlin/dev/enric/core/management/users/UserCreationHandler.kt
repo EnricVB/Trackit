@@ -5,6 +5,7 @@ import dev.enric.core.security.AuthUtil
 import dev.enric.domain.Role
 import dev.enric.domain.User
 import dev.enric.exceptions.InvalidPermissionException
+import dev.enric.exceptions.UserNotFoundException
 import dev.enric.logger.Logger
 import dev.enric.util.index.RoleIndex
 import dev.enric.util.index.UserIndex
@@ -35,6 +36,8 @@ class UserCreationHandler(
      * - If the sudo user is valid and has the necessary permissions.
      *
      * @return True if the user can be created, false otherwise.
+     * @throws InvalidPermissionException If the user already exists or if the sudo user does not have permission to create users.
+     * @throws UserNotFoundException If the sudo user is not found.
      */
     fun checkCanCreateUser(): Boolean {
         userExists()

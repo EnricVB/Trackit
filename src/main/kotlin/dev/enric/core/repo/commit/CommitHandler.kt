@@ -30,6 +30,10 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
      * Verifies if the commit can be done by checking
      * - If player has permissions to write on the branch.
      * - If staged files are not empty.
+     *
+     * @return True if the commit can be done, false otherwise.
+     * @throws InvalidPermissionException If the user does not have write permission on the branch.
+     * @throws IllegalStateException If there are no files to commit.
      */
     fun canDoCommit(): Boolean {
         checkWritePermissionOnBranch(User.newInstance(commit.confirmer))

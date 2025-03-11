@@ -1,16 +1,10 @@
 package dev.enric.command.repo.commit
 
 import dev.enric.command.TrackitCommand
-import dev.enric.command.repo.staging.Stage
 import dev.enric.core.commandconsumer.SudoArgsParameterConsumer
 import dev.enric.core.repo.commit.CommitHandler
-import dev.enric.core.repo.staging.StagingHandler
 import dev.enric.domain.Commit
-import dev.enric.exceptions.InvalidPermissionException
-import dev.enric.logger.Logger
 import picocli.CommandLine.*
-import java.sql.Timestamp
-import java.time.Instant
 
 @Command(
     name = "commit",
@@ -68,7 +62,7 @@ class Commit : TrackitCommand() {
         // Sets some commit properties before the commit
         commitHandler.initializeCommitProperties(sudoArgs, confirmerArgs)
 
-        // Checks if the user has permission to commit
+        // Will never return 1 as it will throw an exception if the commit cannot be done
         if (!commitHandler.canDoCommit()) {
             return 1
         }
