@@ -3,6 +3,7 @@ package dev.enric.domain.tag
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.SIMPLE_TAG
 import dev.enric.core.TrackitObject
+import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.Serializable
@@ -14,10 +15,14 @@ data class SimpleTag(
 ) : Tag, TrackitObject<SimpleTag>(), Serializable {
 
     override fun decode(hash: Hash): SimpleTag {
-        val treeFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
-        val objectFile = treeFolder.resolve(hash.toString())
+        if (!hash.string.startsWith(SIMPLE_TAG.hash.string)) throw IllegalHashException("Hash $hash is not a SimpleTag hash")
+
+        val simpleTagFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
+        val objectFile = simpleTagFolder.resolve(hash.toString())
+
+        if(!Files.exists(objectFile)) throw IllegalHashException("SimpleTag with hash $hash not found")
         val decompressedData = decompressContent(Files.readAllBytes(objectFile))
-            ?: return SimpleTag() // If the file is empty, return an empty tree
+            ?: return SimpleTag() // If the file is empty, return an empty SimpleTag
 
         val byteArrayInputStream = decompressedData.inputStream()
         val objectIStream = java.io.ObjectInputStream(byteArrayInputStream)

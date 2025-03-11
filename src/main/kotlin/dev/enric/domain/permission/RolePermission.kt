@@ -1,9 +1,9 @@
 package dev.enric.domain.permission
 
 import dev.enric.core.Hash
-import dev.enric.core.Hash.HashType.BRANCH_PERMISSION
-import dev.enric.core.Hash.HashType.ROLE_PERMISSION
+import dev.enric.core.Hash.HashType.*
 import dev.enric.core.TrackitObject
+import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.Serializable
@@ -44,10 +44,14 @@ data class RolePermission(
         }
 
     override fun decode(hash: Hash): RolePermission {
-        val commitFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
-        val objectFile = commitFolder.resolve(hash.toString())
+        if (!hash.string.startsWith(ROLE_PERMISSION.hash.string)) throw IllegalHashException("Hash $hash is not a Role Permission hash")
+
+        val branchPermissionFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
+        val objectFile = branchPermissionFolder.resolve(hash.toString())
+
+        if(!Files.exists(objectFile)) throw IllegalHashException("Permission with hash $hash not found")
         val decompressedData = decompressContent(Files.readAllBytes(objectFile))
-            ?: return RolePermission() // If the file is empty, return an empty commit
+            ?: return RolePermission() // If the file is empty, return an empty Permission
 
         val byteArrayInputStream = decompressedData.inputStream()
         val objectIStream = java.io.ObjectInputStream(byteArrayInputStream)

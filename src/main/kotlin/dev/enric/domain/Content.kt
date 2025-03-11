@@ -3,6 +3,7 @@ package dev.enric.domain
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.CONTENT
 import dev.enric.core.TrackitObject
+import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.ByteArrayOutputStream
@@ -13,9 +14,12 @@ import java.util.zip.Deflater
 class Content(val content: ByteArray = ByteArray(0)) : TrackitObject<Content>(), Serializable {
 
     override fun decode(hash: Hash): Content {
+        if (!hash.string.startsWith(CONTENT.hash.string)) throw IllegalHashException("Hash $hash is not a Content hash")
+
         val contentFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
         val objectFile = contentFolder.resolve(hash.toString())
 
+        if(!Files.exists(objectFile)) throw IllegalHashException("Content with hash $hash not found")
         val decompressedStringData = decompressContent(Files.readAllBytes(objectFile))
             ?: return Content() // If the file is empty, return an empty content
 
