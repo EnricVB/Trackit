@@ -56,6 +56,7 @@ class UserCreation : TrackitCommand() {
             sudoArgs
         )
 
+        // Will return 1 as it will throw an exception if the user cannot be created
         if (!handler.checkCanCreateUser()) {
             return 1
         }

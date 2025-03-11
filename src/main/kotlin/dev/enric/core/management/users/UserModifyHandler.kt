@@ -1,10 +1,10 @@
 package dev.enric.core.management.users
 
 import dev.enric.core.CommandHandler
-import dev.enric.core.security.AuthUtil
 import dev.enric.core.security.PasswordHash
 import dev.enric.domain.Role
 import dev.enric.domain.User
+import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.exceptions.UserNotFoundException
 import dev.enric.logger.Logger
 import dev.enric.util.index.RoleIndex
@@ -35,10 +35,18 @@ class UserModifyHandler(
     val sudoArgs: Array<String>? = null
 ) : CommandHandler() {
 
+    /**
+     * Checks if the user has the permission to modify other users.
+     *
+     * @return True if the user has the permission to modify other users, false otherwise.
+     * @throws UserNotFoundException If the user does not exist.
+     * @throws InvalidPermissionException If the user does not have permission to modify users.
+     *
+     */
     fun checkCanModifyUser(): Boolean {
         val sudo = isValidSudoUser(sudoArgs)
         userExists()
-        hasModifyUserPermission(sudo)
+        checkHasModifyUserPermission(sudo)
 
         return true
     }
@@ -51,6 +59,18 @@ class UserModifyHandler(
     fun userExists() {
         if (!UserIndex.userAlreadyExists(name)) {
             throw UserNotFoundException("User does not exist. Please create the user first.")
+        }
+    }
+
+    /**
+     * Checks if the user has the permission to modify users looking at the role permissions.
+     *
+     * @param sudo The sudo user to check the permissions.
+     * @throws InvalidPermissionException If the user does not have permission to modify users.
+     */
+    private fun checkHasModifyUserPermission(sudo: User) {
+        if (!hasModifyUserPermission(sudo)) {
+            throw InvalidPermissionException("User does not have permission to modify users")
         }
     }
 
