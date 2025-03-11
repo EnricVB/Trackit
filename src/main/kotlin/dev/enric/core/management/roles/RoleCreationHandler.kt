@@ -1,5 +1,7 @@
 package dev.enric.core.management.roles
 
+import dev.enric.core.CommandHandler
+import dev.enric.core.allIndexed
 import dev.enric.core.security.AuthUtil
 import dev.enric.domain.Role
 import dev.enric.domain.User
@@ -34,7 +36,7 @@ class RoleCreationHandler(
     val rolePermissions: String,
     val branchPermissions: MutableList<String>,
     val sudoArgs: Array<String>? = null
-) {
+) : CommandHandler() {
 
     /**
      * Checks if the role can be created by verifying several conditions:
@@ -50,9 +52,9 @@ class RoleCreationHandler(
      */
     fun checkCanCreateRole(): Boolean {
         roleExists()
-        isValidRolePermissions()
+        isValidRolePermissions(rolePermissions)
         isValidBranchPermissions()
-        canCreateRole(isValidSudoUser())
+        canCreateRole(isValidSudoUser(sudoArgs))
 
         return true
     }
@@ -69,18 +71,6 @@ class RoleCreationHandler(
     }
 
     /**
-     * Validates the role permissions string format.
-     *
-     * @throws InvalidPermissionException If the role permissions string is invalid.
-     */
-    private fun isValidRolePermissions() {
-        if (!validateRolePermissionsString(rolePermissions)) {
-            throw InvalidPermissionException("Invalid role permissions string. " +
-                                             "Must be a 4-character string with only 'm', 'u', 's', 'a' or '-' characters.")
-        }
-    }
-
-    /**
      * Validates the branch permissions list format.
      *
      * @throws IllegalArgumentValueException If the branch permissions list is invalid.
@@ -90,23 +80,6 @@ class RoleCreationHandler(
             throw IllegalArgumentValueException("Invalid branch permissions list. " +
                                                 "Each branch permission must have a branch name and a 2-character string with only 'r', 'w' or '-' characters.")
         }
-    }
-
-    /**
-     * Verifies if the user is logged in or if the sudo user exists.
-     *
-     * @throws UserNotFoundException If the sudo user is not found.
-     */
-    private fun isValidSudoUser(): User {
-        val sudo = UserIndex.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "") ?: AuthUtil.getLoggedUser()
-
-        if (sudo == null) {
-            throw UserNotFoundException("Sudo user not found. Please login first or use --sudo with proper credentials.")
-        } else {
-            Logger.log("Logged user: ${sudo.name}")
-        }
-
-        return sudo
     }
 
     /**
@@ -220,22 +193,6 @@ class RoleCreationHandler(
     }
 
     /**
-     * Validates the role permissions string format.
-     *
-     * Must be a 4-character string with only 'm', 'u', 's', 'a' or '-' characters.
-     *
-     * @param permissions The role permissions string to be validated.
-     * @return True if the role permissions string is valid, false otherwise.
-     */
-    fun validateRolePermissionsString(permissions: String): Boolean {
-        return permissions.length == 4 && permissions.toList().allIndexed { index, char ->
-            val validChars = listOf('m', 'u', 's', 'a')
-            val expectedChar = validChars.getOrElse(index) { return false }
-            char == expectedChar || char == '-'
-        }
-    }
-
-    /**
      * Validates the branch permissions string format.
      *
      * Must be a 2-character string with only 'r', 'w' or '-' characters.
@@ -250,14 +207,4 @@ class RoleCreationHandler(
             char == expectedChar || char == '-'
         }
     }
-}
-
-/**
- * Checks if all elements in the iterable satisfy the predicate.
- *
- * @param predicate The predicate to be satisfied.
- * @return True if all elements satisfy the predicate, false otherwise.
- */
-private inline fun <T> Iterable<T>.allIndexed(predicate: (Int, T) -> Boolean): Boolean {
-    return this.withIndex().all { (index, item) -> predicate(index, item) }
 }

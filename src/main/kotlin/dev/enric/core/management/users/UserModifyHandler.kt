@@ -1,5 +1,6 @@
 package dev.enric.core.management.users
 
+import dev.enric.core.CommandHandler
 import dev.enric.core.security.AuthUtil
 import dev.enric.core.security.PasswordHash
 import dev.enric.domain.Role
@@ -32,10 +33,10 @@ class UserModifyHandler(
     val newRoleNames: Array<String>,
     val deletePreviousRoles: Boolean,
     val sudoArgs: Array<String>? = null
-) {
+) : CommandHandler() {
 
     fun checkCanModifyUser(): Boolean {
-        val sudo = isValidSudoUser()
+        val sudo = isValidSudoUser(sudoArgs)
         userExists()
         hasModifyUserPermission(sudo)
 
@@ -51,23 +52,6 @@ class UserModifyHandler(
         if (!UserIndex.userAlreadyExists(name)) {
             throw UserNotFoundException("User does not exist. Please create the user first.")
         }
-    }
-
-    /**
-     * Verifies if the user is logged in or if the sudo user exists.
-     *
-     * @throws UserNotFoundException If the sudo user is not found.
-     */
-    private fun isValidSudoUser(): User {
-        val sudo = UserIndex.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "") ?: AuthUtil.getLoggedUser()
-
-        if (sudo == null) {
-            throw UserNotFoundException("Sudo user not found. Please login first or use --sudo with proper credentials.")
-        } else {
-            Logger.log("Logged user: ${sudo.name}")
-        }
-
-        return sudo
     }
 
     /**
@@ -88,7 +72,7 @@ class UserModifyHandler(
      * - Deletes previous roles if specified.
      */
     fun modifyUser() {
-        val sudo = isValidSudoUser()
+        val sudo = isValidSudoUser(sudoArgs)
         val user = UserIndex.getUser(name, password)!!
 
         // Modify password if new password is provided and it is different from the old one
