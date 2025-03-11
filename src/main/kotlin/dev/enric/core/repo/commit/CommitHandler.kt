@@ -1,11 +1,13 @@
 package dev.enric.core.repo.commit
 
+import dev.enric.core.CommandHandler
 import dev.enric.core.Hash
 import dev.enric.domain.Commit
 import dev.enric.domain.Content
 import dev.enric.domain.Tree
 import dev.enric.util.common.SerializablePath
 import dev.enric.core.repo.staging.StagingHandler
+import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.CommitIndex
 import java.io.File
 import java.nio.channels.FileChannel
@@ -19,14 +21,28 @@ import kotlin.io.path.pathString
  * This includes creating commit trees, checking out commits,
  * and verifying file states in relation to commits.
  */
-class CommitHandler {
+data class CommitHandler(val commit: Commit) : CommandHandler() {
+
+    /**
+     * Executes all the pre commit operations.
+     *
+     * - Sets the commit date to the current time.
+     * - Sets the previous commit to the current commit.
+     * - Sets the branch to the current branch.
+     */
+    fun preCommit(author: Array<String>?, confirmer: Array<String>?) {
+        commit.previousCommit = CommitIndex.getCurrentCommit() ?: Hash("0".repeat(32))
+        commit.branch = BranchIndex.getCurrentBranch().encode().first
+
+        commit.autor = isValidSudoUser(author).encode().first
+        commit.confirmer = isValidSudoUser(confirmer).encode().first
+    }
 
     /**
      * Processes a new commit by creating its corresponding tree structure.
-     * @param commit The commit object to process.
      * @return The processed commit with an updated tree.
      */
-    fun processCommit(commit: Commit): Commit {
+    fun processCommit(): Commit {
         val commitTree = createCommitTree()
         commit.tree = commitTree.map { it.encode(true).first }
 
@@ -35,11 +51,12 @@ class CommitHandler {
 
     /**
      * Does all the post commit operations as save into indexes the new commit hash, or replace the branch.
-     * @param commit The commit object that has been created.
      */
-    fun postCommit(commit: Commit) {
-        commit.encode(true)
-        CommitIndex.setCurrentCommit(commit.encode().first)
+    fun postCommit() {
+        val commitHash = commit.encode(true).first
+
+        CommitIndex.setCurrentCommit(commitHash)
+        BranchIndex.setBranchHead(commitHash)
     }
 
     /**
@@ -91,10 +108,9 @@ class CommitHandler {
     /**
      * Checks if a file is up to date with the latest commit.
      * @param file The file to check.
-     * @param commit The commit to compare against.
      * @return True if the file is already committed, false otherwise.
      */
-    fun isFileUpToDateToCommit(file: File, commit: Commit): Boolean {
+    fun isFileUpToDateToCommit(file: File): Boolean {
         val content = Content(Files.readAllBytes(file.toPath()))
         return commit.findFile(content, file.toPath()) != null
     }
