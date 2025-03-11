@@ -1,12 +1,14 @@
 package dev.enric.core.repo.commit
 
+import dev.enric.command.repo.staging.Stage
 import dev.enric.core.CommandHandler
 import dev.enric.core.Hash
-import dev.enric.domain.Commit
-import dev.enric.domain.Content
-import dev.enric.domain.Tree
-import dev.enric.util.common.SerializablePath
 import dev.enric.core.repo.staging.StagingHandler
+import dev.enric.domain.*
+import dev.enric.exceptions.IllegalStateException
+import dev.enric.exceptions.InvalidPermissionException
+import dev.enric.logger.Logger
+import dev.enric.util.common.SerializablePath
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.CommitIndex
 import java.io.File
@@ -14,6 +16,7 @@ import java.nio.channels.FileChannel
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
+import java.sql.Timestamp
 import kotlin.io.path.pathString
 
 /**
@@ -24,18 +27,70 @@ import kotlin.io.path.pathString
 data class CommitHandler(val commit: Commit) : CommandHandler() {
 
     /**
-     * Executes all the pre commit operations.
+     * Verifies if the commit can be done by checking
+     * - If player has permissions to write on the branch.
+     * - If staged files are not empty.
+     */
+    fun canDoCommit(): Boolean {
+        checkWritePermissionOnBranch(User.newInstance(commit.confirmer))
+        hasFilesToCommit()
+
+        return true
+    }
+
+    /**
+     * Checks if the user has the permission to write into the specified branch.
+     */
+    private fun checkWritePermissionOnBranch(user: User) {
+        if (!hasWritePermissionOnBranch(user)) {
+            throw InvalidPermissionException("User does not have write permission on branch ${BranchIndex.getCurrentBranch().encode().first}")
+        }
+    }
+
+    /**
+     * Checks if there are files to commit in the staging area.
+     */
+    private fun hasFilesToCommit() {
+        if (StagingHandler.getStagedFiles().isEmpty()) {
+            throw IllegalStateException("There are no files to commit")
+        }
+    }
+
+    /**
+     * Checks if the user has write permission on the current branch.
+     * @param user The user to check.
+     * @return True if the user has write permission on the branch, false otherwise.
+     */
+    private fun hasWritePermissionOnBranch(user: User) : Boolean {
+        return user.roles.map { Role.newInstance(it) }.any { role ->
+            role.getBranchPermissions().any { it.branch == commit.branch && it.writePermission }
+        }
+    }
+
+    /**
+     * Initializes the commit properties.
      *
      * - Sets the commit date to the current time.
      * - Sets the previous commit to the current commit.
      * - Sets the branch to the current branch.
      */
-    fun preCommit(author: Array<String>?, confirmer: Array<String>?) {
+    fun initializeCommitProperties(author: Array<String>?, confirmer: Array<String>?) {
         commit.previousCommit = CommitIndex.getCurrentCommit() ?: Hash("0".repeat(32))
         commit.branch = BranchIndex.getCurrentBranch().encode().first
 
-        commit.autor = isValidSudoUser(author).encode().first
+        commit.author = isValidSudoUser(author).encode().first
         commit.confirmer = isValidSudoUser(confirmer).encode().first
+
+        commit.date = Timestamp.from(java.time.Instant.now())
+    }
+
+    /**
+     * Does all the pre commit operations. This includes staging all files if needed.
+     */
+    fun preCommit(stageAllFiles: Boolean) {
+        if (stageAllFiles) {
+            stageAllFiles()
+        }
     }
 
     /**
@@ -57,6 +112,10 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
 
         CommitIndex.setCurrentCommit(commitHash)
         BranchIndex.setBranchHead(commitHash)
+
+        // TODO: Implement tags
+
+        StagingHandler.clearStagingArea()
     }
 
     /**
@@ -113,5 +172,21 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
     fun isFileUpToDateToCommit(file: File): Boolean {
         val content = Content(Files.readAllBytes(file.toPath()))
         return commit.findFile(content, file.toPath()) != null
+    }
+
+    /**
+     * Stages all the files before committing
+     *
+     * @see Stage
+     */
+    fun stageAllFiles() {
+        Logger.log("Staging all files before committing")
+
+        val stageCommand = Stage()
+
+        stageCommand.path = "."
+        stageCommand.force = false
+
+        stageCommand.call()
     }
 }
