@@ -1,10 +1,10 @@
 package dev.enric.core.management.users
 
+import dev.enric.core.CommandHandler
 import dev.enric.core.security.AuthUtil
 import dev.enric.domain.Role
 import dev.enric.domain.User
 import dev.enric.exceptions.InvalidPermissionException
-import dev.enric.exceptions.UserNotFoundException
 import dev.enric.logger.Logger
 import dev.enric.util.index.RoleIndex
 import dev.enric.util.index.UserIndex
@@ -27,7 +27,7 @@ class UserCreationHandler(
     val phone: String?,
     val roleNames: Array<String>,
     val sudoArgs: Array<String>? = null
-) {
+) : CommandHandler() {
 
     /**
      * Checks if the user can be created. Performs necessary checks including:
@@ -38,7 +38,7 @@ class UserCreationHandler(
      */
     fun checkCanCreateUser(): Boolean {
         userExists()
-        canCreateUser(isValidSudoUser())
+        canCreateUser(isValidSudoUser(sudoArgs))
 
         return true
     }
@@ -53,24 +53,6 @@ class UserCreationHandler(
             throw InvalidPermissionException("User already exists")
         }
     }
-
-    /**
-     * Verifies if the user is logged in or if the sudo user exists.
-     *
-     * @throws UserNotFoundException If the sudo user is not found.
-     */
-    private fun isValidSudoUser(): User {
-        val sudo = UserIndex.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "") ?: AuthUtil.getLoggedUser()
-
-        if (sudo == null) {
-            throw UserNotFoundException("Sudo user not found. Please login first or use --sudo with proper credentials.")
-        } else {
-            Logger.log("Logged user: ${sudo.name}")
-        }
-
-        return sudo
-    }
-
 
     /**
      * Checks if the user has the permission to create users looking at the role permissions.
