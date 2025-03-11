@@ -6,6 +6,7 @@ import dev.enric.core.commandconsumer.SudoArgsParameterConsumer
 import dev.enric.core.repo.commit.CommitHandler
 import dev.enric.core.repo.staging.StagingHandler
 import dev.enric.domain.Commit
+import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.logger.Logger
 import picocli.CommandLine.*
 import java.sql.Timestamp
@@ -15,7 +16,7 @@ import java.time.Instant
     name = "commit",
     description = ["Commits the staged files"],
     mixinStandardHelpOptions = true,
-    )
+)
 class Commit : TrackitCommand() {
 
     /**
@@ -61,38 +62,22 @@ class Commit : TrackitCommand() {
     override fun call(): Int {
         super.call()
 
-        if(stageAllFiles) {
-            stageAllFiles()
-        }
-
-        createCommit(title, message)
-        StagingHandler.clearStagingArea()
-
-        return 0
-    }
-
-    fun createCommit(title: String, message: String) {
-        val commit = Commit(title = title, message = message, date = Timestamp.from(Instant.now()))
+        val commit = Commit(title = title, message = message)
         val commitHandler = CommitHandler(commit)
 
-        // TODO: Check if can do a commit in specified branch.
-        // if (!commitHandler.canDoCommit(commit, branch) {
-        //     return 1
-        // }
+        // Sets some commit properties before the commit
+        commitHandler.initializeCommitProperties(sudoArgs, confirmerArgs)
 
-        commitHandler.preCommit(sudoArgs, confirmerArgs)
+        // Checks if the user has permission to commit
+        if (!commitHandler.canDoCommit()) {
+            return 1
+        }
+
+        // Processes the commit
+        commitHandler.preCommit(stageAllFiles)
         commitHandler.processCommit()
         commitHandler.postCommit()
-    }
 
-    fun stageAllFiles() {
-        Logger.log("Staging all files before committing")
-
-        val stageCommand = Stage()
-
-        stageCommand.path = "."
-        stageCommand.force = false
-
-        stageCommand.call()
+        return 0
     }
 }
