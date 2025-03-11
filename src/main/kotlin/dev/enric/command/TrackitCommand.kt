@@ -11,12 +11,18 @@ abstract class TrackitCommand : Callable<Int> {
     @Option(names = ["--quiet", "-q"], description = ["Doesn't show logs"])
     var quiet: Boolean = false
 
+    /**
+     * This method is called when the command is executed
+     */
     override fun call(): Int {
         setupLogger()
 
         return 0
     }
 
+    /**
+     * Setup the logger with the desired log level
+     */
     protected fun setupLogger() {
         Logger.setupLogger(
             when {
