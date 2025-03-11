@@ -44,6 +44,7 @@ class CommitNotFoundException(message: String) : TrackitException(message, 1003)
 // Invalid data exceptions
 class IllegalArgumentValueException(message: String) : TrackitException(message, 2000)
 class IllegalHashException(message: String) : TrackitException(message, 2001)
+class IllegalStateException(message: String) : TrackitException(message, 2002)
 
 // Permission exceptions
 class InvalidPermissionException(message: String) : TrackitException(message, 3001)
