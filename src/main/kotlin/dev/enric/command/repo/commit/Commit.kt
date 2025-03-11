@@ -2,6 +2,7 @@ package dev.enric.command.repo.commit
 
 import dev.enric.command.TrackitCommand
 import dev.enric.command.repo.staging.Stage
+import dev.enric.core.commandconsumer.SudoArgsParameterConsumer
 import dev.enric.core.repo.commit.CommitHandler
 import dev.enric.core.repo.staging.StagingHandler
 import dev.enric.domain.Commit
@@ -35,6 +36,28 @@ class Commit : TrackitCommand() {
     @Option(names = ["--all", "-A"], description = ["Stage all modified and untracked files before committing"])
     var stageAllFiles: Boolean = false
 
+    /**
+     * Execute the command as a different user
+     */
+    @Option(
+        names = ["--sudo", "-s"],
+        description = ["Execute command as user"],
+        parameterConsumer = SudoArgsParameterConsumer::class,
+        arity = "2"
+    )
+    var sudoArgs: Array<String>? = null
+
+    /**
+     * Confirm the commit as a different user
+     */
+    @Option(
+        names = ["--confirmer", "-c"],
+        description = ["Confirm commit as user"],
+        parameterConsumer = SudoArgsParameterConsumer::class,
+        arity = "2"
+    )
+    var confirmerArgs: Array<String>? = null
+
     override fun call(): Int {
         super.call()
 
@@ -48,6 +71,20 @@ class Commit : TrackitCommand() {
         return 0
     }
 
+    fun createCommit(title: String, message: String) {
+        val commit = Commit(title = title, message = message, date = Timestamp.from(Instant.now()))
+        val commitHandler = CommitHandler(commit)
+
+        // TODO: Check if can do a commit in specified branch.
+        // if (!commitHandler.canDoCommit(commit, branch) {
+        //     return 1
+        // }
+
+        commitHandler.preCommit(sudoArgs, confirmerArgs)
+        commitHandler.processCommit()
+        commitHandler.postCommit()
+    }
+
     fun stageAllFiles() {
         Logger.log("Staging all files before committing")
 
@@ -57,19 +94,5 @@ class Commit : TrackitCommand() {
         stageCommand.force = false
 
         stageCommand.call()
-    }
-
-    fun createCommit(title: String, message: String) {
-        val commitHandler = CommitHandler()
-        val commit = Commit(title = title, message = message, date = Timestamp.from(Instant.now()))
-
-        // TODO: Check if can do a commit in specified branch.
-        // if (!commitHandler.canDoCommit(commit, branch) {
-        //     return 1
-        // }
-
-        val processedCommit = CommitHandler().processCommit(commit)
-
-        CommitHandler().postCommit(processedCommit)
     }
 }
