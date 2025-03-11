@@ -85,7 +85,7 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
         }
     }
 
-    fun getRepositoryFolderPath(): Path {
+    fun getTrackitFolderPath(): Path {
         return trackitFolder
     }
 
@@ -105,16 +105,12 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
         return initFolder
     }
 
-    fun getTrackitFolderPath(): Path {
-        return getRepositoryFolderPath().resolve(TRACKIT_FOLDER)
-    }
-
     fun getConfigFilePath(): Path {
-        return getRepositoryFolderPath().resolve(CONFIG_FILE)
+        return getTrackitFolderPath().resolve(CONFIG_FILE)
     }
 
     fun getStagingIndexPath(): Path {
-        return getRepositoryFolderPath().resolve(STAGING_INDEX)
+        return getTrackitFolderPath().resolve(STAGING_INDEX)
     }
 
     fun getCurrentCommitPath(): Path {
@@ -135,6 +131,10 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
 
     fun getPermissionIndexPath(): Path {
         return getIndexFolderPath().resolve(PERMISSION_INDEX)
+    }
+
+    fun getIgnorePath(): Path {
+        return getInitFolderPath().resolve(".ignore")
     }
 
     fun getSecretKeyPath(): Path {
