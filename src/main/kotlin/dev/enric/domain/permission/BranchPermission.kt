@@ -4,6 +4,7 @@ import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.BRANCH_PERMISSION
 import dev.enric.core.TrackitObject
 import dev.enric.domain.Branch
+import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.Serializable
@@ -33,9 +34,13 @@ data class BranchPermission(
         get() = if (writePermission) WRITE else if (readPermission) READ else READ
 
     override fun decode(hash: Hash): BranchPermission {
-        val commitFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
-        val objectFile = commitFolder.resolve(hash.toString())
-        val decompressedData = decompressContent(Files.readAllBytes(objectFile)) ?: return BranchPermission() // If the file is empty, return an empty commit
+        if (!hash.string.startsWith(BRANCH_PERMISSION.hash.string)) throw IllegalHashException("Hash $hash is not a Branch Permission hash")
+
+        val branchPermissionFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
+        val objectFile = branchPermissionFolder.resolve(hash.toString())
+
+        if(!Files.exists(objectFile)) throw IllegalHashException("Permission with hash $hash not found")
+        val decompressedData = decompressContent(Files.readAllBytes(objectFile)) ?: return BranchPermission() // If the file is empty, return an empty Permission
 
         val byteArrayInputStream = decompressedData.inputStream()
         val objectIStream = java.io.ObjectInputStream(byteArrayInputStream)

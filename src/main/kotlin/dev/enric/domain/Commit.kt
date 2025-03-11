@@ -3,6 +3,7 @@ package dev.enric.domain
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.COMMIT
 import dev.enric.core.TrackitObject
+import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.Serializable
@@ -24,8 +25,12 @@ data class Commit(
 ) : TrackitObject<Commit>(), Serializable {
 
     override fun decode(hash: Hash): Commit {
+        if (!hash.string.startsWith(COMMIT.hash.string)) throw IllegalHashException("Hash $hash is not a Commit hash")
+
         val commitFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
         val objectFile = commitFolder.resolve(hash.toString())
+
+        if(!Files.exists(objectFile)) throw IllegalHashException("Commit with hash $hash not found")
         val decompressedData = decompressContent(Files.readAllBytes(objectFile)) ?: return Commit() // If the file is empty, return an empty commit
 
         val byteArrayInputStream = decompressedData.inputStream()

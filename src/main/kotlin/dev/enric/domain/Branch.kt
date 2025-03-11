@@ -4,6 +4,7 @@ import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.BRANCH
 import dev.enric.core.TrackitObject
 import dev.enric.domain.permission.BranchPermission
+import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.index.BranchPermissionIndex
 import dev.enric.util.repository.RepositoryFolderManager
@@ -13,8 +14,12 @@ import java.nio.file.Files
 class Branch(val name: String = "") : TrackitObject<Branch>(), Serializable {
 
     override fun decode(hash: Hash): Branch {
+        if (!hash.string.startsWith(BRANCH.hash.string)) throw IllegalHashException("Hash $hash is not a Branch hash")
+
         val branchFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
         val objectFile = branchFolder.resolve(hash.toString())
+
+        if(!Files.exists(objectFile)) throw IllegalHashException("Branch with hash $hash not found")
         val decompressedData = decompressContent(Files.readAllBytes(objectFile))
             ?: return Branch() // If the file is empty, return an empty Branch
 

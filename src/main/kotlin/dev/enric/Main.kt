@@ -58,7 +58,7 @@ class Main : TrackitCommand() {
             cmd.isStopAtPositional = false
 
             cmd.setExecutionExceptionHandler { ex, _, _ ->
-                ex.printStackTrace()
+                //ex.printStackTrace()
                 return@setExecutionExceptionHandler 1
             }
 

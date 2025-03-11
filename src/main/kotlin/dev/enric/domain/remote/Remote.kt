@@ -3,6 +3,7 @@ package dev.enric.domain.remote
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.REMOTE
 import dev.enric.core.TrackitObject
+import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.Serializable
@@ -14,9 +15,13 @@ data class Remote(
 ) : TrackitObject<Remote>(), Serializable {
 
     override fun decode(hash: Hash): Remote {
-        val commitFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
-        val objectFile = commitFolder.resolve(hash.toString())
-        val decompressedData = decompressContent(Files.readAllBytes(objectFile)) ?: return Remote() // If the file is empty, return an empty commit
+        if (!hash.string.startsWith(REMOTE.hash.string)) throw IllegalHashException("Hash $hash is not a Remote hash")
+
+        val remoteFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
+        val objectFile = remoteFolder.resolve(hash.toString())
+
+        if(!Files.exists(objectFile)) throw IllegalHashException("Remote with hash $hash not found")
+        val decompressedData = decompressContent(Files.readAllBytes(objectFile)) ?: return Remote() // If the file is empty, return an empty Remote
 
         val byteArrayInputStream = decompressedData.inputStream()
         val objectIStream = java.io.ObjectInputStream(byteArrayInputStream)

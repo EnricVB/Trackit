@@ -5,6 +5,7 @@ import dev.enric.core.Hash.HashType.*
 import dev.enric.core.TrackitObject
 import dev.enric.domain.permission.BranchPermission
 import dev.enric.domain.permission.RolePermission
+import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.Serializable
@@ -18,10 +19,14 @@ data class Role(
     Serializable {
 
     override fun decode(hash: Hash): Role {
-        val commitFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
-        val objectFile = commitFolder.resolve(hash.toString())
+        if (!hash.string.startsWith(ROLE.hash.string)) throw IllegalHashException("Hash $hash is not a Role hash")
+
+        val roleFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
+        val objectFile = roleFolder.resolve(hash.toString())
+
+        if(!Files.exists(objectFile)) throw IllegalHashException("Role with hash $hash not found")
         val decompressedData = decompressContent(Files.readAllBytes(objectFile))
-            ?: return Role() // If the file is empty, return an empty commit
+            ?: return Role() // If the file is empty, return an empty role
 
         val byteArrayInputStream = decompressedData.inputStream()
         val objectIStream = java.io.ObjectInputStream(byteArrayInputStream)

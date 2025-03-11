@@ -55,6 +55,8 @@ abstract class TrackitObject<T : TrackitObject<T>> {
      * The Hash is the key that is going to be used to retrieve the object from the repository.
      * @param hash Hash that is going to be used to retrieve the object.
      * @return T object type that is going to be decoded into.
+     *
+     * @throws IllegalHashException if the hash is not found in the repository.
      */
     abstract fun decode(hash: Hash): T
 
