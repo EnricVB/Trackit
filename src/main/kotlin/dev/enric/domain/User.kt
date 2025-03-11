@@ -4,6 +4,7 @@ import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.USER
 import dev.enric.core.TrackitObject
 import dev.enric.core.security.PasswordHash
+import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.Serializable
@@ -20,8 +21,12 @@ data class User(
 ) : TrackitObject<User>(), Serializable {
 
     override fun decode(hash: Hash): User {
-        val treeFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
-        val objectFile = treeFolder.resolve(hash.toString())
+        if (!hash.string.startsWith(USER.hash.string)) throw IllegalHashException("Hash $hash is not a User hash")
+
+        val userFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
+        val objectFile = userFolder.resolve(hash.toString())
+
+        if(!Files.exists(objectFile)) throw IllegalHashException("User with hash $hash not found")
         val decompressedData = decompressContent(Files.readAllBytes(objectFile))
             ?: return User() // If the file is empty, return an empty user
 

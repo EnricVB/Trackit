@@ -3,6 +3,7 @@ package dev.enric.domain.tag
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.COMPLEX_TAG
 import dev.enric.core.TrackitObject
+import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.Serializable
@@ -19,10 +20,14 @@ data class ComplexTag(
 ) : Tag, TrackitObject<ComplexTag>(), Serializable {
 
     override fun decode(hash: Hash): ComplexTag {
-        val treeFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
-        val objectFile = treeFolder.resolve(hash.toString())
+        if (!hash.string.startsWith(COMPLEX_TAG.hash.string)) throw IllegalHashException("Hash $hash is not a ComplexTag hash")
+
+        val complexTagFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
+        val objectFile = complexTagFolder.resolve(hash.toString())
+
+        if(!Files.exists(objectFile)) throw IllegalHashException("ComplexTag with hash $hash not found")
         val decompressedData = decompressContent(Files.readAllBytes(objectFile))
-            ?: return ComplexTag() // If the file is empty, return an empty tree
+            ?: return ComplexTag() // If the file is empty, return an empty ComplexTag
 
         val byteArrayInputStream = decompressedData.inputStream()
         val objectIStream = java.io.ObjectInputStream(byteArrayInputStream)

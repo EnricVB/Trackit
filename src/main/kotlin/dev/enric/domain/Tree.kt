@@ -3,6 +3,7 @@ package dev.enric.domain
 import dev.enric.core.Hash
 import dev.enric.core.Hash.HashType.TREE
 import dev.enric.core.TrackitObject
+import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
 import dev.enric.util.common.SerializablePath
@@ -18,8 +19,12 @@ data class Tree(
     constructor(path: Path, hash: Hash) : this(SerializablePath.of(path), hash)
 
     override fun decode(hash: Hash): Tree {
+        if (!hash.string.startsWith(TREE.hash.string)) throw IllegalHashException("Hash $hash is not a Tree hash")
+
         val treeFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
         val objectFile = treeFolder.resolve(hash.toString())
+
+        if(!Files.exists(objectFile)) throw IllegalHashException("Tree with hash $hash not found")
         val decompressedData = decompressContent(Files.readAllBytes(objectFile)) ?: return Tree() // If the file is empty, return an empty tree
 
         val byteArrayInputStream = decompressedData.inputStream()
