@@ -1,25 +1,23 @@
 package dev.enric.command.repo.commit
 
 import dev.enric.command.TrackitCommand
-import dev.enric.command.repo.staging.Stage
 import dev.enric.core.Hash
 import dev.enric.core.commandconsumer.SudoArgsParameterConsumer
 import dev.enric.core.repo.commit.CheckoutHandler
-import dev.enric.core.repo.commit.CommitHandler
-import dev.enric.core.repo.staging.StagingHandler
 import dev.enric.domain.Commit
 import dev.enric.exceptions.IllegalArgumentValueException
-import dev.enric.logger.Logger
 import dev.enric.util.index.CommitIndex
+import dev.enric.util.repository.RepositoryFolderManager
 import picocli.CommandLine.*
-import java.sql.Timestamp
-import java.time.Instant
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.PathWalkOption
+import kotlin.io.path.walk
 
 @Command(
     name = "checkout",
     description = ["Changes repository state to a specified commit or branch"],
     mixinStandardHelpOptions = true,
-    )
+)
 class Checkout : TrackitCommand() {
 
     /**
@@ -43,14 +41,15 @@ class Checkout : TrackitCommand() {
         super.call()
 
         // TODO: Check if has permissions to read this branch
-
         val checkoutHandler = CheckoutHandler(getCommitByHash(), sudoArgs)
+
+        checkoutHandler.preCheckout()
         checkoutHandler.checkout()
 
         return 0
     }
 
-    private fun getCommitByHash() : Commit {
+    private fun getCommitByHash(): Commit {
         val hashes = if (CommitIndex.isAbbreviatedHash(commitHash)) {
             CommitIndex.getAbbreviatedCommit(commitHash)
         } else {
@@ -59,7 +58,7 @@ class Checkout : TrackitCommand() {
 
         if (hashes.size > 1) {
             throw IllegalArgumentValueException("There are many Commits starting with $commitHash")
-        } else if(hashes.isEmpty()) {
+        } else if (hashes.isEmpty()) {
             throw IllegalArgumentValueException("There are no Commits starting with $commitHash")
         }
 
