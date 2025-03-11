@@ -120,7 +120,17 @@ tasks.register<JavaExec>("tktUserCreate") {
     group = "execute"
     classpath = project.sourceSets["main"].runtimeClasspath
 
-    args = listOf("user-create", "-n", "Usuario Prueba", "-p", "Password Prueba", "-m", "mail@gmail.com", "-P", "123456789")
+    args = listOf(
+        "user-create",
+        "-n",
+        "Usuario Prueba",
+        "-p",
+        "Password Prueba",
+        "-m",
+        "mail@gmail.com",
+        "-P",
+        "123456789"
+    )
 }
 
 tasks.register<JavaExec>("tktUserList") {
@@ -165,5 +175,10 @@ tasks.register<JavaExec>("tktCheckout") {
     group = "execute"
     classpath = project.sourceSets["main"].runtimeClasspath
 
-    args = listOf("checkout", "") // Second parameter must be the hash
+    doFirst {
+        println("Enter the commit hash to checkout:")
+        val hash = readLine() ?: ""
+
+        args = listOf("checkout", hash) // Second parameter must be the hash
+    }
 }
