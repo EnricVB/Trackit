@@ -7,19 +7,25 @@ import dev.enric.exceptions.UserNotFoundException
 import dev.enric.logger.Logger
 import dev.enric.util.index.UserIndex
 
-open class CommandHandler() {
+open class CommandHandler {
     /**
      * Verifies if the user is logged in or if the sudo user exists.
      *
      * @throws UserNotFoundException If the sudo user is not found.
+     * @return The user that is logged in or the sudo user.
      */
     protected fun isValidSudoUser(sudoArgs : Array<String>?): User {
-        val sudo = UserIndex.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "") ?: AuthUtil.getLoggedUser()
+        var sudo = UserIndex.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "")
 
         if (sudo == null) {
-            throw UserNotFoundException("Sudo user not found. Please login first or use --sudo with proper credentials.")
+            Logger.error("Sudo user not found. Trying to login with logged user.")
+            sudo = AuthUtil.getLoggedUser()
+        }
+
+        if (sudo == null) {
+            throw UserNotFoundException("User not found. Please login first or use --sudo with proper credentials.")
         } else {
-            Logger.log("Logged user: ${sudo.name}")
+            Logger.log("Logged in with user: ${sudo.name}")
         }
 
         return sudo
@@ -58,6 +64,6 @@ open class CommandHandler() {
  * @param predicate The predicate to match.
  * @return True if all elements match the predicate, false otherwise.
  */
-public inline fun <T> Iterable<T>.allIndexed(predicate: (Int, T) -> Boolean): Boolean {
+inline fun <T> Iterable<T>.allIndexed(predicate: (Int, T) -> Boolean): Boolean {
     return this.withIndex().all { (index, item) -> predicate(index, item) }
 }
