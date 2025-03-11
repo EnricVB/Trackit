@@ -75,6 +75,7 @@ class UserModify : TrackitCommand() {
             sudoArgs
         )
 
+        // Will return 1 as it will throw an exception if the user cannot be modified
         if (!handler.checkCanModifyUser()) {
             return 1
         }
