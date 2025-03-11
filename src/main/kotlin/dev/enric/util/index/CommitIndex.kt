@@ -25,10 +25,10 @@ object CommitIndex {
      *
      * @return A [Hash] object representing the current commit.
      */
-    fun getCurrentCommit() : Hash {
+    fun getCurrentCommit() : Hash? {
         val hashString = Files.readString(repositoryFolderManager.getCurrentCommitPath())
 
-        return Commit.newInstance(Hash(hashString)).encode().first
+        return if(hashString.isNullOrEmpty()) null else Commit.newInstance(Hash(hashString)).encode().first
     }
 
     /**
