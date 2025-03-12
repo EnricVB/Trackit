@@ -1,8 +1,8 @@
 package dev.enric.util.index
 
-import dev.enric.core.Hash
-import dev.enric.core.Hash.HashType.BRANCH_PERMISSION
-import dev.enric.core.Hash.HashType.ROLE_PERMISSION
+import dev.enric.domain.Hash
+import dev.enric.domain.Hash.HashType.BRANCH_PERMISSION
+import dev.enric.domain.Hash.HashType.ROLE_PERMISSION
 import dev.enric.domain.Branch
 import dev.enric.domain.permission.BranchPermission
 import dev.enric.util.repository.RepositoryFolderManager

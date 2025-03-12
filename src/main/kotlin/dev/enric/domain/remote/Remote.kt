@@ -1,8 +1,8 @@
 package dev.enric.domain.remote
 
-import dev.enric.core.Hash
-import dev.enric.core.Hash.HashType.REMOTE
-import dev.enric.core.TrackitObject
+import dev.enric.domain.Hash
+import dev.enric.domain.Hash.HashType.REMOTE
+import dev.enric.domain.TrackitObject
 import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager

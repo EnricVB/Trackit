@@ -1,8 +1,8 @@
 package dev.enric.domain.permission
 
-import dev.enric.core.Hash
-import dev.enric.core.Hash.HashType.*
-import dev.enric.core.TrackitObject
+import dev.enric.domain.Hash
+import dev.enric.domain.Hash.HashType.*
+import dev.enric.domain.TrackitObject
 import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager

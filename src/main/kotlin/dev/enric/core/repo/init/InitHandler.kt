@@ -1,6 +1,6 @@
 package dev.enric.core.repo.init
 
-import dev.enric.core.Hash
+import dev.enric.domain.Hash
 import dev.enric.domain.Branch
 import dev.enric.domain.Role
 import dev.enric.domain.User

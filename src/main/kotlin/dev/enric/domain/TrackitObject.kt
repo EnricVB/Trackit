@@ -1,4 +1,4 @@
-package dev.enric.core
+package dev.enric.domain
 
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.ByteArrayOutputStream
