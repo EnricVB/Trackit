@@ -1,3 +1,5 @@
+@file:Suppress("ReplaceReadLineWithReadln")
+
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
@@ -102,7 +104,16 @@ tasks.register<JavaExec>("tktCommit") {
     group = "execute"
     classpath = project.sourceSets["main"].runtimeClasspath
 
-    args = listOf("commit", "Title", "Message")
+
+    doFirst {
+        print("Enter the commit title:")
+        val title = readLine() ?: ""
+
+        print("Enter the commit message:")
+        val message = readLine() ?: ""
+
+        args = listOf("commit", title, message, "-a")
+    }
 }
 
 tasks.register<JavaExec>("tktKeepSession") {
@@ -176,9 +187,34 @@ tasks.register<JavaExec>("tktCheckout") {
     classpath = project.sourceSets["main"].runtimeClasspath
 
     doFirst {
-        println("Enter the commit hash to checkout:")
+        print("Enter the commit hash to checkout:")
         val hash = readLine() ?: ""
 
         args = listOf("checkout", hash) // Second parameter must be the hash
+    }
+}
+
+tasks.register<JavaExec>("tktLog") {
+    mainClass.set("dev.enric.Main")
+    workingDir = file("${project.rootDir}/tktFolder")
+    group = "execute"
+    classpath = project.sourceSets["main"].runtimeClasspath
+
+    args = listOf("log")
+}
+
+tasks.register<JavaExec>("tkt") {
+    mainClass.set("dev.enric.Main")
+    workingDir = file("${project.rootDir}/tktFolder")
+    group = "execute"
+    classpath = project.sourceSets["main"].runtimeClasspath
+
+    doFirst {
+        print("trackit ")
+        System.out.flush()
+
+        val command = readLine() ?: ""
+
+        args = command.split(' ')
     }
 }

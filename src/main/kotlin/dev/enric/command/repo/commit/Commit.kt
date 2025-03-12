@@ -51,13 +51,15 @@ class Commit : TrackitCommand() {
         // Sets some commit properties before the commit
         commitHandler.initializeCommitProperties(sudoArgs, confirmerArgs)
 
+        // Stages all files if the flag is set
+        commitHandler.preCommit(stageAllFiles)
+
         // Will never return 1 as it will throw an exception if the commit cannot be done
         if (!commitHandler.canDoCommit()) {
             return 1
         }
 
         // Processes the commit
-        commitHandler.preCommit(stageAllFiles)
         commitHandler.processCommit()
         commitHandler.postCommit()
 

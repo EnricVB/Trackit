@@ -11,7 +11,7 @@ import java.sql.Timestamp
 import java.time.Instant
 
 data class Commit(
-    var previousCommit: Hash = Hash("0".repeat(32)),
+    var previousCommit: Hash? = null,
     var tree: List<Hash> = listOf(),
     var branch: Hash = Hash("0".repeat(32)),
     var author: Hash = Hash("0".repeat(32)),
@@ -56,42 +56,28 @@ data class Commit(
     }
 
     override fun printInfo(): String {
+        val author = User.newInstance(author)
+        val confirmer = User.newInstance(confirmer)
+
         return buildString {
-            appendLine(ColorUtil.title("Commit Details"))
+            appendLine(ColorUtil.title("commit ${generateKey()}"))
 
-            append(ColorUtil.label("  Previous Commit: "))
-            appendLine(ColorUtil.text(previousCommit.toString()))
+            append("Author: \t${author.name}")
+            if (author.mail.isNotBlank()) append(" <${author.mail}>")
+            if (author.phone.isNotBlank()) append(" <${author.phone}>")
+            appendLine(" : ${author.encode().first}")
 
-            append(ColorUtil.label("  Tree Hashes: "))
-            if (tree.isNotEmpty()) {
-                tree.forEach { appendLine("    - " + ColorUtil.text(it.toString())) }
-            } else {
-                appendLine(ColorUtil.message("No tree objects assigned"))
-            }
+            append("Confirmer: \t${confirmer.name}")
+            if (confirmer.mail.isNotBlank()) append(" <${confirmer.mail}>")
+            if (confirmer.phone.isNotBlank()) append(" <${confirmer.phone}>")
+            appendLine(" : ${confirmer.encode().first}")
 
-            append(ColorUtil.label("  Branch: "))
-            appendLine(ColorUtil.text(branch.toString()))
+            appendLine("Date: $date")
 
-            append(ColorUtil.label("  Author: "))
-            appendLine(ColorUtil.text(author.toString()))
-
-            append(ColorUtil.label("  Confirmer: "))
-            appendLine(ColorUtil.text(confirmer.toString()))
-
-            append(ColorUtil.label("  Date: "))
-            appendLine(ColorUtil.text(date.toString()))
-
-            append(ColorUtil.label("  Title: "))
-            appendLine(if (title.isNotEmpty()) ColorUtil.text(title) else ColorUtil.message("No title assigned"))
-
-            append(ColorUtil.label("  Message: "))
-            appendLine(if (message.isNotEmpty()) ColorUtil.text(message) else ColorUtil.message("No message assigned"))
-
-            append(ColorUtil.label("  Tag: "))
-            appendLine(if (tag.isNotEmpty()) ColorUtil.text(tag) else ColorUtil.message("No tag assigned"))
+            appendLine("\n\t$title")
+            appendLine("\n\t$message")
         }
     }
-
 
     override fun showDifferences(newer: Hash, oldest: Hash): String {
         TODO("Not yet implemented")
