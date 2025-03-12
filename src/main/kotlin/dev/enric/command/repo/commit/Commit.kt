@@ -28,19 +28,8 @@ class Commit : TrackitCommand() {
     /**
      * Stage all modified and untracked files before committing, it will add all the files to the staging area
      */
-    @Option(names = ["--all", "-A"], description = ["Stage all modified and untracked files before committing"])
+    @Option(names = ["--all", "-a"], description = ["Stage all modified and untracked files before committing"])
     var stageAllFiles: Boolean = false
-
-    /**
-     * Execute the command as a different user
-     */
-    @Option(
-        names = ["--sudo", "-s"],
-        description = ["Execute command as user"],
-        parameterConsumer = SudoArgsParameterConsumer::class,
-        arity = "2"
-    )
-    var sudoArgs: Array<String>? = null
 
     /**
      * Confirm the commit as a different user
