@@ -64,6 +64,8 @@ object InitHandler {
 
     /**
      * Creates the main branch 'main' in the repository.
+     *
+     * @return A [Hash] object representing the main branch.
      */
     private fun createMainBranch() : Hash {
         return Branch("main").encode(true).first

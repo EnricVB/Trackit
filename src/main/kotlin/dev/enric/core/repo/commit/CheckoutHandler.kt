@@ -1,6 +1,5 @@
 package dev.enric.core.repo.commit
 
-import dev.enric.core.Hash
 import dev.enric.domain.Commit
 import dev.enric.domain.Content
 import dev.enric.domain.Tree
