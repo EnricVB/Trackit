@@ -1,6 +1,7 @@
 package dev.enric.exceptions
 
 import dev.enric.logger.Logger
+import dev.enric.util.common.Utility
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
@@ -37,7 +38,7 @@ open class TrackitException(message: String, errorCode: Int) : Exception(message
 
         Logger.error("Reason: $message")
         Logger.error("Error code: $errorCode")
-        Logger.error("Date: ${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))}")
+        Logger.error("Date: ${Utility.getLogDateFormat("yyyy-MM-dd HH:mm:ss")}")
 
         Logger.error("\n########################################")
     }

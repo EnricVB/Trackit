@@ -1,6 +1,10 @@
 package dev.enric.logger
 
 import dev.enric.util.common.ColorUtil
+import dev.enric.util.common.Utility
+import dev.enric.util.repository.RepositoryFolderManager
+import java.nio.file.Files
+import java.nio.file.StandardOpenOption
 
 /**
  * Logger class to log messages to the console
@@ -9,6 +13,10 @@ import dev.enric.util.common.ColorUtil
  * @constructor Creates a Logger with the given log level
  */
 object Logger {
+    val repositoryFolderManager : RepositoryFolderManager = RepositoryFolderManager()
+    val commitLogFile = repositoryFolderManager.getCommitLogsFilePath()
+    val commandLogFile = repositoryFolderManager.getCommandLogsFilePath()
+
     var logLevel: LogLevel = LogLevel.INFO
 
     /**
@@ -22,8 +30,11 @@ object Logger {
     /**
      * Logs a message to the console.
      * In case the log level is set to QUIET or ERRORS, the message will not be printed.
+     *
+     * @param message The message to log
      */
     fun log(message: String) {
+        saveLog("[${Utility.getLogDateFormat("yyyy-MM-dd HH:mm:ss")}] [INFO] $message")
         if(logLevel != LogLevel.INFO) return
 
         println(ColorUtil.message(message))
@@ -32,11 +43,30 @@ object Logger {
     /**
      * Logs an error message to the console.
      * In case the log level is set to QUIET, the message will not be printed.
+     *
+     * @param message The error message to log
      */
     fun error(message: String) {
+        saveLog("[${Utility.getLogDateFormat("yyyy-MM-dd HH:mm:ss")}] [ERROR] $message")
         if(logLevel == LogLevel.QUIET) return
 
         System.err.println(ColorUtil.error(message))
+    }
+
+    /**
+     * Saves a log message to a file to store all steps of the application.
+     *
+     * In case the file does not exist, it will be created. This may happen if it is a new day, as the logs are stored daily.
+     *
+     * @param message The message to save
+     */
+    fun saveLog(message: String) {
+        if (!commandLogFile.toFile().exists()) {
+            commandLogFile.parent.toFile().mkdirs()
+            Files.createFile(commandLogFile)
+        }
+
+        Files.writeString(commandLogFile, message + "\n", Charsets.UTF_8, StandardOpenOption.APPEND)
     }
 
     /**
