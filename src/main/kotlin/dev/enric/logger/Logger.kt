@@ -14,7 +14,6 @@ import java.nio.file.StandardOpenOption
  */
 object Logger {
     val repositoryFolderManager : RepositoryFolderManager = RepositoryFolderManager()
-    val commitLogFile = repositoryFolderManager.getCommitLogsFilePath()
     val commandLogFile = repositoryFolderManager.getCommandLogsFilePath()
 
     var logLevel: LogLevel = LogLevel.INFO

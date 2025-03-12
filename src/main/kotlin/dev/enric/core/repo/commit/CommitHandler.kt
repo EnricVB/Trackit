@@ -79,7 +79,7 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
      * - Sets the branch to the current branch.
      */
     fun initializeCommitProperties(author: Array<String>?, confirmer: Array<String>?) {
-        commit.previousCommit = CommitIndex.getCurrentCommit() ?: Hash("0".repeat(32))
+        commit.previousCommit = CommitIndex.getCurrentCommit()
         commit.branch = BranchIndex.getCurrentBranch().encode().first
 
         Logger.log("Logging for author...")
