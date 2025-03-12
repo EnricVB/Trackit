@@ -82,7 +82,10 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
         commit.previousCommit = CommitIndex.getCurrentCommit() ?: Hash("0".repeat(32))
         commit.branch = BranchIndex.getCurrentBranch().encode().first
 
+        Logger.log("Logging for author: ")
         commit.author = isValidSudoUser(author).encode().first
+
+        Logger.log("\nLogging for confirmer: ")
         commit.confirmer = isValidSudoUser(confirmer).encode().first
 
         commit.date = Timestamp.from(java.time.Instant.now())

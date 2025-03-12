@@ -14,21 +14,20 @@ open class CommandHandler {
      * @throws UserNotFoundException If the sudo user is not found.
      * @return The user that is logged in or the sudo user.
      */
-    protected fun isValidSudoUser(sudoArgs : Array<String>?): User {
-        var sudo = UserIndex.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "")
+    protected fun isValidSudoUser(sudoArgs: Array<String>?): User {
+        val sudo = UserIndex.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "")
+        val loggedUser = AuthUtil.getLoggedUser()
 
-        if (sudo == null) {
-            Logger.error("Sudo user not found. Trying to login with logged user.")
-            sudo = AuthUtil.getLoggedUser()
+        if (sudo != null) {
+            Logger.log("Logged in with sudo user: ${sudo.name}")
+            return sudo
+
+        } else if (loggedUser != null) {
+            Logger.log("Logged in with logged user: ${loggedUser.name}")
+            return loggedUser
         }
 
-        if (sudo == null) {
-            throw UserNotFoundException("User not found. Please login first or use --sudo with proper credentials.")
-        } else {
-            Logger.log("Logged in with user: ${sudo.name}")
-        }
-
-        return sudo
+        throw UserNotFoundException("User not found for ${sudoArgs?.get(0) ?: "None"}")
     }
 
     /**
@@ -38,8 +37,10 @@ open class CommandHandler {
      */
     protected fun isValidRolePermissions(rolePermissions: String) {
         if (!validateRolePermissionsString(rolePermissions)) {
-            throw InvalidPermissionException("Invalid role permissions string. " +
-                    "Must be a 4-character string with only 'm', 'u', 's', 'a' or '-' characters.")
+            throw InvalidPermissionException(
+                "Invalid role permissions string. " +
+                        "Must be a 4-character string with only 'm', 'u', 's', 'a' or '-' characters."
+            )
         }
     }
 

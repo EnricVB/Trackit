@@ -4,9 +4,9 @@ import dev.enric.core.Hash
 import dev.enric.domain.Branch
 import dev.enric.domain.Role
 import dev.enric.domain.User
+import dev.enric.domain.permission.BranchPermission
 import dev.enric.domain.permission.RolePermission
 import dev.enric.util.repository.RepositoryFolderManager
-
 
 /**
  * InitHandler is an object that handles the initialization of a new repository.
@@ -28,7 +28,6 @@ object InitHandler {
 
         val owner = createDefaultRoles()
         createUser(owner)
-        createMainBranch()
     }
 
     /**
@@ -43,8 +42,11 @@ object InitHandler {
         val projectManagerPermissions = RolePermission("musa").encode(true).first
         val undefinedPermissions = RolePermission("----").encode(true).first
 
-        val owner = Role("owner", 1, mutableListOf(ownerPermissions)).encode(true).first
-        Role("projectManager", 2, mutableListOf(projectManagerPermissions)).encode(true).first
+        val mainBranch = createMainBranch()
+        val mainBranchPermissions = BranchPermission("rw", mainBranch).encode(true).first
+
+        val owner = Role("owner", 1, mutableListOf(ownerPermissions, mainBranchPermissions)).encode(true).first
+        Role("projectManager", 2, mutableListOf(projectManagerPermissions, mainBranch)).encode(true).first
         Role("undefined", Int.MAX_VALUE, mutableListOf(undefinedPermissions)).encode(true).first
 
         return Role.newInstance(owner)
@@ -63,7 +65,7 @@ object InitHandler {
     /**
      * Creates the main branch 'main' in the repository.
      */
-    private fun createMainBranch() {
-        Branch("main").encode(true)
+    private fun createMainBranch() : Hash {
+        return Branch("main").encode(true).first
     }
 }
