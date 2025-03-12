@@ -1,17 +1,12 @@
 package dev.enric.command.repo.commit
 
 import dev.enric.command.TrackitCommand
-import dev.enric.core.Hash
-import dev.enric.core.commandconsumer.SudoArgsParameterConsumer
+import dev.enric.domain.Hash
 import dev.enric.core.repo.commit.CheckoutHandler
 import dev.enric.domain.Commit
 import dev.enric.exceptions.IllegalArgumentValueException
 import dev.enric.util.index.CommitIndex
-import dev.enric.util.repository.RepositoryFolderManager
 import picocli.CommandLine.*
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.PathWalkOption
-import kotlin.io.path.walk
 
 @Command(
     name = "checkout",
@@ -25,17 +20,6 @@ class Checkout : TrackitCommand() {
      */
     @Parameters(index = "0", paramLabel = "Hash", description = ["The hash of the commit"])
     lateinit var commitHash: String
-
-    /**
-     * Sudo args in case user did not kept session logged in.
-     */
-    @Option(
-        names = ["--sudo", "-s"],
-        description = ["Execute command as user"],
-        parameterConsumer = SudoArgsParameterConsumer::class,
-        arity = "2"
-    )
-    var sudoArgs: Array<String>? = null
 
     override fun call(): Int {
         super.call()

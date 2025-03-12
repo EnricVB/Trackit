@@ -52,15 +52,6 @@ class UserModify : TrackitCommand() {
     )
     var deletePreviousRoles: Boolean = false
 
-    @Option(
-        names = ["--sudo", "-s"],
-        description = ["Execute command as user"],
-        arity = "2",
-        parameterConsumer = SudoArgsParameterConsumer::class,
-        required = false
-    )
-    var sudoArgs: Array<String>? = null
-
     override fun call(): Int {
         super.call()
 
