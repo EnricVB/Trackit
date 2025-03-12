@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package dev.enric.core
+package dev.enric.domain
 
 import io.github.rctcwyvrn.blake3.Blake3
 import java.io.Serializable

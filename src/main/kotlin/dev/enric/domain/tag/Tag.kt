@@ -1,6 +1,6 @@
 package dev.enric.domain.tag
 
-import dev.enric.core.Hash
+import dev.enric.domain.Hash
 
 interface Tag {
     val name : String

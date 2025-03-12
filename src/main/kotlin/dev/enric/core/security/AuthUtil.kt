@@ -1,6 +1,6 @@
 package dev.enric.core.security
 
-import dev.enric.core.Hash
+import dev.enric.domain.Hash
 import dev.enric.domain.User
 import dev.enric.util.common.EnvironmentVariables
 import dev.enric.util.index.UserIndex

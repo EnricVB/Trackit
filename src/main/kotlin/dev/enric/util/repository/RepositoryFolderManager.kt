@@ -6,8 +6,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.nio.file.attribute.PosixFilePermissions
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 /**
  * This class is responsible for managing the repository folder structure.
@@ -58,12 +56,11 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
 
         trackitFolder.toFile().mkdir()
         logsFolder.toFile().mkdir()
-        commitLogsFile.toFile().mkdir()
-        commandLogsFile.toFile().mkdir()
         objectsFolder.toFile().mkdir()
         indexFolder.toFile().mkdir()
 
         ignoreFile.toFile().createNewFile()
+        commitLogsFile.toFile().createNewFile()
         secretKey.toFile().createNewFile()
 
         getConfigFilePath().toFile().createNewFile()

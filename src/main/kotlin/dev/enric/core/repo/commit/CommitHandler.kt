@@ -2,7 +2,7 @@ package dev.enric.core.repo.commit
 
 import dev.enric.command.repo.staging.Stage
 import dev.enric.core.CommandHandler
-import dev.enric.core.Hash
+import dev.enric.domain.Hash
 import dev.enric.core.repo.staging.StagingHandler
 import dev.enric.domain.*
 import dev.enric.exceptions.IllegalStateException
@@ -56,7 +56,7 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
      */
     private fun hasFilesToCommit() {
         if (StagingHandler.getStagedFiles().isEmpty()) {
-            throw IllegalStateException("There are no files to commit")
+            throw IllegalStateException("The staging area is empty. Add files to commit.")
         }
     }
 
@@ -82,10 +82,10 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
         commit.previousCommit = CommitIndex.getCurrentCommit() ?: Hash("0".repeat(32))
         commit.branch = BranchIndex.getCurrentBranch().encode().first
 
-        Logger.log("Logging for author: ")
+        Logger.log("Logging for author...")
         commit.author = isValidSudoUser(author).encode().first
 
-        Logger.log("\nLogging for confirmer: ")
+        Logger.log("Logging for confirmer...")
         commit.confirmer = isValidSudoUser(confirmer).encode().first
 
         commit.date = Timestamp.from(java.time.Instant.now())
