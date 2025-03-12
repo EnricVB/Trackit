@@ -1,9 +1,8 @@
 package dev.enric.core.management.roles
 
 import dev.enric.core.CommandHandler
-import dev.enric.core.Hash.HashType.BRANCH_PERMISSION
+import dev.enric.domain.Hash.HashType.BRANCH_PERMISSION
 import dev.enric.core.allIndexed
-import dev.enric.core.security.AuthUtil
 import dev.enric.domain.Role
 import dev.enric.domain.User
 import dev.enric.domain.permission.BranchPermission

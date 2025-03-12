@@ -1,8 +1,6 @@
 package dev.enric.domain
 
-import dev.enric.core.Hash
-import dev.enric.core.Hash.HashType.*
-import dev.enric.core.TrackitObject
+import dev.enric.domain.Hash.HashType.*
 import dev.enric.domain.permission.BranchPermission
 import dev.enric.domain.permission.RolePermission
 import dev.enric.exceptions.IllegalHashException

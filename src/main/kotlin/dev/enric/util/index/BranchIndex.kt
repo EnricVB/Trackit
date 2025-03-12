@@ -1,8 +1,8 @@
 package dev.enric.util.index
 
-import dev.enric.core.Hash
-import dev.enric.core.Hash.HashType.BRANCH
-import dev.enric.core.Hash.HashType.USER
+import dev.enric.domain.Hash
+import dev.enric.domain.Hash.HashType.BRANCH
+import dev.enric.domain.Hash.HashType.USER
 import dev.enric.domain.Branch
 import dev.enric.domain.Commit
 import dev.enric.util.index.CommitIndex.repositoryFolderManager

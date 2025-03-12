@@ -1,7 +1,7 @@
 package dev.enric.util.index
 
-import dev.enric.core.Hash
-import dev.enric.core.Hash.HashType.ROLE
+import dev.enric.domain.Hash
+import dev.enric.domain.Hash.HashType.ROLE
 import dev.enric.domain.Role
 import dev.enric.util.repository.RepositoryFolderManager
 import kotlin.io.path.ExperimentalPathApi

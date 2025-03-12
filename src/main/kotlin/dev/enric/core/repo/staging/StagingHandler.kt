@@ -1,6 +1,6 @@
 package dev.enric.core.repo.staging
 
-import dev.enric.core.Hash
+import dev.enric.domain.Hash
 import dev.enric.domain.Content
 import dev.enric.util.repository.RepositoryFolderManager
 import dev.enric.util.common.SerializablePath
