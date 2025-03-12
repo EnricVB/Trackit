@@ -1,10 +1,13 @@
 package dev.enric.util.repository
 
 import dev.enric.core.security.SecretKey
+import dev.enric.util.common.Utility
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.nio.file.attribute.PosixFilePermissions
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 /**
  * This class is responsible for managing the repository folder structure.
@@ -38,7 +41,11 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
     private val trackitFolder: Path by lazy { initFolder.resolve(TRACKIT_FOLDER) }
     private val ignoreFile: Path by lazy { initFolder.resolve(".ignore") }
     private val secretKey: Path by lazy { initFolder.resolve("key.secret") }
+
     private val logsFolder: Path by lazy { trackitFolder.resolve(LOGS_FOLDER) }
+    private val commitLogsFile: Path by lazy { logsFolder.resolve("commit-${Utility.getLogDateFormat("yyyy-MM-dd")}") }
+    private val commandLogsFile: Path by lazy { logsFolder.resolve("command").resolve("command-${Utility.getLogDateFormat("yyyy-MM-dd")}") }
+
     private val objectsFolder: Path by lazy { trackitFolder.resolve(OBJECTS_FOLDER) }
     private val indexFolder: Path by lazy { trackitFolder.resolve(INDEX_FOLDER) }
 
@@ -51,6 +58,8 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
 
         trackitFolder.toFile().mkdir()
         logsFolder.toFile().mkdir()
+        commitLogsFile.toFile().mkdir()
+        commandLogsFile.toFile().mkdir()
         objectsFolder.toFile().mkdir()
         indexFolder.toFile().mkdir()
 
@@ -91,6 +100,14 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
 
     fun getLogsFolderPath(): Path {
         return logsFolder
+    }
+
+    fun getCommitLogsFilePath(): Path {
+        return commitLogsFile
+    }
+
+    fun getCommandLogsFilePath(): Path {
+        return commandLogsFile
     }
 
     fun getObjectsFolderPath(): Path {
