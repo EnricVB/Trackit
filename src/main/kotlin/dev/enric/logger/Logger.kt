@@ -18,13 +18,15 @@ object Logger {
     val commandLogFile = repositoryFolderManager.getCommandLogsFilePath()
 
     var logLevel: LogLevel = LogLevel.INFO
+    var clazz: String = ""
 
     /**
      * Sets up the logger with the given log level
      * @param logLevel The log level to use
      */
-    fun setupLogger(logLevel: LogLevel) {
+    fun setupLogger(logLevel: LogLevel, clazz: String) {
         this.logLevel = logLevel
+        this.clazz = clazz
     }
 
     /**
@@ -34,7 +36,7 @@ object Logger {
      * @param message The message to log
      */
     fun log(message: String) {
-        saveLog("[${Utility.getLogDateFormat("yyyy-MM-dd HH:mm:ss")}] [INFO] $message")
+        saveLog("[${getDateTime()}] [INFO] [$clazz] $message")
         if(logLevel != LogLevel.INFO) return
 
         println(ColorUtil.message(message))
@@ -47,10 +49,15 @@ object Logger {
      * @param message The error message to log
      */
     fun error(message: String) {
-        saveLog("[${Utility.getLogDateFormat("yyyy-MM-dd HH:mm:ss")}] [ERROR] $message")
+        saveLog("[${getDateTime()}] [ERROR] [$clazz] $message")
         if(logLevel == LogLevel.QUIET) return
 
         System.err.println(ColorUtil.error(message))
+    }
+
+
+    fun trace(message: String) {
+        saveLog("[${getDateTime()}] [TRACE] [$clazz] $message")
     }
 
     /**
@@ -67,6 +74,10 @@ object Logger {
         }
 
         Files.writeString(commandLogFile, message + "\n", Charsets.UTF_8, StandardOpenOption.APPEND)
+    }
+
+    fun getDateTime(): String {
+        return Utility.getLogDateFormat("yyyy-MM-dd HH:mm:ss")
     }
 
     /**
