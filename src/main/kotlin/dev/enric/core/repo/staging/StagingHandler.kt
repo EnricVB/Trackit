@@ -1,9 +1,12 @@
 package dev.enric.core.repo.staging
 
+import dev.enric.core.repo.ignore.IgnoreHandler
 import dev.enric.domain.Hash
 import dev.enric.domain.Content
 import dev.enric.util.repository.RepositoryFolderManager
 import dev.enric.util.common.SerializablePath
+import dev.enric.util.index.CommitIndex
+import dev.enric.util.index.ContentIndex
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -151,18 +154,23 @@ data class StagingHandler(val force: Boolean = false) {
 
     /**
      * Get the status of the staging area.
-     * For each file in the staging area, it checks if the file is :
-     * - Untracked: The file is not in the staging area.
-     * - Unmodified: The file is in the staging area and has the same hash.
-     * - Modified: The file is in the staging area but has a different hash.
-     * - Ready to be committed: The file is in the staging area and has the same hash.
-     * - Staged: The file is in the staging area and has the same hash.
      *
      * @param hash The hash of the file to be checked
      * @param hideUntracked If true, hides untracked files from the status
      * @return A string with the status of the staging area
      */
-    fun getStatus(hash: Hash, hideUntracked: Boolean = false): String {
+    fun getStatus(hash: Hash, path: Path, hideUntracked: Boolean = false): String {
+        val isNonTracked = !ContentIndex.isFileTracked(hash)
+        val isTracked = !isNonTracked
+
+        val isStaged = getStagedFiles().any { it.first == hash }
+        val isStagedModified = getStagedFiles().any { it.second == path && it.first != hash }
+        val isIgnored = IgnoreHandler.isIgnored(path)
+
+
+
+
+
         return "Getting staged files for hash $hash"
     }
 
