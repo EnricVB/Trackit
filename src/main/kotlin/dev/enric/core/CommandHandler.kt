@@ -22,12 +22,16 @@ open class CommandHandler {
             Logger.log("Logged in with sudo user: ${sudo.name}")
             return sudo
 
-        } else if (loggedUser != null) {
-            Logger.log("Logged in with logged user: ${loggedUser.name}")
-            return loggedUser
+        } else {
+            Logger.log("Trying to log in with logged user...")
+
+            if (loggedUser != null) {
+                Logger.log("Logged in with logged user: ${loggedUser.name}")
+                return loggedUser
+            }
         }
 
-        throw UserNotFoundException("User not found for ${sudoArgs?.get(0) ?: "None"}")
+        throw UserNotFoundException("Couldn't log in. celTry keeping session with 'trackit config --keep-session' or use '--sudo' option.")
     }
 
     /**

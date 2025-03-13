@@ -41,7 +41,7 @@ data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProp
     private val secretKey: Path by lazy { initFolder.resolve("key.secret") }
 
     private val logsFolder: Path by lazy { trackitFolder.resolve(LOGS_FOLDER) }
-    private val commandLogsFile: Path by lazy { logsFolder.resolve("command-${Utility.getLogDateFormat("yyyy-MM-dd")}") }
+    private val commandLogsFile: Path by lazy { logsFolder.resolve("command-${Utility.getLogDateFormat("yyyy-MM-dd")}.txt") }
 
     private val objectsFolder: Path by lazy { trackitFolder.resolve(OBJECTS_FOLDER) }
     private val indexFolder: Path by lazy { trackitFolder.resolve(INDEX_FOLDER) }

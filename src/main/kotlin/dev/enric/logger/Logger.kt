@@ -17,7 +17,7 @@ object Logger {
     val commandLogFile = repositoryFolderManager.getCommandLogsFilePath()
 
     var logLevel: LogLevel = LogLevel.INFO
-    var clazz: String = ""
+    var clazz: String = "COMMAND"
 
     /**
      * Sets up the logger with the given log level
@@ -66,7 +66,7 @@ object Logger {
      *
      * @param message The message to save
      */
-    fun saveLog(message: String) {
+    private fun saveLog(message: String) {
         if (!commandLogFile.toFile().exists()) {
             commandLogFile.parent.toFile().mkdirs()
             Files.createFile(commandLogFile)

@@ -106,7 +106,18 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
      */
     fun processCommit(): Commit {
         val commitTree = createCommitTree()
-        commit.tree = commitTree.map { it.encode(true).first }
+        commit.tree = commitTree.map { it.encode(true).first }.toMutableList()
+
+        commit.previousCommit.let {
+            if (it == null) return@let
+
+            val previousCommit = Commit.newInstance(it)
+            commit.tree.addAll(previousCommit.tree)
+
+            previousCommit.tree.forEach { tree ->
+                println(Tree.newInstance(tree).printInfo())
+            }
+        }
 
         return commit
     }
