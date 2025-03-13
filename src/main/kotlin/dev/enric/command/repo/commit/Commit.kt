@@ -40,7 +40,7 @@ class Commit : TrackitCommand() {
         parameterConsumer = SudoArgsParameterConsumer::class,
         arity = "2"
     )
-    var confirmerArgs: Array<String>? = null
+    var confirmerArgs: Array<String>? = sudoArgs
 
     override fun call(): Int {
         super.call()

@@ -15,6 +15,7 @@ import dev.enric.command.management.users.UserCreation
 import dev.enric.command.management.users.UserList
 import dev.enric.command.management.users.UserModify
 import dev.enric.command.repo.commit.Checkout
+import dev.enric.logger.Logger
 import org.fusesource.jansi.AnsiConsole
 import picocli.CommandLine
 import picocli.CommandLine.Command
@@ -44,6 +45,9 @@ class Main : TrackitCommand() {
             System.setProperty("picocli.ansi", "true")
             AnsiConsole.systemInstall()
 
+            // Saves the command line arguments to a log file
+            Logger.trace("trackit ${args.joinToString()}")
+
             val cmd = CommandLine(Main())
 
             cmd.setColorScheme(ColorScheme.Builder()
@@ -58,7 +62,7 @@ class Main : TrackitCommand() {
             cmd.isCaseInsensitiveEnumValuesAllowed = true
             cmd.isStopAtPositional = false
 
-            cmd.setExecutionExceptionHandler { ex, _, _ ->
+            cmd.setExecutionExceptionHandler { _, _, _ ->
                 return@setExecutionExceptionHandler 1
             }
 

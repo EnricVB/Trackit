@@ -12,7 +12,7 @@ import java.time.Instant
 
 data class Commit(
     var previousCommit: Hash? = null,
-    var tree: List<Hash> = listOf(),
+    var tree: MutableList<Hash> = mutableListOf(),
     var branch: Hash = Hash("0".repeat(32)),
     var author: Hash = Hash("0".repeat(32)),
     var confirmer: Hash = Hash("0".repeat(32)),
@@ -60,17 +60,19 @@ data class Commit(
         val confirmer = User.newInstance(confirmer)
 
         return buildString {
-            appendLine(ColorUtil.title("commit ${generateKey()}"))
+            appendLine(ColorUtil.title("commit ${generateKey().string}"))
 
             append("Author: \t${author.name}")
             if (author.mail.isNotBlank()) append(" <${author.mail}>")
             if (author.phone.isNotBlank()) append(" <${author.phone}>")
             appendLine(" : ${author.encode().first}")
 
-            append("Confirmer: \t${confirmer.name}")
-            if (confirmer.mail.isNotBlank()) append(" <${confirmer.mail}>")
-            if (confirmer.phone.isNotBlank()) append(" <${confirmer.phone}>")
-            appendLine(" : ${confirmer.encode().first}")
+            if (confirmer != author) {
+                append("Confirmer: \t${confirmer.name}")
+                if (confirmer.mail.isNotBlank()) append(" <${confirmer.mail}>")
+                if (confirmer.phone.isNotBlank()) append(" <${confirmer.phone}>")
+                appendLine(" : ${confirmer.encode().first}")
+            }
 
             appendLine("Date: $date")
 
