@@ -38,7 +38,8 @@ class Commit : TrackitCommand() {
         names = ["--confirmer", "-c"],
         description = ["Confirm commit as user"],
         parameterConsumer = SudoArgsParameterConsumer::class,
-        arity = "2"
+        arity = "2",
+        required = false
     )
     var confirmerArgs: Array<String>? = sudoArgs
 
