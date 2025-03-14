@@ -4,7 +4,7 @@ import dev.enric.command.repo.staging.Stage
 import dev.enric.core.CommandHandler
 import dev.enric.domain.Hash
 import dev.enric.core.repo.staging.StagingHandler
-import dev.enric.domain.*
+import dev.enric.domain.objects.*
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.logger.Logger

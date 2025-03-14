@@ -1,7 +1,7 @@
 package dev.enric.core
 
 import dev.enric.core.security.AuthUtil
-import dev.enric.domain.User
+import dev.enric.domain.objects.User
 import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.exceptions.UserNotFoundException
 import dev.enric.logger.Logger

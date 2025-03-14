@@ -3,7 +3,7 @@ package dev.enric.util.index
 import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.USER
 import dev.enric.core.security.PasswordHash
-import dev.enric.domain.User
+import dev.enric.domain.objects.User
 import dev.enric.util.repository.RepositoryFolderManager
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.PathWalkOption

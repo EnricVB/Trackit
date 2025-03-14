@@ -1,8 +1,8 @@
 package dev.enric.core.repo.commit
 
-import dev.enric.domain.Commit
-import dev.enric.domain.Content
-import dev.enric.domain.Tree
+import dev.enric.domain.objects.Commit
+import dev.enric.domain.objects.Content
+import dev.enric.domain.objects.Tree
 import dev.enric.util.repository.RepositoryFolderManager
 import java.nio.file.Files
 import java.nio.file.Path
@@ -52,7 +52,7 @@ class CheckoutHandler(
             if (!tree.serializablePath.toPath().toFile().exists()) {
                 Files.writeString(
                     tree.serializablePath.toPath(),
-                    String(Content.newInstance(tree.hash).content),
+                    String(Content.newInstance(tree.content).content),
                     StandardOpenOption.CREATE_NEW,
                     StandardOpenOption.WRITE
                 )

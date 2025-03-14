@@ -1,4 +1,4 @@
-package dev.enric.domain.tag
+package dev.enric.domain.objects.tag
 
 import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.COMPLEX_TAG

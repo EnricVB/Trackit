@@ -1,4 +1,4 @@
-package dev.enric.domain.remote
+package dev.enric.domain.objects.remote
 
 import java.io.Serializable
 

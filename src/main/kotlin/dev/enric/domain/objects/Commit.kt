@@ -1,6 +1,8 @@
-package dev.enric.domain
+package dev.enric.domain.objects
 
+import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.COMMIT
+import dev.enric.domain.TrackitObject
 import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
@@ -47,7 +49,7 @@ data class Commit(
         tree.forEach {
             val tree = Tree.newInstance(it)
 
-            if (tree.serializablePath.pathString == path.toString() && tree.hash == content.generateKey()) {
+            if (tree.serializablePath.pathString == path.toString() && tree.content == content.generateKey()) {
                 return tree
             }
         }

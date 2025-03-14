@@ -2,8 +2,8 @@ package dev.enric.core.management.users
 
 import dev.enric.core.CommandHandler
 import dev.enric.core.security.AuthUtil
-import dev.enric.domain.Role
-import dev.enric.domain.User
+import dev.enric.domain.objects.Role
+import dev.enric.domain.objects.User
 import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.exceptions.UserNotFoundException
 import dev.enric.logger.Logger
