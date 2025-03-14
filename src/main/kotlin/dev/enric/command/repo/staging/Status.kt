@@ -15,23 +15,10 @@ import kotlin.io.path.walk
 )
 class Status : TrackitCommand() {
 
-    @OptIn(ExperimentalPathApi::class)
     override fun call(): Int {
         super.call()
 
-        val repositoryFolderManager = RepositoryFolderManager()
-
-        repositoryFolderManager.getInitFolderPath()
-            .walk(PathWalkOption.INCLUDE_DIRECTORIES)
-            .forEach {
-                val isTrackitFolder = it.toRealPath().startsWith(repositoryFolderManager.getTrackitFolderPath())
-                val isSecretKey = it.toRealPath().startsWith(repositoryFolderManager.getSecretKeyPath())
-                val isRootFolder = it.toRealPath() == repositoryFolderManager.getInitFolderPath()
-
-                if (isTrackitFolder || isSecretKey || isRootFolder) return@forEach
-
-                println("File: ${it.fileName} ${StatusHandler.getStatus(it.toFile())}")
-            }
+        StatusHandler.printStatus()
 
         return 0
     }
