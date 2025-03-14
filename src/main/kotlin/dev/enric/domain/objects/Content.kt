@@ -1,6 +1,8 @@
-package dev.enric.domain
+package dev.enric.domain.objects
 
+import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.CONTENT
+import dev.enric.domain.TrackitObject
 import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager

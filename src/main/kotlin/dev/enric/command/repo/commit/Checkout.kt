@@ -3,7 +3,7 @@ package dev.enric.command.repo.commit
 import dev.enric.command.TrackitCommand
 import dev.enric.domain.Hash
 import dev.enric.core.repo.commit.CheckoutHandler
-import dev.enric.domain.Commit
+import dev.enric.domain.objects.Commit
 import dev.enric.exceptions.IllegalArgumentValueException
 import dev.enric.util.index.CommitIndex
 import picocli.CommandLine.*

@@ -2,7 +2,7 @@ package dev.enric.util.index
 
 import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.ROLE_PERMISSION
-import dev.enric.domain.permission.RolePermission
+import dev.enric.domain.objects.permission.RolePermission
 import dev.enric.util.repository.RepositoryFolderManager
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.PathWalkOption

@@ -1,6 +1,6 @@
 package dev.enric.core.management.roles
 
-import dev.enric.domain.Role
+import dev.enric.domain.objects.Role
 import dev.enric.exceptions.RoleNotFoundException
 import dev.enric.util.index.RoleIndex
 

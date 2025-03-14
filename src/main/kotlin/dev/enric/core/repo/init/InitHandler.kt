@@ -1,11 +1,11 @@
 package dev.enric.core.repo.init
 
 import dev.enric.domain.Hash
-import dev.enric.domain.Branch
-import dev.enric.domain.Role
-import dev.enric.domain.User
-import dev.enric.domain.permission.BranchPermission
-import dev.enric.domain.permission.RolePermission
+import dev.enric.domain.objects.Branch
+import dev.enric.domain.objects.Role
+import dev.enric.domain.objects.User
+import dev.enric.domain.objects.permission.BranchPermission
+import dev.enric.domain.objects.permission.RolePermission
 import dev.enric.util.repository.RepositoryFolderManager
 
 /**

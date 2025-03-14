@@ -15,6 +15,7 @@ import dev.enric.command.management.users.UserCreation
 import dev.enric.command.management.users.UserList
 import dev.enric.command.management.users.UserModify
 import dev.enric.command.repo.commit.Checkout
+import dev.enric.command.repo.staging.Status
 import dev.enric.logger.Logger
 import org.fusesource.jansi.AnsiConsole
 import picocli.CommandLine
@@ -31,7 +32,7 @@ import picocli.CommandLine.Help.ColorScheme
     version = ["Trackit 1.0"],
     description = ["Track your files"],
     subcommands = [Init::class,
-        Stage::class, Unstage::class,
+        Stage::class, Unstage::class, Status::class,
         Ignore::class, Config::class, Log::class,
         Commit::class, Checkout::class,
         UserCreation::class, UserModify::class, UserList::class,
@@ -62,7 +63,9 @@ class Main : TrackitCommand() {
             cmd.isCaseInsensitiveEnumValuesAllowed = true
             cmd.isStopAtPositional = false
 
-            cmd.setExecutionExceptionHandler { _, _, _ ->
+            cmd.setExecutionExceptionHandler { ex, _, _ ->
+                Logger.error("An internal error occurred.")
+                Logger.trace(ex.stackTrace.contentToString())
                 return@setExecutionExceptionHandler 1
             }
 

@@ -3,7 +3,7 @@ package dev.enric.command.repo.staging
 import dev.enric.command.TrackitCommand
 import dev.enric.core.repo.ignore.IgnoreHandler
 import dev.enric.core.repo.staging.StagingHandler
-import dev.enric.domain.Content
+import dev.enric.domain.objects.Content
 import dev.enric.logger.Logger
 import dev.enric.util.repository.RepositoryFolderManager
 import dev.enric.util.common.SerializablePath
