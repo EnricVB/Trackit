@@ -3,8 +3,8 @@ package dev.enric.util.index
 import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.BRANCH
 import dev.enric.domain.Hash.HashType.USER
-import dev.enric.domain.Branch
-import dev.enric.domain.Commit
+import dev.enric.domain.objects.Branch
+import dev.enric.domain.objects.Commit
 import dev.enric.util.index.CommitIndex.repositoryFolderManager
 import dev.enric.util.repository.RepositoryFolderManager
 import java.nio.file.Files

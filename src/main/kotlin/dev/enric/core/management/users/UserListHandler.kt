@@ -1,6 +1,6 @@
 package dev.enric.core.management.users
 
-import dev.enric.domain.User
+import dev.enric.domain.objects.User
 import dev.enric.logger.Logger
 import dev.enric.util.index.UserIndex
 

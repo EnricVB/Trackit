@@ -2,11 +2,10 @@ package dev.enric.core.management.roles
 
 import dev.enric.core.CommandHandler
 import dev.enric.core.allIndexed
-import dev.enric.core.security.AuthUtil
-import dev.enric.domain.Role
-import dev.enric.domain.User
-import dev.enric.domain.permission.BranchPermission
-import dev.enric.domain.permission.RolePermission
+import dev.enric.domain.objects.Role
+import dev.enric.domain.objects.User
+import dev.enric.domain.objects.permission.BranchPermission
+import dev.enric.domain.objects.permission.RolePermission
 import dev.enric.exceptions.*
 import dev.enric.logger.Logger
 import dev.enric.util.index.*

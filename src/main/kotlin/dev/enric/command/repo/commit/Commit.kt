@@ -3,7 +3,7 @@ package dev.enric.command.repo.commit
 import dev.enric.command.TrackitCommand
 import dev.enric.core.commandconsumer.SudoArgsParameterConsumer
 import dev.enric.core.repo.commit.CommitHandler
-import dev.enric.domain.Commit
+import dev.enric.domain.objects.Commit
 import picocli.CommandLine.*
 
 @Command(

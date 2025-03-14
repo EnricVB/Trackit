@@ -1,6 +1,6 @@
 package dev.enric.core.administration
 
-import dev.enric.domain.Commit
+import dev.enric.domain.objects.Commit
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.logger.Logger
 import dev.enric.util.index.BranchIndex

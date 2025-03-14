@@ -1,6 +1,8 @@
-package dev.enric.domain
+package dev.enric.domain.objects
 
+import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.TREE
+import dev.enric.domain.TrackitObject
 import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
@@ -11,7 +13,7 @@ import java.nio.file.Path
 
 data class Tree(
     val serializablePath: SerializablePath = SerializablePath("."),
-    val hash: Hash = Hash("0".repeat(32))
+    val content: Hash = Hash("0".repeat(32))
 ) : TrackitObject<Tree>(), Serializable {
 
     constructor(path: Path, hash: Hash) : this(SerializablePath.of(path), hash)
@@ -32,7 +34,7 @@ data class Tree(
     }
 
     override fun generateKey(): Hash {
-        val hashData = Hash.parseText("${serializablePath.toString()};${hash}", 15)
+        val hashData = Hash.parseText("$serializablePath;${content}", 15)
 
         return TREE.hash.plus(hashData)
     }
@@ -47,10 +49,10 @@ data class Tree(
                 else ColorUtil.message("No path assigned")
             )
 
-            append(ColorUtil.label("  Hash: "))
+            append(ColorUtil.label("  Content: "))
             appendLine(
-                if (hash.toString().isNotEmpty()) ColorUtil.text(hash.toString())
-                else ColorUtil.message("No hash assigned")
+                if (content.toString().isNotEmpty()) ColorUtil.text(content.toString())
+                else ColorUtil.message("No content assigned")
             )
         }
     }

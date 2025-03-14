@@ -1,7 +1,9 @@
-package dev.enric.domain
+package dev.enric.domain.objects
 
+import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.BRANCH
-import dev.enric.domain.permission.BranchPermission
+import dev.enric.domain.TrackitObject
+import dev.enric.domain.objects.permission.BranchPermission
 import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.index.BranchPermissionIndex

@@ -1,4 +1,4 @@
-package dev.enric.domain.permission
+package dev.enric.domain.objects.permission
 
 import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.*
