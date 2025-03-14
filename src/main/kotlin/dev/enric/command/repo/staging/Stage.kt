@@ -35,7 +35,7 @@ class Stage : TrackitCommand() {
     @Parameters(index = "0", paramLabel = "path", description = ["The path of the file/directory to be staged"])
     lateinit var path: String
 
-    private val repositoryFolder = RepositoryFolderManager().initFolder
+    private val repositoryFolder = RepositoryFolderManager().getInitFolderPath()
     private val stagingHandler = StagingHandler(force)
 
     /**

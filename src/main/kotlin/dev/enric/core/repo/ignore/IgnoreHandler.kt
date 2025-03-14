@@ -15,7 +15,7 @@ import java.nio.file.StandardOpenOption
  */
 object IgnoreHandler {
     private val repositoryFolderManager = RepositoryFolderManager()
-    private val ignoreFile = repositoryFolderManager.initFolder.resolve(".ignore")
+    private val ignoreFile = repositoryFolderManager.getInitFolderPath().resolve(".ignore")
 
     /**
      * Ignores a file or directory from the repository from being tracked.
@@ -25,7 +25,7 @@ object IgnoreHandler {
      * @param path The file or directory of the file to be ignored
      */
     fun ignore(path: Path) {
-        val relativePath = SerializablePath.of(path).relativePath(repositoryFolderManager.initFolder)
+        val relativePath = SerializablePath.of(path).relativePath(repositoryFolderManager.getInitFolderPath())
 
         if(isIgnored(relativePath)) {
             Logger.log("The file or directory is already being ignored")
@@ -47,7 +47,7 @@ object IgnoreHandler {
      * @return True if the file or directory is being ignored, false otherwise
      */
     fun isIgnored(path: Path): Boolean {
-        val relativePath = SerializablePath.of(path).relativePath(RepositoryFolderManager().initFolder)
+        val relativePath = SerializablePath.of(path).relativePath(RepositoryFolderManager().getInitFolderPath())
 
         return getIgnoredFiles().any { relativePath.startsWith(it) }
     }

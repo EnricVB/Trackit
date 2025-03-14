@@ -27,7 +27,7 @@ class Ignore : TrackitCommand() {
     @Parameters(index = "0", paramLabel = "path", description = ["The path of the file/directory to be ignored"])
     lateinit var path: String
 
-    private val repositoryFolder = RepositoryFolderManager().initFolder
+    private val repositoryFolder = RepositoryFolderManager().getInitFolderPath()
 
     override fun call(): Int {
         super.call()
