@@ -27,7 +27,7 @@ data class StagingHandler(val force: Boolean = false) {
      */
     fun stage(content: Content, path: Path): Boolean {
         val hash = content.encode(true).first
-        val relativePath = SerializablePath.of(path).relativePath(repositoryFolderManager.initFolder)
+        val relativePath = SerializablePath.of(path).relativePath(repositoryFolderManager.getInitFolderPath())
 
         if (checkIfOutdated(hash, relativePath)) return replaceOutdatedFile(hash, relativePath)
         if (!checkIfStaged(hash, relativePath)) return stageNewFile(hash, relativePath)
@@ -125,7 +125,7 @@ data class StagingHandler(val force: Boolean = false) {
      */
     fun unstage(unstagePath: Path): Boolean {
         val tempFile = Files.createTempFile("temp", ".temp")
-        val relativeUnstagePath = SerializablePath.of(unstagePath).relativePath(RepositoryFolderManager().initFolder)
+        val relativeUnstagePath = SerializablePath.of(unstagePath).relativePath(RepositoryFolderManager().getInitFolderPath())
 
         return try {
             Files.newBufferedReader(stagingIndex).use { reader ->

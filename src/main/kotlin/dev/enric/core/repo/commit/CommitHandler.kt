@@ -79,7 +79,7 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
      * - Sets the branch to the current branch.
      */
     fun initializeCommitProperties(author: Array<String>?, confirmer: Array<String>?) {
-        commit.previousCommit = CommitIndex.getCurrentCommit()
+        commit.previousCommit = CommitIndex.getCurrentCommit()?.encode()?.first
         commit.branch = BranchIndex.getCurrentBranch().encode().first
 
         Logger.log("Logging for author...")
@@ -113,10 +113,6 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
 
             val previousCommit = Commit.newInstance(it)
             commit.tree.addAll(previousCommit.tree)
-
-            previousCommit.tree.forEach { tree ->
-                println(Tree.newInstance(tree).printInfo())
-            }
         }
 
         return commit
