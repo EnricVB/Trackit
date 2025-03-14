@@ -16,6 +16,7 @@ import dev.enric.command.management.users.UserList
 import dev.enric.command.management.users.UserModify
 import dev.enric.command.repo.commit.Checkout
 import dev.enric.command.repo.staging.Status
+import dev.enric.exceptions.TrackitException
 import dev.enric.logger.Logger
 import org.fusesource.jansi.AnsiConsole
 import picocli.CommandLine
@@ -64,8 +65,11 @@ class Main : TrackitCommand() {
             cmd.isStopAtPositional = false
 
             cmd.setExecutionExceptionHandler { ex, _, _ ->
-                Logger.error("An internal error occurred.")
-                Logger.trace(ex.stackTrace.contentToString())
+                if (ex !is TrackitException) {
+                    Logger.error("An internal error occurred.")
+                    Logger.trace(ex.stackTrace.contentToString())
+                }
+
                 return@setExecutionExceptionHandler 1
             }
 

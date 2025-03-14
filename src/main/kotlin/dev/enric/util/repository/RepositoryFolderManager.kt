@@ -15,7 +15,7 @@ import java.nio.file.attribute.PosixFilePermissions
  * @property objectsFolder The folder where the trackit objects will be stored.
  * @property indexFolder The folder where the index files will be stored.
  */
-data class RepositoryFolderManager(val initFolder: Path = Path.of(System.getProperty("user.dir"))) {
+data class RepositoryFolderManager(private val initFolder: Path = Path.of(System.getProperty("user.dir"))) {
 
     /**
      * Constants for the repository folder structure.

@@ -32,7 +32,7 @@ class Unstage : TrackitCommand() {
     )
     lateinit var file: String
 
-    private val repositoryFolder = RepositoryFolderManager().initFolder
+    private val repositoryFolder = RepositoryFolderManager().getInitFolderPath()
     private val stagingHandler = StagingHandler()
 
     /**

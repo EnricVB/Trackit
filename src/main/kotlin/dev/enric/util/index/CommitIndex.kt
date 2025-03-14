@@ -23,12 +23,12 @@ object CommitIndex {
     /**
      * Retrieves the current commit the Working Direcotry has.
      *
-     * @return A [Hash] object representing the current commit.
+     * @return The current commit.
      */
-    fun getCurrentCommit() : Hash? {
+    fun getCurrentCommit() : Commit? {
         val hashString = Files.readString(repositoryFolderManager.getCurrentCommitPath())
 
-        return if(hashString.isNullOrEmpty()) null else Commit.newInstance(Hash(hashString)).encode().first
+        return if(hashString.isNullOrEmpty()) null else Commit.newInstance(Hash(hashString))
     }
 
     /**
