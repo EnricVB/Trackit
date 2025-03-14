@@ -19,7 +19,7 @@ enum class FileStatusTypes(val symbol: String, val description: String) {
     /**
      * The file is tracked and has not been modified since the last commit.
      */
-    UNMODIFIED(" ", """Files up to date:"""),
+    UNMODIFIED("*", """Files up to date:"""),
 
     /**
      * The file has been modified but is not yet staged for commit.
