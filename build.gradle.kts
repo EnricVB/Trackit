@@ -15,14 +15,15 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.rctcwyvrn:blake3:1.3")             // Blake3 hash function
-    implementation("org.bouncycastle:bcprov-jdk18on:1.76")       // Argon2 password hashing
+    implementation("io.github.rctcwyvrn:blake3:1.3")                         // Blake3 hash function
+    implementation("org.bouncycastle:bcprov-jdk18on:1.76")                   // Argon2 password hashing
 
-    implementation("org.tukaani:xz:1.8")                         // ZLib compression algorithm
-    implementation("info.picocli:picocli:4.7.6")                 // Command line interface
-    implementation("org.fusesource.jansi:jansi:2.4.0")           // ANSI escape codes
+    implementation("org.tukaani:xz:1.8")                                     // ZLib compression algorithm
+    implementation("info.picocli:picocli:4.7.6")                             // Command line interface
+    implementation("org.fusesource.jansi:jansi:2.4.0")                       // ANSI escape codes
 
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.21")  // Standard library
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.21")              // Standard library
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")    // Coroutines
 
     testImplementation(kotlin("test"))
 }
@@ -132,15 +133,7 @@ tasks.register<JavaExec>("tktUserCreate") {
     classpath = project.sourceSets["main"].runtimeClasspath
 
     args = listOf(
-        "user-create",
-        "-n",
-        "Usuario Prueba",
-        "-p",
-        "Password Prueba",
-        "-m",
-        "mail@gmail.com",
-        "-P",
-        "123456789"
+        "user-create", "-n", "Usuario Prueba", "-p", "Password Prueba", "-m", "mail@gmail.com", "-P", "123456789"
     )
 }
 
