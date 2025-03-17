@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  trackit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trackit-container
+    ports:
+      - "2222:22"
+    volumes:
+      - ./trackit:/trackit
+    restart: unless-stopped
