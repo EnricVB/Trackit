@@ -4,6 +4,7 @@ import dev.enric.command.repo.staging.Stage
 import dev.enric.core.CommandHandler
 import dev.enric.domain.Hash
 import dev.enric.core.repo.staging.StagingHandler
+import dev.enric.core.repo.staging.StatusHandler
 import dev.enric.domain.objects.*
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.exceptions.InvalidPermissionException
@@ -105,17 +106,37 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
      * @return The processed commit with an updated tree.
      */
     fun processCommit(): Commit {
-        val commitTree = createCommitTree()
-        commit.tree = commitTree.map { it.encode(true).first }.toMutableList()
-
-        commit.previousCommit.let {
-            if (it == null) return@let
-
-            val previousCommit = Commit.newInstance(it)
-            commit.tree.addAll(previousCommit.tree)
-        }
+        commitTree()
+        keepPreviousCommitTree()
 
         return commit
+    }
+
+    /**
+     * Commits the tree structure to the commit object.
+     * This is done by creating a tree structure based on the staged files.
+     *
+     * @see createCommitTree
+     */
+    private fun commitTree() {
+        val commitTree = createCommitTree()
+        commit.tree = commitTree.map { it.encode(true).first }.toMutableList()
+    }
+
+    /**
+     * Keeps the previous commit tree.
+     * Filters the previous commit tree to keep only the files that are still present in the working directory.
+     */
+    private fun keepPreviousCommitTree() {
+        val previousCommit = CommitIndex.getCurrentCommit() ?: return
+
+        previousCommit.tree.removeIf { treeHash ->
+            val tree = Tree.newInstance(treeHash)
+
+            return@removeIf StatusHandler.hasBeenDeleted(tree.serializablePath.toPath().toFile())
+        }
+
+        commit.tree.addAll(previousCommit.tree)
     }
 
     /**
@@ -176,16 +197,6 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
         } catch (exception: Exception) {
             null
         }
-    }
-
-    /**
-     * Checks if a file is up to date with the latest commit.
-     * @param file The file to check.
-     * @return True if the file is already committed, false otherwise.
-     */
-    fun isFileUpToDateToCommit(file: File): Boolean {
-        val content = Content(Files.readAllBytes(file.toPath()))
-        return commit.findFile(content, file.toPath()) != null
     }
 
     /**
