@@ -1,4 +1,4 @@
-package dev.enric.core.management.users
+package dev.enric.core.handler.management.users
 
 import dev.enric.domain.objects.User
 import dev.enric.logger.Logger

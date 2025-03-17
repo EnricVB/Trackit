@@ -1,7 +1,7 @@
 package dev.enric.command.administration
 
 import dev.enric.command.TrackitCommand
-import dev.enric.core.security.config.KeepSession
+import dev.enric.core.handler.config.KeepSession
 import dev.enric.logger.Logger
 import dev.enric.core.security.AuthUtil
 import dev.enric.util.index.UserIndex
@@ -19,7 +19,7 @@ class Config : TrackitCommand() {
     /**
      * Username to authenticate the user
      */
-    @Option(names = ["--username", "-u"], description = ["Define the username to configure"], required = true)
+    @Option(names = ["--username", "-u"], description = ["Define the username to configure"], required = false)
     var username: String? = null
 
     /**
@@ -68,8 +68,13 @@ class Config : TrackitCommand() {
      */
     private fun validateCredentials(): Boolean {
         if (username.isNullOrBlank()) {
-            Logger.error("Username is required for authentication")
-            return false
+            val console: Console? = System.console()
+            if (console != null) {
+                username = console.readLine("Enter username: ")
+            } else {
+                Logger.error("Username is required but cannot be read in this environment")
+                return false
+            }
         }
 
         if (password.isNullOrBlank()) {

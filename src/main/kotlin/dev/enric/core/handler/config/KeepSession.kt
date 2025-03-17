@@ -1,4 +1,4 @@
-package dev.enric.core.security.config
+package dev.enric.core.handler.config
 
 import dev.enric.core.security.AuthUtil
 import dev.enric.core.security.PasswordHash

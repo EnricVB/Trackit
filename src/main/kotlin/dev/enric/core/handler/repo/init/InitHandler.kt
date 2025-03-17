@@ -1,4 +1,4 @@
-package dev.enric.core.repo.init
+package dev.enric.core.handler.repo.init
 
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Branch

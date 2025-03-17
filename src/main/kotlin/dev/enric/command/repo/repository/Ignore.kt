@@ -1,7 +1,7 @@
 package dev.enric.command.repo.repository
 
 import dev.enric.command.TrackitCommand
-import dev.enric.core.repo.ignore.IgnoreHandler
+import dev.enric.core.handler.repo.ignore.IgnoreHandler
 import dev.enric.logger.Logger
 import dev.enric.util.repository.RepositoryFolderManager
 import picocli.CommandLine.Command

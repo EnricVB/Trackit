@@ -1,8 +1,8 @@
 package dev.enric.command.repo.staging
 
 import dev.enric.command.TrackitCommand
-import dev.enric.core.repo.ignore.IgnoreHandler
-import dev.enric.core.repo.staging.StagingHandler
+import dev.enric.core.handler.repo.ignore.IgnoreHandler
+import dev.enric.core.handler.repo.staging.StagingHandler
 import dev.enric.domain.objects.Content
 import dev.enric.logger.Logger
 import dev.enric.util.repository.RepositoryFolderManager
@@ -54,10 +54,6 @@ class Stage : TrackitCommand() {
         }
 
         return 0
-    }
-
-    fun stageAllFiles() {
-        stageFolder(repositoryFolder)
     }
 
     /**

@@ -1,4 +1,4 @@
-package dev.enric.core.repo.ignore
+package dev.enric.core.handler.repo.ignore
 
 import dev.enric.logger.Logger
 import dev.enric.util.repository.RepositoryFolderManager
