@@ -22,7 +22,7 @@ class Commit : TrackitCommand() {
     /**
      * Message of the commit to be created, it should be a detailed description of the changes
      */
-    @Parameters(index = "1", paramLabel = "MESSAGE", description = ["The commit message"])
+    @Parameters(index = "1", paramLabel = "MESSAGE", description = ["The commit message"], arity = "0..1")
     lateinit var message: String
 
     /**
