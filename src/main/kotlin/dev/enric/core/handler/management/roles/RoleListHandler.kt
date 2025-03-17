@@ -1,4 +1,4 @@
-package dev.enric.core.management.roles
+package dev.enric.core.handler.management.roles
 
 import dev.enric.domain.objects.Role
 import dev.enric.exceptions.RoleNotFoundException

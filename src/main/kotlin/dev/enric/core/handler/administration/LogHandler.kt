@@ -1,4 +1,4 @@
-package dev.enric.core.administration
+package dev.enric.core.handler.administration
 
 import dev.enric.domain.objects.Commit
 import dev.enric.exceptions.IllegalStateException

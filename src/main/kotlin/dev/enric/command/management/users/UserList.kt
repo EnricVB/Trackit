@@ -1,7 +1,7 @@
 package dev.enric.command.management.users
 
 import dev.enric.command.TrackitCommand
-import dev.enric.core.management.users.UserListHandler
+import dev.enric.core.handler.management.users.UserListHandler
 import picocli.CommandLine.Command
 
 @Command(

@@ -1,8 +1,8 @@
-package dev.enric.core.management.roles
+package dev.enric.core.handler.management.roles
 
-import dev.enric.core.CommandHandler
+import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.Hash.HashType.BRANCH_PERMISSION
-import dev.enric.core.allIndexed
+import dev.enric.core.handler.allIndexed
 import dev.enric.domain.objects.Role
 import dev.enric.domain.objects.User
 import dev.enric.domain.objects.permission.BranchPermission

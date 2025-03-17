@@ -1,4 +1,4 @@
-package dev.enric.core
+package dev.enric.core.handler
 
 import dev.enric.core.security.AuthUtil
 import dev.enric.domain.objects.User

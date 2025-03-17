@@ -1,10 +1,10 @@
-package dev.enric.core.repo.commit
+package dev.enric.core.handler.repo.commit
 
 import dev.enric.command.repo.staging.Stage
-import dev.enric.core.CommandHandler
+import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.Hash
-import dev.enric.core.repo.staging.StagingHandler
-import dev.enric.core.repo.staging.StatusHandler
+import dev.enric.core.handler.repo.staging.StagingHandler
+import dev.enric.core.handler.repo.staging.StatusHandler
 import dev.enric.domain.objects.*
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.exceptions.InvalidPermissionException
@@ -14,7 +14,6 @@ import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.CommitIndex
 import java.io.File
 import java.nio.channels.FileChannel
-import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.sql.Timestamp

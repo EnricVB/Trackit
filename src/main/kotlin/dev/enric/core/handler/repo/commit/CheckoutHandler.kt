@@ -1,4 +1,4 @@
-package dev.enric.core.repo.commit
+package dev.enric.core.handler.repo.commit
 
 import dev.enric.domain.objects.Commit
 import dev.enric.domain.objects.Content

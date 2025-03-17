@@ -1,12 +1,8 @@
 package dev.enric.command.repo.staging
 
 import dev.enric.command.TrackitCommand
-import dev.enric.core.repo.staging.StatusHandler
-import dev.enric.util.repository.RepositoryFolderManager
+import dev.enric.core.handler.repo.staging.StatusHandler
 import picocli.CommandLine.Command
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.PathWalkOption
-import kotlin.io.path.walk
 
 @Command(
     name = "status",

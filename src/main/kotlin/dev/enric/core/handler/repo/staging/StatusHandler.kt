@@ -1,6 +1,6 @@
-package dev.enric.core.repo.staging
+package dev.enric.core.handler.repo.staging
 
-import dev.enric.core.repo.ignore.IgnoreHandler
+import dev.enric.core.handler.repo.ignore.IgnoreHandler
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Content
 import dev.enric.domain.objects.Tree
