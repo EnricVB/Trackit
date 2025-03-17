@@ -1,6 +1,6 @@
 package dev.enric.util.repository
 
-import dev.enric.core.repo.staging.StagingHandler
+import dev.enric.core.handler.repo.staging.StagingHandler
 import dev.enric.core.security.SecretKey
 import dev.enric.util.common.Utility
 import java.nio.file.Files
@@ -31,7 +31,6 @@ data class RepositoryFolderManager(private val initFolder: Path = Path.of(System
         const val STAGING_INDEX = "staging.index"
         const val CURRENT_COMMIT = "CURRENT_COMMIT"
         const val REMOTE_POINTER = "REMOTE_POINTER"
-        const val USER_INDEX = "USER_INDEX"
         const val BRANCH_HEAD = "BRANCH_HEAD"
         const val TAG_INDEX = "TAG_INDEX"
         const val PERMISSION_INDEX = "PERMISSION_INDEX"
@@ -99,10 +98,6 @@ data class RepositoryFolderManager(private val initFolder: Path = Path.of(System
         return trackitFolder
     }
 
-    fun getLogsFolderPath(): Path {
-        return logsFolder
-    }
-
     fun getCommandLogsFilePath(): Path {
         return commandLogsFile
     }
@@ -145,10 +140,6 @@ data class RepositoryFolderManager(private val initFolder: Path = Path.of(System
 
     fun getPermissionIndexPath(): Path {
         return getIndexFolderPath().resolve(PERMISSION_INDEX)
-    }
-
-    fun getIgnorePath(): Path {
-        return getInitFolderPath().resolve(".ignore")
     }
 
     fun getSecretKeyPath(): Path {

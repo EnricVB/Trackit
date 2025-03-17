@@ -1,6 +1,6 @@
-package dev.enric.core.management.users
+package dev.enric.core.handler.management.users
 
-import dev.enric.core.CommandHandler
+import dev.enric.core.handler.CommandHandler
 import dev.enric.core.security.PasswordHash
 import dev.enric.domain.objects.Role
 import dev.enric.domain.objects.User

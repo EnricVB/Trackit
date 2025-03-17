@@ -1,7 +1,7 @@
 package dev.enric.command.management.roles
 
 import dev.enric.command.TrackitCommand
-import dev.enric.core.management.roles.RoleListHandler
+import dev.enric.core.handler.management.roles.RoleListHandler
 import picocli.CommandLine.Command
 
 @Command(

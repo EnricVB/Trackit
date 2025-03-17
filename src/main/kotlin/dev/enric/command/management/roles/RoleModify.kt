@@ -1,8 +1,7 @@
 package dev.enric.command.management.roles
 
 import dev.enric.command.TrackitCommand
-import dev.enric.core.commandconsumer.SudoArgsParameterConsumer
-import dev.enric.core.management.roles.RoleModifyHandler
+import dev.enric.core.handler.management.roles.RoleModifyHandler
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 

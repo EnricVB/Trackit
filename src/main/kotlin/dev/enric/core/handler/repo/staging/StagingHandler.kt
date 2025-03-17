@@ -1,4 +1,4 @@
-package dev.enric.core.repo.staging
+package dev.enric.core.handler.repo.staging
 
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Content

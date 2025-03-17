@@ -1,14 +1,8 @@
 package dev.enric.command.administration
 
 import dev.enric.command.TrackitCommand
-import dev.enric.core.administration.LogHandler
-import dev.enric.core.security.config.KeepSession
-import dev.enric.logger.Logger
-import dev.enric.core.security.AuthUtil
-import dev.enric.util.index.UserIndex
+import dev.enric.core.handler.administration.LogHandler
 import picocli.CommandLine.Command
-import picocli.CommandLine.Option
-import java.io.Console
 
 @Command(
     name = "log",

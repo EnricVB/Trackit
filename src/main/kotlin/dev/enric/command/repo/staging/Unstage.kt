@@ -2,7 +2,7 @@ package dev.enric.command.repo.staging
 
 import dev.enric.command.TrackitCommand
 import dev.enric.domain.Hash
-import dev.enric.core.repo.staging.StagingHandler
+import dev.enric.core.handler.repo.staging.StagingHandler
 import dev.enric.logger.Logger
 import dev.enric.util.repository.RepositoryFolderManager
 import picocli.CommandLine.Command

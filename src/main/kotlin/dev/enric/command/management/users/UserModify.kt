@@ -1,8 +1,7 @@
 package dev.enric.command.management.users
 
 import dev.enric.command.TrackitCommand
-import dev.enric.core.commandconsumer.SudoArgsParameterConsumer
-import dev.enric.core.management.users.UserModifyHandler
+import dev.enric.core.handler.management.users.UserModifyHandler
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 
