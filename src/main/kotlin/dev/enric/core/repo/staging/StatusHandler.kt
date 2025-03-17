@@ -134,6 +134,32 @@ object StatusHandler {
     }
 
     /**
+     * Determines if a file has been deleted from the repository.
+     * This is done by comparing the current commit tree with the working directory.
+     *
+     * @param file The file to check.
+     * @return `true` if the file has been deleted, `false` otherwise.
+     * @see CommitIndex
+     */
+    private fun hasBeenDeleted(file: File): Boolean {
+        val currentCommit = CommitIndex.getCurrentCommit() ?: return false
+
+        currentCommit.tree.forEach { tree ->
+            val treeObject = Tree.newInstance(tree)
+            val treePath = treeObject.serializablePath.relativePath(repositoryFolderManager.getInitFolderPath())
+            val filePath = SerializablePath.of(file.path).relativePath(repositoryFolderManager.getInitFolderPath())
+
+            if (treePath == filePath) {
+                if (!file.exists()) {
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
+
+    /**
      * Determines if a file is up to date with the latest commit.
      *
      * @param file The file to check.
