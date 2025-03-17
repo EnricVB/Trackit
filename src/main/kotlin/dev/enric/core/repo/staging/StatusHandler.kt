@@ -12,6 +12,10 @@ import dev.enric.util.common.SerializablePath
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.CommitIndex
 import dev.enric.util.repository.RepositoryFolderManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.PathWalkOption
@@ -74,6 +78,7 @@ object StatusHandler {
 
         repositoryFolderManager.getInitFolderPath()
             .walk(PathWalkOption.INCLUDE_DIRECTORIES)
+            .toMutableList()
             .filterNot {
                 it.toFile().isDirectory ||
                         it.toRealPath().startsWith(repositoryFolderManager.getTrackitFolderPath()) ||
@@ -86,6 +91,10 @@ object StatusHandler {
 
                 statusMap.getOrPut(status) { mutableListOf() }.add(file)
             }
+
+        getDeletedFiles().forEach {
+            statusMap.getOrPut(FileStatusTypes.DELETE) { mutableListOf() }.add(it)
+        }
 
         return statusMap.mapValues { (_, files) -> files.sortedBy { it.path } }
     }
@@ -134,6 +143,30 @@ object StatusHandler {
     }
 
     /**
+     * Retrieves the list of files that have been deleted from the repository.
+     * This is done by comparing the current commit tree with the working directory.
+     *
+     * @return A list of files that have been deleted.
+     */
+    fun getDeletedFiles(): List<File> {
+        val currentCommit = CommitIndex.getCurrentCommit() ?: return emptyList()
+        val initFolderPath = repositoryFolderManager.getInitFolderPath()
+
+        return runBlocking {
+            currentCommit.tree.map { treeHash ->
+                async (Dispatchers.IO) {
+                    val treeObject = Tree.newInstance(treeHash)
+                    val treePathRelative = treeObject.serializablePath.relativePath(initFolderPath)
+                    val filePath = initFolderPath.resolve(treePathRelative)
+                    val file = filePath.toFile()
+
+                    if (!file.exists()) file else null
+                }
+            }.awaitAll().filterNotNull()
+        }
+    }
+
+    /**
      * Determines if a file has been deleted from the repository.
      * This is done by comparing the current commit tree with the working directory.
      *
@@ -141,7 +174,7 @@ object StatusHandler {
      * @return `true` if the file has been deleted, `false` otherwise.
      * @see CommitIndex
      */
-    private fun hasBeenDeleted(file: File): Boolean {
+    fun hasBeenDeleted(file: File): Boolean {
         val currentCommit = CommitIndex.getCurrentCommit() ?: return false
 
         currentCommit.tree.forEach { tree ->

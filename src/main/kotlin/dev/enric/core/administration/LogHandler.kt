@@ -34,7 +34,7 @@ class LogHandler {
             count++
 
             // Prompt the user to load more commits
-            print(": ")
+            print(":")
             if (count >= commitShowSize) {
                 when (getKey()) {
                     'q' -> return
