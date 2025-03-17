@@ -1,5 +1,6 @@
 package dev.enric.util.repository
 
+import dev.enric.core.repo.staging.StagingHandler
 import dev.enric.core.security.SecretKey
 import dev.enric.util.common.Utility
 import java.nio.file.Files
@@ -69,7 +70,12 @@ data class RepositoryFolderManager(private val initFolder: Path = Path.of(System
         getTagIndexPath().toFile().createNewFile()
         getPermissionIndexPath().toFile().createNewFile()
 
+        assignInitialStagingIndex()
         assignSecretKey()
+    }
+
+    fun assignInitialStagingIndex() {
+        StagingHandler(true).stage(ignoreFile)
     }
 
     fun assignSecretKey() {

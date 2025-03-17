@@ -21,6 +21,18 @@ data class StagingHandler(val force: Boolean = false) {
 
     /**
      * Stages a file to be committed by storing its hash and path in the staging index.
+     * @param path The absolute path of the file to be staged.
+     * @return True if the file was successfully staged, false otherwise.
+     */
+    fun stage(path: Path): Boolean {
+        val content = Content(Files.readString(path).toByteArray())
+        content.encode(true)
+
+        return stage(content, path)
+    }
+
+    /**
+     * Stages a file to be committed by storing its hash and path in the staging index.
      * @param content The content of the file to be staged.
      * @param path The absolute path of the file to be staged.
      * @return True if the file was successfully staged, false otherwise.
