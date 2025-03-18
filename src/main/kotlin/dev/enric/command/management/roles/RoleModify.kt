@@ -5,66 +5,120 @@ import dev.enric.core.handler.management.roles.RoleModifyHandler
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 
-
+/**
+ * Command to modify an existing role's configuration, including permission levels,
+ * role permissions, and branch-specific permissions.
+ *
+ * This command allows fine-grained control over role management, enabling the addition,
+ * removal, or overwriting of permissions assigned to a role.
+ *
+ * Usage examples:
+ *   - Modify role permission level:
+ *     trackit role-modify -n Developer -l 2
+ *
+ *   - Add role permissions:
+ *     trackit role-modify -n Maintainer -r mus-
+ *
+ *   - Add branch permissions:
+ *     trackit role-modify -n QA -b feature rw
+ *
+ *   - Remove branch permissions:
+ *     trackit role-modify -n QA -rb feature hotfix
+ *
+ *   - Overwrite all role permissions:
+ *     trackit role-modify -n Admin -r mus- -o
+ */
 @Command(
     name = "role-modify",
-    description = ["Modifies a new role"],
+    description = ["Modifies an existing role's configuration"],
     mixinStandardHelpOptions = true,
 )
 class RoleModify : TrackitCommand() {
+
+    /**
+     * The name of the role to be modified.
+     */
     @Option(names = ["--name", "-n"], description = ["Role name to modify."], required = true)
     var name: String = ""
 
-    @Option(names = ["--permission-level", "-l"], description = ["Level permissions. Can't be equal or greater than user permissions level"], required = false)
+    /**
+     * New permission level for the role.
+     * Cannot be equal to or higher than the current user's permission level.
+     */
+    @Option(
+        names = ["--permission-level", "-l"],
+        description = ["Level permissions. Can't be equal or greater than user permissions level"],
+        required = false
+    )
     var level: Int = 0
 
+    /**
+     * Role permissions to add to the current role.
+     * Format: 4-character string using 'm', 'u', 's', 'a', or '-' (no permission).
+     *
+     * Example:
+     *   - "mus-" grants modify, user, assign permissions, but not create role permission.
+     */
     @Option(
         names = ["--role-permission", "-r"],
-        description = ["Adds new role permissions to the current one. The permissions are: \n" +
-                "  - m: Modify role permissions, except a equal or higher roles\n" +
-                "  - u: User operations, as create or modify users\n" +
-                "  - s: Assign new roles to specified user\n" +
-                "  - a: Create new roles\n" +
-                "  - '-': To specify role has not the permission"]
+        description = ["Adds new role permissions to the current one. The permissions are: \n" + "  - m: Modify role permissions, except a equal or higher roles\n" + "  - u: User operations, as create or modify users\n" + "  - s: Assign new roles to specified user\n" + "  - a: Create new roles\n" + "  - '-': To specify role has not the permission"]
     )
     var rolePermissions: String = "----"
 
+    /**
+     * Branch permissions to assign to the role.
+     * Format: --branch-permission <branch> <permission>
+     *
+     * Example:
+     *   -b main rw → Grants read/write on 'main'
+     *   -b feature r → Grants read-only on feature branches
+     *
+     * Use '--' (in quotes) to assign empty permission.
+     */
     @Option(
         names = ["--branch-permission", "-b"],
-        description = ["Adds branch permissions. Format: --branch-permission <branch> <permission>. \n" +
-                "  In case you want to asssign a empty permission, use '--' between ' '."],
+        description = ["Adds branch permissions. Format: --branch-permission <branch> <permission>. \n" + "  In case you want to assign an empty permission, use '--' between ' '."],
         split = " ",
         arity = "2",
     )
     var branchPermissions: MutableList<String> = mutableListOf()
 
+    /**
+     * Branch permissions to remove from the role.
+     * Format: --remove-branch-permission <branch1> <branch2> ...
+     */
     @Option(
-        names = ["--remove-brach-permission", "-rb"],
+        names = ["--remove-branch-permission", "-rb"],
         description = ["Removes branch permissions. Format: --remove-branch-permission <branch> <branch> ..."],
         split = " "
     )
     var removeBranchPermissions: MutableList<String> = mutableListOf()
 
+    /**
+     * Overwrite existing role permissions with the specified ones.
+     * If false, new permissions are added without removing existing ones.
+     */
     @Option(
-        names = ["--overwrite", "-o"],
-        description = ["Overwrite the current role permissions"]
+        names = ["--overwrite", "-o"], description = ["Overwrite the current role permissions"]
     )
     var overwrite: Boolean = false
 
+    /**
+     * Executes the role modification.
+     *
+     * Delegates the logic to [RoleModifyHandler], which validates permissions
+     * and applies the changes.
+     *
+     * @return 0 on success, 1 on failure (e.g., permission denied).
+     */
     override fun call(): Int {
         super.call()
 
         val handler = RoleModifyHandler(
-            name,
-            level,
-            rolePermissions,
-            branchPermissions,
-            removeBranchPermissions,
-            overwrite,
-            sudoArgs
+            name, level, rolePermissions, branchPermissions, removeBranchPermissions, overwrite, sudoArgs
         )
 
-        // Will never return 1 because the checkCanCreateRole method will throw an exception if the role can't be created
+        // Validation will throw exception if modification is not permitted
         if (!handler.checkCanModifyRole()) {
             return 1
         }

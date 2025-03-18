@@ -6,6 +6,15 @@ import dev.enric.logger.Logger
 import dev.enric.util.repository.RepositoryFolderManager
 import picocli.CommandLine.Command
 
+/**
+ * Command to initialize a new Trackit repository in the current directory.
+ *
+ * This sets up the necessary internal folder structure and files for Trackit
+ * to begin tracking files, similar to how `git init` works in Git.
+ *
+ * Example usage:
+ *   trackit init
+ */
 @Command(
     name = "init",
     description = ["Initialize a new repository"],
@@ -14,13 +23,23 @@ import picocli.CommandLine.Command
 class Init : TrackitCommand() {
 
     /**
-     * Create a new repository folder in the current directory.
-     * @see RepositoryFolderManager.createRepositoryFolder
+     * Executes the repository initialization.
+     *
+     * The command performs the following steps:
+     * 1. Calls the InitHandler to create the internal folder structure.
+     * 2. Logs a confirmation message upon successful initialization.
+     *
+     * @return Exit code 0 if successful.
+     * @see RepositoryFolderManager.createRepositoryFolder for folder creation logic.
      */
     override fun call(): Int {
+        // Ensures any required setup from TrackitCommand is done
         super.call()
 
+        // Handles the initialization logic (folder creation, metadata setup, etc.)
         InitHandler.init()
+
+        // Inform the user that initialization succeeded
         Logger.log("Repository initialized")
 
         return 0
