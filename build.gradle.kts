@@ -14,6 +14,7 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
@@ -26,6 +27,8 @@ dependencies {
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.21")              // Standard library
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")    // Coroutines
+
+    implementation("io.github.java-diff-utils:java-diff-utils:4.12")         // Diff algorithm
 
     testImplementation(kotlin("test"))
 }

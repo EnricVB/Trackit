@@ -26,4 +26,12 @@ object ColorUtil {
     fun error(message: String): String {
         return Ansi.AUTO.string("@|bold,red ${message}|@")
     }
+
+    fun insertLine(text: String): String {
+        return Ansi.AUTO.string("@|green $text|@")
+    }
+
+    fun deleteLine(text: String): String {
+        return Ansi.AUTO.string("@|red $text|@")
+    }
 }
