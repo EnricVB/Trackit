@@ -1,10 +1,11 @@
 package dev.enric.command.repo.staging
 
 import dev.enric.command.TrackitCommand
-import dev.enric.core.handler.repo.ignore.IgnoreHandler
 import dev.enric.core.handler.repo.staging.StagingHandler
 import dev.enric.domain.objects.Content
 import dev.enric.logger.Logger
+import dev.enric.util.common.FileStatus
+import dev.enric.util.common.FileStatus.*
 import dev.enric.util.repository.RepositoryFolderManager
 import dev.enric.util.common.SerializablePath
 import picocli.CommandLine.*
@@ -62,28 +63,29 @@ class Stage : TrackitCommand() {
      * @see stageFile
      */
     fun stageFolder(directory: Path) {
-        Logger.log("Staging folder: $directory")
-
         getFilesToStage(directory).forEach { stageFile(it) }
     }
 
     /**
      * Stage a single file and his content
-     * @param file The file to stage
+     * @param path The file to stage
      */
-    fun stageFile(file: Path) {
-        if(IgnoreHandler.isIgnored(file) && !force) {
-            val paramFile = repositoryFolder.resolve(path)
+    fun stageFile(path: Path) {
+        val file = path.toFile()
+        val status = FileStatus.getStatus(file)
+        val paramFile = repositoryFolder.resolve(this.path)
 
-            if(file == paramFile) {
-                Logger.error("The file is being ignored")
+        when (status) {
+            MODIFIED, UNTRACKED -> {
+                val content = Content(Files.readAllBytes(path))
+                val relativePath = SerializablePath.of(path).relativePath(repositoryFolder)
+
+                stagingHandler.stage(content, path)
+                Logger.log("Staging file: $relativePath")
             }
-
-            return
+            IGNORED -> if (force) stageFile(path) else if (path == paramFile) Logger.error("The file is being ignored")
+            else -> {}
         }
-
-        Logger.log("Staging file: ${SerializablePath.of(file).relativePath(repositoryFolder)}")
-        stagingHandler.stage(Content(Files.readAllBytes(file)), file)
     }
 
     /**
