@@ -4,11 +4,11 @@ import dev.enric.command.repo.staging.Stage
 import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.Hash
 import dev.enric.core.handler.repo.staging.StagingHandler
-import dev.enric.core.handler.repo.staging.StatusHandler
 import dev.enric.domain.objects.*
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.logger.Logger
+import dev.enric.util.common.FileStatus
 import dev.enric.util.common.SerializablePath
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.CommitIndex
@@ -131,7 +131,7 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
 
         previousCommit.tree.removeIf { treeHash ->
             val tree = Tree.newInstance(treeHash)
-            return@removeIf StatusHandler.hasBeenDeleted(tree.serializablePath.toPath().toFile())
+            return@removeIf FileStatus.hasBeenDeleted(tree.serializablePath.toPath().toFile())
         }
 
         val currentPaths = commit.tree.map { Tree.newInstance(it).serializablePath.toPath() }.toSet()
