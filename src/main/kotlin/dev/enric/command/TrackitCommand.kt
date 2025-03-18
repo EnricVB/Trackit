@@ -32,6 +32,13 @@ abstract class TrackitCommand : Callable<Int> {
     var quiet: Boolean = false
 
     /**
+     * Show debug logs.
+     * Useful for troubleshooting and detailed output.
+     */
+    @Option(names = ["--verbose", "-v"], description = ["Shows debug logs"])
+    var verbose: Boolean = false
+
+    /**
      * Execute the command as another user (sudo-like behavior).
      *
      * Parameters:
@@ -82,6 +89,7 @@ abstract class TrackitCommand : Callable<Int> {
             when {
                 onlyErrors -> Logger.LogLevel.ERRORS
                 quiet -> Logger.LogLevel.QUIET
+                verbose -> Logger.LogLevel.VERBOSE
                 else -> Logger.LogLevel.INFO
             },
             this.javaClass.simpleName
