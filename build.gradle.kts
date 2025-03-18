@@ -1,6 +1,8 @@
 @file:Suppress("ReplaceReadLineWithReadln")
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import java.nio.file.Files
+import java.nio.file.Paths
 
 plugins {
     kotlin("jvm") version "2.0.21"
@@ -44,6 +46,19 @@ tasks {
         archiveBaseName.set("trackit")
         archiveClassifier.set("")
         archiveVersion.set("")
+
+
+        doLast {
+            val outputDir = Paths.get("docker/jar")
+            if (!Files.exists(outputDir)) {
+                Files.createDirectories(outputDir)
+            }
+
+            val jarFile = archiveFile.get().asFile
+            jarFile.copyTo(outputDir.resolve("trackit.jar").toFile(), overwrite = true)
+
+            println("✅ JAR copiado a docker/jar/trackit.jar")
+        }
     }
 }
 
