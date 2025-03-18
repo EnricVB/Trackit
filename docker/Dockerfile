@@ -34,11 +34,11 @@ RUN useradd -ms /bin/bash trackit && \
 EXPOSE 22
 
 # Copia el .jar al contenedor
-WORKDIR /trackit
-COPY ./trackit.jar .
+WORKDIR /home/trackit
+COPY ./jar/trackit.jar .
 
 # Crea script ejecutable: "trackit"
-RUN echo -e '#!/bin/bash\njava -jar /trackit.jar "$@"' > /usr/local/bin/trackit && \
+RUN echo -e '#!/bin/bash\njava -jar /home/trackit/trackit.jar "$@"' > /usr/local/bin/trackit && \
     chmod +x /usr/local/bin/trackit
 
 # CMD: iniciar servidor SSH
