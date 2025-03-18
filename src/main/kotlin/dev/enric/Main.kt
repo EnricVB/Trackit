@@ -18,6 +18,7 @@ import dev.enric.command.repo.commit.Checkout
 import dev.enric.command.repo.staging.Status
 import dev.enric.exceptions.TrackitException
 import dev.enric.logger.Logger
+import dev.enric.util.repository.RepositoryFolderManager
 import org.fusesource.jansi.AnsiConsole
 import picocli.CommandLine
 import picocli.CommandLine.Command
@@ -82,6 +83,11 @@ class Main : TrackitCommand() {
 
 
     override fun call(): Int {
+        if (!RepositoryFolderManager().isRepositoryFolder()) {
+            Logger.error("This is not a trackit repository.")
+            return 1
+        }
+
         CommandLine.usage(this, System.out)
 
         return 0

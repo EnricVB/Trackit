@@ -145,4 +145,8 @@ data class RepositoryFolderManager(private val initFolder: Path = Path.of(System
     fun getSecretKeyPath(): Path {
         return secretKey
     }
+
+    fun isRepositoryFolder(): Boolean {
+        return Files.exists(trackitFolder)
+    }
 }
