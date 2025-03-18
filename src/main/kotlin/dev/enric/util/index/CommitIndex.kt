@@ -46,7 +46,7 @@ object CommitIndex {
      * @return True in case it has been abbreviated
      */
     fun isAbbreviatedHash(abbreviatedHash: String): Boolean {
-        return abbreviatedHash.length <= 15
+        return abbreviatedHash.trim().length <= 15
     }
 
     /**
@@ -57,7 +57,7 @@ object CommitIndex {
      * @return A [Hash] or list of [Hash] objects representing the found commit.
      */
     fun getAbbreviatedCommit(abbreviatedHash: String) : List<Hash> {
-        return getAllCommit().filter { it.string.startsWith(abbreviatedHash) }
+        return getAllCommit().filter { it.string.startsWith(abbreviatedHash.trim()) }
     }
 
     /**
