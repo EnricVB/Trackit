@@ -50,8 +50,15 @@ class Main : TrackitCommand() {
 
             // Saves the command line arguments to a log file
             Logger.trace("trackit ${args.joinToString()}")
+            val cmd : CommandLine
 
-            val cmd = CommandLine(Main())
+            try {
+                cmd = CommandLine(Main())
+            } catch (ex: Exception) {
+                Logger.error("An internal error occurred.")
+                Logger.trace(ex.stackTrace.contentToString())
+                exitProcess(1)
+            }
 
             cmd.setColorScheme(ColorScheme.Builder()
                 .errors(Ansi.Style.bold, Ansi.Style.fg_red)

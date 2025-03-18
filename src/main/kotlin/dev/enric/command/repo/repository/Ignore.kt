@@ -7,32 +7,59 @@ import dev.enric.util.repository.RepositoryFolderManager
 import picocli.CommandLine.Command
 import picocli.CommandLine.Parameters
 
-
+/**
+ * Command to ignore a specific file or directory in the repository.
+ *
+ * This command prevents the specified path from being tracked by the repository's version control.
+ * It updates the repository’s ignore configuration so that the provided file or directory (and its
+ * contents if a directory) will be excluded from staging and committing.
+ *
+ * Usage examples:
+ *   trackit ignore build/
+ *   trackit ignore temp/data.txt
+ */
 @Command(
     name = "ignore",
     description = ["Ignores a file from the repository from being tracked"],
     mixinStandardHelpOptions = true,
-    )
+)
 class Ignore : TrackitCommand() {
 
     /**
-     * The path of the file/directory to be ignored, relative to the repository folder.
+     * The path of the file or directory to be ignored, relative to the repository folder.
      *
-     * In case you want to ignore a file named `file.txt` located in the root of the repository, you should pass `file.txt` as the argument.
-     *
-     * You can also ignore a file located in a subdirectory of the repository folder. In this case, you should pass the path relative to the repository folder.
-     *
-     * If you pass a directory, all the files and directories inside it will be ignored.
+     * Examples:
+     * - To ignore a file in the root directory: `file.txt`
+     * - To ignore a file in a subfolder: `subfolder/file.txt`
+     * - To ignore a directory and all its contents: `folder/`
      */
     @Parameters(index = "0", paramLabel = "path", description = ["The path of the file/directory to be ignored"])
     lateinit var path: String
 
+    /**
+     * Root folder of the repository, obtained from RepositoryFolderManager.
+     */
     private val repositoryFolder = RepositoryFolderManager().getInitFolderPath()
 
+    /**
+     * Executes the ignore command logic.
+     *
+     * 1. Resolves the provided relative path against the repository root folder.
+     * 2. Calls the IgnoreHandler to update the repository ignore configuration.
+     * 3. Logs confirmation of the ignore action.
+     *
+     * @return Exit code 0 if successful.
+     */
     override fun call(): Int {
         super.call()
 
-        IgnoreHandler.ignore(repositoryFolder.resolve(path))
+        // Resolve the path relative to the repository root
+        val targetPath = repositoryFolder.resolve(path)
+
+        // Handle the ignore operation
+        IgnoreHandler.ignore(targetPath)
+
+        // Log the action
         Logger.log("File ignored")
 
         return 0

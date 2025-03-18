@@ -6,18 +6,58 @@ import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 
 
+/**
+ * Command to create a new role in the repository or system.
+ *
+ * This command allows administrators to define custom roles with specific permission levels and access rights
+ * to control operations such as user management, role management, and branch-specific actions.
+ *
+ * Usage examples:
+ *   trackit role-create --name Developer --permission-level 1 --role-permission mus- --branch-permission main rw
+ *   trackit role-create -n Reviewer -l 2 -r ---- -b main r- -b dev '--'
+ *
+ * Available permissions:
+ * - Role Permissions:
+ *      m → Modify other roles (only those with lower permission levels)
+ *      u → Create or modify users
+ *      s → Assign roles to users
+ *      a → Create new roles
+ *      '-' → No permission in that position
+ *
+ * - Branch Permissions:
+ *      Format: <branch> <permission>
+ *      Use '--' (between quotes) to denote no permissions
+ */
 @Command(
     name = "role-create",
     description = ["Creates a new role"],
     mixinStandardHelpOptions = true,
 )
 class RoleCreation : TrackitCommand() {
+
+    /**
+     * Name of the role to be created.
+     */
     @Option(names = ["--name", "-n"], description = ["Role name."], required = true)
     var name: String = ""
 
-    @Option(names = ["--permission-level", "-l"], description = ["Level permissions. Can't be equal or greater than user permissions level"], required = false)
+    /**
+     * Numeric level of permissions for this role.
+     * Cannot be equal or higher than the current user's permission level.
+     * Defaults to 0 if not specified.
+     */
+    @Option(
+        names = ["--permission-level", "-l"],
+        description = ["Level permissions. Can't be equal or greater than user permissions level"],
+        required = false
+    )
     var level: Int = 0
 
+    /**
+     * Role-level permissions represented as a 4-character string (e.g., "mus-").
+     * Each character defines whether the role has the specific permission.
+     * Defaults to "----" (no permissions).
+     */
     @Option(
         names = ["--role-permission", "-r"],
         description = ["Assign role permissions. The permissions are: \n" +
@@ -29,6 +69,13 @@ class RoleCreation : TrackitCommand() {
     )
     var rolePermissions: String = "----"
 
+
+    /**
+     * Branch-level permissions.
+     * Format: <branch> <permission>. Example: --branch-permission feature rw
+     * Use '--' (in quotes) to specify no permissions.
+     * Can be specified multiple times.
+     */
     @Option(
         names = ["--branch-permission", "-b"],
         description = ["Assign branch permissions. Format: --branch-permission <branch> <permission>. \n" +
