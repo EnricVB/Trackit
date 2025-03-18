@@ -57,6 +57,9 @@ object Logger {
 
     fun trace(message: String) {
         saveLog("[${getDateTime()}] [TRACE] [$clazz] $message")
+        if(logLevel != LogLevel.VERBOSE) return
+
+        System.err.println(ColorUtil.error(message))
     }
 
     /**
@@ -85,6 +88,7 @@ object Logger {
     enum class LogLevel {
         INFO,
         ERRORS,
+        VERBOSE,
         QUIET
     }
 }
