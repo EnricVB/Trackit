@@ -52,6 +52,14 @@ data class Hash(val string: String) : Serializable {
         fun parse(data: ByteArray, length: Int = 16): Hash {
             return Hash(blake3Hash(data, length))
         }
+
+        /**
+         * Returns an empty Hash object with a string of 32 zeros.
+         */
+        @JvmStatic
+        fun empty32(): Hash {
+            return Hash("0".repeat(32))
+        }
     }
 
     /**
@@ -70,7 +78,7 @@ data class Hash(val string: String) : Serializable {
         BRANCH(parseText("Branch", 1)),                     // 21
         REMOTE(parseText("Remote", 1)),                     //
         ROLE(parseText("Role", 1)),                         // d4
-        BRANCH_PERMISSION(parseText("BranchPermission", 1)),//
+        BRANCH_PERMISSION(parseText("BranchPermission", 1)),// 71
         ROLE_PERMISSION(parseText("RolePermission", 1))     // 8d
     }
 }

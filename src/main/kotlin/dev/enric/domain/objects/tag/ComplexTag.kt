@@ -14,7 +14,7 @@ import java.time.Instant
 data class ComplexTag(
     override val name: String = "",
     override val commit: Hash? = null,
-    val user: Hash = Hash("0".repeat(32)),
+    val user: Hash = Hash.empty32(),
     val date: Timestamp = Timestamp.from(Instant.now()),
     val message: String = ""
 ) : Tag, TrackitObject<ComplexTag>(), Serializable {

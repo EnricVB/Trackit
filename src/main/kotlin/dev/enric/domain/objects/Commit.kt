@@ -15,9 +15,9 @@ import java.time.Instant
 data class Commit(
     var previousCommit: Hash? = null,
     var tree: MutableList<Hash> = mutableListOf(),
-    var branch: Hash = Hash("0".repeat(32)),
-    var author: Hash = Hash("0".repeat(32)),
-    var confirmer: Hash = Hash("0".repeat(32)),
+    var branch: Hash = Hash.empty32(),
+    var author: Hash = Hash.empty32(),
+    var confirmer: Hash = Hash.empty32(),
     var date: Timestamp = Timestamp.from(Instant.now()),
     var title: String = "",
     var message: String = "",
