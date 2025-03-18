@@ -60,7 +60,6 @@ class Unstage : TrackitCommand() {
     fun unstageFile(file: Path) {
         when {
             file.isDirectory() -> {
-                Logger.log("Unstaging folder: $file")
                 unstageFolder(file)
             }
 
