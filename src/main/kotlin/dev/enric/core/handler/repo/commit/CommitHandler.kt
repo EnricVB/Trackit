@@ -131,11 +131,19 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
 
         previousCommit.tree.removeIf { treeHash ->
             val tree = Tree.newInstance(treeHash)
-
             return@removeIf StatusHandler.hasBeenDeleted(tree.serializablePath.toPath().toFile())
         }
 
-        commit.tree.addAll(previousCommit.tree)
+        val currentPaths = commit.tree.map { Tree.newInstance(it).serializablePath.toPath() }.toSet()
+
+        previousCommit.tree.forEach { treeHash ->
+            val tree = Tree.newInstance(treeHash)
+            val treePath = tree.serializablePath.toPath()
+
+            if (treePath !in currentPaths) {
+                commit.tree.add(treeHash)
+            }
+        }
     }
 
     /**
