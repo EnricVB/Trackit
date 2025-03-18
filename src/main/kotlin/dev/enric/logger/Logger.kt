@@ -54,7 +54,12 @@ object Logger {
         System.err.println(ColorUtil.error(message))
     }
 
-
+    /**
+     * Logs a warning message to the console.
+     * In case the log level is set to anything but VERBOSE, the message will not be printed.
+     *
+     * @param message The warning message to log
+     */
     fun trace(message: String) {
         saveLog("[${getDateTime()}] [TRACE] [$clazz] $message")
         if(logLevel != LogLevel.VERBOSE) return

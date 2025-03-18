@@ -13,7 +13,7 @@ import java.nio.file.Path
 
 data class Tree(
     val serializablePath: SerializablePath = SerializablePath("."),
-    val content: Hash = Hash("0".repeat(32))
+    val content: Hash = Hash.empty32()
 ) : TrackitObject<Tree>(), Serializable {
 
     constructor(path: Path, hash: Hash) : this(SerializablePath.of(path), hash)
