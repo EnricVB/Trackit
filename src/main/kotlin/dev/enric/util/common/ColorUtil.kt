@@ -27,11 +27,15 @@ object ColorUtil {
         return Ansi.AUTO.string("@|bold,red ${message}|@")
     }
 
+    fun warning(message: String): Any {
+        return Ansi.AUTO.string("@|yellow $message|@")
+    }
+
     fun insertLine(text: String): String {
-        return Ansi.AUTO.string("@|green $text|@")
+        return Ansi.AUTO.string("@|bold,green $text|@")
     }
 
     fun deleteLine(text: String): String {
-        return Ansi.AUTO.string("@|red $text|@")
+        return Ansi.AUTO.string("@|bold,red $text|@")
     }
 }

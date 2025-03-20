@@ -6,6 +6,7 @@ import dev.enric.domain.Hash.HashType.ROLE_PERMISSION
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.permission.BranchPermission
 import dev.enric.util.repository.RepositoryFolderManager
+import java.io.File
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.PathWalkOption
 import kotlin.io.path.isDirectory
@@ -52,7 +53,7 @@ object BranchPermissionIndex {
         return branchPermissionFolder.walk(PathWalkOption.INCLUDE_DIRECTORIES).filter {
             !it.isDirectory()
         }.map {
-            Hash(it.toString().substringAfterLast("\\" + ROLE_PERMISSION.hash + "\\"))
+            Hash(it.toString().substringAfterLast(File.separator + ROLE_PERMISSION.hash + File.separator))
         }.toList()
     }
 
@@ -70,7 +71,7 @@ object BranchPermissionIndex {
         return branchPermissionFolder.walk(PathWalkOption.INCLUDE_DIRECTORIES).filter {
             !it.isDirectory()
         }.map {
-            Hash(it.toString().substringAfterLast("\\" + ROLE_PERMISSION.hash + "\\"))
+            Hash(it.toString().substringAfterLast(File.separator + ROLE_PERMISSION.hash + File.separator))
         }.filter {
             val branchHash = BranchPermission.newInstance(it).branch
             val branch = Branch.newInstance(branchHash)
