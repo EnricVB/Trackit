@@ -4,6 +4,7 @@ import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.ROLE
 import dev.enric.domain.objects.Role
 import dev.enric.util.repository.RepositoryFolderManager
+import java.io.File
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.PathWalkOption
 import kotlin.io.path.isDirectory
@@ -58,7 +59,7 @@ object RoleIndex {
         return roleFolder.walk(PathWalkOption.INCLUDE_DIRECTORIES).filter {
             !it.isDirectory()
         }.map {
-            Hash(it.toString().substringAfterLast("\\" + ROLE.hash + "\\"))
+            Hash(it.toString().substringAfterLast(File.separator + ROLE.hash + File.separator))
         }.toList()
     }
 }

@@ -42,6 +42,17 @@ object Logger {
     }
 
     /**
+     * Logs a warning message to the console.
+     * In case the log level is set to QUIET or ERRORS, the message will not be printed.
+     */
+    fun warning(message: String) {
+        saveLog("[${getDateTime()}] [WARNING] [$clazz] $message")
+        if(logLevel == LogLevel.QUIET) return
+
+        println(ColorUtil.warning(message))
+    }
+
+    /**
      * Logs an error message to the console.
      * In case the log level is set to QUIET, the message will not be printed.
      *
