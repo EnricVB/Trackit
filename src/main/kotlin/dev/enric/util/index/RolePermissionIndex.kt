@@ -4,6 +4,7 @@ import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.ROLE_PERMISSION
 import dev.enric.domain.objects.permission.RolePermission
 import dev.enric.util.repository.RepositoryFolderManager
+import java.io.File
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.PathWalkOption
 import kotlin.io.path.isDirectory
@@ -66,7 +67,7 @@ object RolePermissionIndex {
         return rolePermissionFolder.walk(PathWalkOption.INCLUDE_DIRECTORIES).filter {
             !it.isDirectory()
         }.map {
-            Hash(it.toString().substringAfterLast("\\" + ROLE_PERMISSION.hash + "\\"))
+            Hash(it.toString().substringAfterLast(File.separator + ROLE_PERMISSION.hash + File.separator))
         }.toList()
     }
 }

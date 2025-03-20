@@ -37,6 +37,8 @@ EXPOSE 22
 WORKDIR /home/trackit
 COPY ./jar/trackit.jar .
 
+WORKDIR /trackit
+
 # Crea script ejecutable: "trackit"
 RUN echo -e '#!/bin/bash\njava -jar /home/trackit/trackit.jar "$@"' > /usr/local/bin/trackit && \
     chmod +x /usr/local/bin/trackit

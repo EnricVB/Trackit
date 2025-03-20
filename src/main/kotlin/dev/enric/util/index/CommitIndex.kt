@@ -6,6 +6,7 @@ import dev.enric.domain.Hash.HashType.USER
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
 import dev.enric.util.repository.RepositoryFolderManager
+import java.io.File
 import java.nio.file.Files
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.PathWalkOption
@@ -84,7 +85,7 @@ object CommitIndex {
         return commitFolder.walk(PathWalkOption.INCLUDE_DIRECTORIES).filter {
             !it.isDirectory()
         }.map {
-            Hash(it.toString().substringAfterLast("\\" + USER.hash + "\\"))
+            Hash(it.toString().substringAfterLast(File.separator + USER.hash + File.separator))
         }.toList()
     }
 }

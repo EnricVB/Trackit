@@ -5,6 +5,8 @@ import dev.enric.domain.Hash.HashType.USER
 import dev.enric.core.security.PasswordHash
 import dev.enric.domain.objects.User
 import dev.enric.util.repository.RepositoryFolderManager
+import java.io.File
+import java.nio.file.Files
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.PathWalkOption
 import kotlin.io.path.isDirectory
@@ -76,7 +78,7 @@ object UserIndex {
         return usersFolder.walk(PathWalkOption.INCLUDE_DIRECTORIES).filter {
             !it.isDirectory()
         }.map {
-            Hash(it.toString().substringAfterLast("\\" + USER.hash + "\\"))
+            Hash(it.toString().substringAfterLast(File.separator + USER.hash + File.separator))
         }.toList()
     }
 }

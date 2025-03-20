@@ -55,8 +55,12 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
      * Checks if there are files to commit in the staging area.
      */
     private fun hasFilesToCommit() {
-        if (StagingHandler.getStagedFiles().isEmpty()) {
+        val hasDeletedFilesToCommit = FileStatus.getDeletedFiles().isNotEmpty()
+
+        if (StagingHandler.getStagedFiles().isEmpty() && !hasDeletedFilesToCommit) {
             throw IllegalStateException("The staging area is empty. Add files to commit.")
+        } else if (hasDeletedFilesToCommit) {
+            Logger.warning("There are only files to be deleted. The commit will be empty.")
         }
     }
 
@@ -176,7 +180,7 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
     private fun mapStagedFilesToTree(stagedFiles: List<Pair<Hash, Path>>): List<Tree> {
         return stagedFiles.mapNotNull { stagedFile ->
             val rootPath = File(".").absoluteFile.toPath()
-            val relativePath = stagedFile.second.pathString.replace("\\.\\", "")
+            val relativePath = stagedFile.second.pathString.replace("${File.separator}.${File.separator}", "")
             val path = rootPath.resolve(relativePath)
 
             val fileContent = safeFileRead(path.toFile())
