@@ -3,6 +3,7 @@ package dev.enric.core.handler.repo.commit
 import dev.enric.domain.objects.Commit
 import dev.enric.domain.objects.Content
 import dev.enric.domain.objects.Tree
+import dev.enric.logger.Logger
 import dev.enric.util.repository.RepositoryFolderManager
 import java.nio.file.Files
 import java.nio.file.Path
@@ -58,5 +59,7 @@ class CheckoutHandler(
                 )
             }
         }
+
+        Logger.log("Checkout successful.")
     }
 }

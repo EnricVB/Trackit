@@ -5,6 +5,7 @@ import dev.enric.core.security.PasswordHash
 import dev.enric.domain.Hash
 import dev.enric.domain.TrackitObject
 import dev.enric.exceptions.IllegalHashException
+import dev.enric.logger.Logger
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.Serializable
@@ -131,13 +132,13 @@ data class User(
                 password = String(console.readPassword("Enter password: "))
             } else { // This is running in an IDE
                 val scanner = Scanner(System.`in`)
-                println("Enter username: ")
+                Logger.log("Enter username: ")
                 username = scanner.nextLine()
-                println("Enter mail: ")
+                Logger.log("Enter mail: ")
                 mail = scanner.nextLine()
-                println("Enter phone: ")
+                Logger.log("Enter phone: ")
                 phone = scanner.nextLine()
-                println("Enter password: ")
+                Logger.log("Enter password: ")
                 password = scanner.nextLine()
             }
 
