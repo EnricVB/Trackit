@@ -2,6 +2,7 @@ package dev.enric.core.handler.management.roles
 
 import dev.enric.domain.objects.Role
 import dev.enric.exceptions.RoleNotFoundException
+import dev.enric.logger.Logger
 import dev.enric.util.index.RoleIndex
 
 /**
@@ -30,6 +31,6 @@ class RoleListHandler {
         }
 
         // Print the information of each role
-        roles.forEach { println(Role.newInstance(it).printInfo()) }
+        roles.forEach { Logger.log(Role.newInstance(it).printInfo()) }
     }
 }

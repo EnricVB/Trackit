@@ -2,6 +2,7 @@ package dev.enric.core.handler.repo.staging
 
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Content
+import dev.enric.logger.Logger
 import dev.enric.util.common.SerializablePath
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.IOException
@@ -77,7 +78,7 @@ data class StagingHandler(val force: Boolean = false) {
             Files.move(tempFile, stagingIndex, StandardCopyOption.REPLACE_EXISTING)
             true
         } catch (e: IOException) {
-            println("Error replacing outdated staged file $path: ${e.message}")
+            Logger.error("Error replacing outdated staged file $path: ${e.message}")
             false
         }
     }
@@ -97,7 +98,7 @@ data class StagingHandler(val force: Boolean = false) {
             )
             true
         } catch (e: IOException) {
-            println("Error staging file $relativePath: ${e.message}")
+            Logger.error("Error staging file $relativePath: ${e.message}")
             false
         }
     }
@@ -125,7 +126,7 @@ data class StagingHandler(val force: Boolean = false) {
             Files.move(tempFile, stagingIndex, StandardCopyOption.REPLACE_EXISTING)
             true
         } catch (e: IOException) {
-            println("Error unstaging file $hash: ${e.message}")
+            Logger.error("Error unstaging file $hash: ${e.message}")
             false
         }
     }
@@ -156,7 +157,7 @@ data class StagingHandler(val force: Boolean = false) {
             Files.move(tempFile, stagingIndex, StandardCopyOption.REPLACE_EXISTING)
             true
         } catch (e: IOException) {
-            println("Error unstaging file $unstagePath ${e.printStackTrace()}")
+            Logger.error("Error unstaging file $unstagePath ${e.printStackTrace()}")
             false
         }
     }
@@ -210,7 +211,7 @@ data class StagingHandler(val force: Boolean = false) {
                     }
                 }
             } catch (e: IOException) {
-                println("Error getting staged files")
+                Logger.error("Error getting staged files")
             }
 
             return stagedFiles
@@ -228,7 +229,7 @@ data class StagingHandler(val force: Boolean = false) {
             try {
                 Files.write(stagingIndex, byteArrayOf())
             } catch (e: IOException) {
-                println("Error clearing staging area ${e.printStackTrace()}")
+                Logger.error("Error clearing staging area ${e.printStackTrace()}")
             }
         }
     }

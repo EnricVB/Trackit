@@ -1,5 +1,6 @@
 package dev.enric.domain
 
+import dev.enric.logger.Logger
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.ByteArrayOutputStream
 import java.io.ObjectOutputStream
@@ -120,7 +121,7 @@ abstract class TrackitObject<T : TrackitObject<T>> {
             return outputStream.toByteArray()
         } catch (e: DataFormatException) {
             e.printStackTrace()
-            println("Error decompressing data. Check that the data is compressed correctly.")
+            Logger.error("Error decompressing data. Check that the data is compressed correctly.")
         }
 
         return null

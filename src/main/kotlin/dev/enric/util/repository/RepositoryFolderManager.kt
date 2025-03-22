@@ -2,6 +2,7 @@ package dev.enric.util.repository
 
 import dev.enric.core.handler.repo.staging.StagingHandler
 import dev.enric.core.security.SecretKey
+import dev.enric.logger.Logger
 import dev.enric.util.common.Utility
 import java.nio.file.Files
 import java.nio.file.Path
@@ -90,7 +91,7 @@ data class RepositoryFolderManager(private val initFolder: Path = Path.of(System
                 secretKey.toFile().setWritable(true, true)
             }
         } catch (e: Exception) {
-            println("Error setting permissions: ${e.message}")
+            Logger.error("Error setting permissions: ${e.message}")
         }
     }
 

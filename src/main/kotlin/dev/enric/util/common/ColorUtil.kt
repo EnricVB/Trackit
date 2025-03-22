@@ -8,34 +8,34 @@ import picocli.CommandLine.Help.Ansi
 object ColorUtil {
 
     fun title(title : String): String {
-        return Ansi.AUTO.string("@|cyan ${title}|@")
+        return Ansi.ON.string("@|cyan ${title}|@")
     }
 
     fun label(label : String): String {
-        return Ansi.AUTO.string("@|bold,cyan ${label}|@")
+        return Ansi.ON.string("@|bold,cyan ${label}|@")
     }
 
     fun text(text : String): String {
-        return Ansi.AUTO.string("@|white ${text}|@")
+        return Ansi.ON.string("@|white ${text}|@")
     }
 
     fun message(message : String): String {
-        return Ansi.AUTO.string("@|italic,white ${message}|@")
+        return Ansi.ON.string("@|italic,white ${message}|@")
     }
 
     fun error(message: String): String {
-        return Ansi.AUTO.string("@|bold,red ${message}|@")
+        return Ansi.ON.string("@|bold,red ${message}|@")
     }
 
     fun warning(message: String): Any {
-        return Ansi.AUTO.string("@|yellow $message|@")
+        return Ansi.ON.string("@|yellow $message|@")
     }
 
     fun insertLine(text: String): String {
-        return Ansi.AUTO.string("@|bold,green $text|@")
+        return Ansi.ON.string("@|bold,green $text|@")
     }
 
     fun deleteLine(text: String): String {
-        return Ansi.AUTO.string("@|bold,red $text|@")
+        return Ansi.ON.string("@|bold,red $text|@")
     }
 }
