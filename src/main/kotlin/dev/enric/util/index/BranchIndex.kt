@@ -51,22 +51,46 @@ object BranchIndex {
     /**
      * Saves the Branch Head Pointer to the given commit.
      *
-     * @param commit A [Hash] object representing the commit to set as the branch head.
+     * @param branchHash The hash of the branch.
+     * @param commitHash The hash of the commit to set as the head of the branch.
+     * @return `true` if the branch head was updated, `false` otherwise.
      */
-    fun setBranchHead(commit: Hash) {
-        Files.writeString(repositoryFolderManager.getBranchHeadPath(), commit.string)
+    fun updateBranchHead(branchHash: Hash, commitHash: Hash) {
+        val branchHeadPath = repositoryFolderManager.getBranchHeadPath()
+        val lines = Files.readAllLines(branchHeadPath).toMutableList()
+
+        var updated = false
+        for (i in lines.indices) {
+            if (lines[i].startsWith(branchHash.string)) {
+                lines[i] = "${branchHash.string}:${commitHash.string}"
+
+                updated = true
+                break
+            }
+        }
+
+        if (!updated) {
+            lines.add("${branchHash.string}:${commitHash.string}")
+        }
+
+        Files.write(branchHeadPath, lines)
     }
 
     /**
-     * Retrieves the Branch Head Pointer.
-     * This is the commit the branch is pointing to.
+     * Retrieves the Branch Head Pointer for a specific branch hash.
      *
-     * @return A [Commit] object representing the branch head.
+     * @param branchHash The hash of the branch.
+     * @return A [Commit] representing the head of the branch, or null if not found.
      */
-    fun getBranchHead() : Commit? {
-        val hashString = Files.readString(repositoryFolderManager.getBranchHeadPath())
+    fun getBranchHead(branchHash: Hash): Commit? {
+        val branchHeadPath = repositoryFolderManager.getBranchHeadPath()
+        val lines = Files.readAllLines(branchHeadPath)
 
-        return if(hashString.isNullOrEmpty()) null else Commit.newInstance(Hash(hashString))
+        val targetLine = lines.find { it.startsWith(branchHash.string) }
+
+        return targetLine?.split(":")?.getOrNull(1)?.trim()?.takeIf { it.isNotEmpty() }?.let { commitHashStr ->
+            Commit.newInstance(Hash(commitHashStr))
+        }
     }
 
     /**
@@ -78,7 +102,7 @@ object BranchIndex {
      * @return A [Branch] object representing the current branch.
      */
     fun getCurrentBranch() : Branch {
-        return if(getBranchHead()?.branch != null) Branch.newInstance(getBranchHead()?.branch!!) else Branch("main")
+        return if(CommitIndex.getCurrentCommit()?.branch != null) Branch.newInstance(CommitIndex.getCurrentCommit()?.branch!!) else Branch("main")
     }
 
     /**

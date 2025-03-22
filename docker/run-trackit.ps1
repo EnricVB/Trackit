@@ -1,5 +1,5 @@
 Write-Host "🚀 Build de Trackit Docker..."
-docker compose build --no-cache
+docker compose build
 
 Write-Host "🐳 Iniciando contenedor Trackit..."
 docker compose up -d
