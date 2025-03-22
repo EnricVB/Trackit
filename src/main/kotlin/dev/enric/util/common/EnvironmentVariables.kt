@@ -1,5 +1,7 @@
 package dev.enric.util.common
 
+import dev.enric.logger.Logger
+
 /**
  * Utility object to manage environment variables across different operating systems.
  * It allows setting and retrieving environment variables for Windows, Linux, and macOS.
@@ -42,7 +44,7 @@ object EnvironmentVariables {
         try {
             ProcessBuilder("cmd", "/c", "setx $key \"$value\"").start().waitFor()
         } catch (e: Exception) {
-            println("Error setting Windows environment variable: ${e.message}")
+            Logger.error("Error setting Windows environment variable: ${e.message}")
         }
     }
 
@@ -57,7 +59,7 @@ object EnvironmentVariables {
         try {
             ProcessBuilder("bash", "-c", "echo 'export $key=\"$value\"' >> ~/.bashrc").start().waitFor()
         } catch (e: Exception) {
-            println("Error setting Linux environment variable: ${e.message}")
+            Logger.error("Error setting Linux environment variable: ${e.message}")
         }
     }
 
@@ -72,7 +74,7 @@ object EnvironmentVariables {
         try {
             ProcessBuilder("sudo", "sh", "-c", "echo 'export $key=\"$value\"' >> /etc/profile").start().waitFor()
         } catch (e: Exception) {
-            println("Error setting macOS environment variable: ${e.message}")
+            Logger.error("Error setting macOS environment variable: ${e.message}")
         }
     }
 
