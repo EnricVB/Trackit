@@ -33,7 +33,7 @@ class LogHandler {
      * @throws IllegalStateException if no commits are found in the repository.
      */
     fun showLog(limit: Int?, authorFilter: String?, since: LocalDateTime?, until: LocalDateTime?, message: String) {
-        val branchHead = BranchIndex.getBranchHead() ?: throw IllegalStateException("No commits found in the repository")
+        val branchHead = BranchIndex.getBranchHead(BranchIndex.getCurrentBranch().generateKey()) ?: throw IllegalStateException("No commits found in the repository")
         var commit: Commit? = branchHead
         var shownCount = 0
 
