@@ -30,9 +30,34 @@ import picocli.CommandLine.Option
  */
 @Command(
     name = "role-modify",
-    description = ["Modifies an existing role's configuration"],
+    description = ["Modify an existing role’s permissions and configuration."],
+    footer = [
+        "",
+        "Description:",
+        "  Allows modification of a role’s permission level, role permissions, and branch access.",
+        "",
+        "Role Permissions:",
+        "  m: Modify roles (only those with lower permission level)",
+        "  u: Create/modify users",
+        "  s: Assign roles to users",
+        "  a: Create new roles",
+        "  -: No permission in that position",
+        "",
+        "Branch Permissions:",
+        "  Format: --branch-permission <branch> <permission>",
+        "  Use '--' (in quotes) for no permission.",
+        "",
+        "Examples:",
+        "  trackit role-modify -n Developer -l 2",
+        "  trackit role-modify -n Maintainer -r mus-",
+        "  trackit role-modify -n QA -b feature rw",
+        "  trackit role-modify -n QA -rb feature hotfix",
+        "  trackit role-modify -n Admin -r mus- -o",
+        ""
+    ],
     mixinStandardHelpOptions = true,
 )
+
 class RoleModify : TrackitCommand() {
 
     /**

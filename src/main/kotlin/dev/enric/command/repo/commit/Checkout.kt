@@ -19,8 +19,13 @@ import picocli.CommandLine.*
  */
 @Command(
     name = "checkout",
-    description = ["Changes repository state to a specified commit or branch"],
+    description = ["Changes repository state to a specified commit or branch. Allows switching to a commit identified by hash."],
     mixinStandardHelpOptions = true,
+    footer = [
+        "Examples:",
+        "  trackit checkout a1b2c3d           # Checkout to a commit using an abbreviated hash",
+        "  trackit checkout 1234567890abcdef  # Checkout to a commit using a full hash"
+    ]
 )
 class Checkout : TrackitCommand() {
 

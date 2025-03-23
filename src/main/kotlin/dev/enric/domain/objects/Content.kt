@@ -58,14 +58,6 @@ class Content(val content: ByteArray = ByteArray(0)) : TrackitObject<Content>(),
         }
     }
 
-
-    override fun showDifferences(newer: Hash, oldest: Hash): String {
-        val newerContent = decode(newer)
-        val oldestContent = decode(oldest)
-
-        return "Newer content: ${newerContent.content}\nOldest content: ${oldestContent.content}" // TODO: Implement a better way to show differences
-    }
-
     companion object {
         @JvmStatic
         fun newInstance(hash: Hash): Content {

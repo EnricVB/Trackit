@@ -22,6 +22,24 @@ import picocli.CommandLine.Parameters
     name = "ignore",
     description = ["Ignores a file from the repository from being tracked"],
     mixinStandardHelpOptions = true,
+    footer = [
+        "",
+        "Examples:",
+        "  trackit ignore build/",
+        "    Ignores the 'build/' directory and all of its contents from being tracked in the repository.",
+        "",
+        "  trackit ignore temp/data.txt",
+        "    Ignores the 'temp/data.txt' file from being tracked in the repository.",
+        "",
+        "Notes:",
+        "  - The specified path should be relative to the root directory of the repository.",
+        "  - If a directory is provided, all files and subdirectories inside it will be ignored.",
+        "  - The ignored files or directories will not be staged or committed, and their changes will be excluded from version control.",
+        "  - To undo the ignore action, manually remove the corresponding entry from the repository’s ignore configuration.",
+        "  - This command only affects files tracked by the repository’s ignore settings, not existing commits.",
+        "",
+    ]
+
 )
 class Ignore : TrackitCommand() {
 

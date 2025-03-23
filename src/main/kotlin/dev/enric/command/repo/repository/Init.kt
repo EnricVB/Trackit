@@ -19,6 +19,19 @@ import picocli.CommandLine.Command
     name = "init",
     description = ["Initialize a new repository"],
     mixinStandardHelpOptions = true,
+    footer = [
+        "",
+        "Example:",
+        "  trackit init",
+        "    Initializes a new Trackit repository in the current directory.",
+        "",
+        "Notes:",
+        "  - This command sets up the necessary internal folder structure and configuration files for Trackit.",
+        "  - The repository will start tracking changes in the current directory, and you can begin adding files and commits.",
+        "  - After running this command, you can use other Trackit commands such as 'trackit add' and 'trackit commit' to start working with the repository.",
+        "  - This is similar to how 'git init' works in Git.",
+        "",
+    ]
 )
 class Init : TrackitCommand() {
 

@@ -25,7 +25,22 @@ import java.io.Console
  */
 @Command(
     name = "user-create",
-    description = ["Creates a new user"],
+    description = ["Create a new user account with optional contact info and role assignment."],
+    footer = [
+        "",
+        "Description:",
+        "  Creates a user with a unique name, password, optional email/phone, and assigned roles.",
+        "  If password is omitted, it will be prompted interactively (if supported).",
+        "",
+        "Examples:",
+        "  trackit user-create -n Alice -p secretPass -m alice@example.com -P 123456789 -r Developer Tester",
+        "  trackit user-create -n Bob -p myPassword -r Admin",
+        "",
+        "Notes:",
+        "  - Use '-r' followed by one or more roles separated by space.",
+        "  - Password entered interactively will not be echoed to the terminal.",
+        ""
+    ],
     mixinStandardHelpOptions = true,
 )
 class UserCreation : TrackitCommand() {

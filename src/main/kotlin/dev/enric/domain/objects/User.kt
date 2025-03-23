@@ -75,10 +75,6 @@ data class User(
         return userDetails
     }
 
-    override fun showDifferences(newer: Hash, oldest: Hash): String {
-        TODO("Not yet implemented")
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

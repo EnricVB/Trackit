@@ -22,6 +22,23 @@ import picocli.CommandLine.*
     name = "restore",
     description = ["Restores files from a specified commit into the working directory"],
     mixinStandardHelpOptions = true,
+    footer = [
+        "",
+        "Examples:",
+        "  trackit restore a1b2c3d",
+        "    Restores all files from the commit with hash 'a1b2c3d' into the current working directory.",
+        "",
+        "  trackit restore a1b2c3d README.md",
+        "    Restores the 'README.md' file from the commit with hash 'a1b2c3d' into the working directory.",
+        "",
+        "Notes:",
+        "  - If no commit hash is provided, the restore will use the current HEAD.",
+        "  - If no specific file is provided, all files from the commit will be restored.",
+        "  - The commit hash can be provided in full or as an abbreviation, as long as it is unique.",
+        "  - Restoring a specific file requires the path relative to the root of the repository.",
+        "  - If the specified file doesn't exist in the commit, it will be ignored without error.",
+        "",
+    ]
 )
 class Restore : TrackitCommand() {
 

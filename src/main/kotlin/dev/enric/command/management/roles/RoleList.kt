@@ -24,7 +24,22 @@ import picocli.CommandLine.Command
  */
 @Command(
     name = "role-list",
-    description = ["List all roles"]
+    description = ["List all roles in the repository or system."],
+    footer = [
+        "",
+        "Description:",
+        "  Displays all roles with their permission levels, role permissions, and branch-specific access.",
+        "",
+        "Output includes:",
+        "  - Role name",
+        "  - Permission level",
+        "  - Role permissions (e.g., mus-)",
+        "  - Branch permissions (e.g., main rw, feature r-)",
+        "",
+        "Example:",
+        "  trackit role-list"
+    ],
+    mixinStandardHelpOptions = true,
 )
 class RoleList : TrackitCommand() {
 
