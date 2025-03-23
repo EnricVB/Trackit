@@ -21,6 +21,27 @@ import picocli.CommandLine.*
     name = "commit",
     description = ["Commits the staged files"],
     mixinStandardHelpOptions = true,
+    footer = [
+        "",
+        "Examples:",
+        "  trackit commit \"Fix login bug\" \"Fixed NPE on login when user has no roles\"",
+        "    Creates a new commit with the title 'Fix login bug' and the detailed message 'Fixed NPE on login when user has no roles'.",
+        "",
+        "  trackit commit \"Add tests\" --all",
+        "    Stages all modified and untracked files and creates a commit with the title 'Add tests'. No commit message is provided, so it defaults to an empty message.",
+        "",
+        "  trackit commit \"Fix issue\" --confirmer alice password123",
+        "    Commits the staged changes as user 'alice' after confirming the action with the provided password.",
+        "",
+        "Notes:",
+        "  - The commit title is mandatory, while the message is optional.",
+        "  - Use the --all flag to stage all modified and untracked files before committing.",
+        "  - The --confirmer option allows an administrative user to confirm the commit on behalf of another user, requiring both username and password.",
+        "  - If no files are staged for commit, the operation will fail.",
+        "  - If the commit is invalid or the user lacks permissions, the operation will not proceed.",
+        "",
+        "For more information, see the Trackit documentation or use the '--help' option for each command."
+    ]
 )
 class Commit : TrackitCommand() {
 

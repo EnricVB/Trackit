@@ -69,10 +69,6 @@ data class BranchPermission(
         }
     }
 
-    override fun showDifferences(newer: Hash, oldest: Hash): String {
-        TODO("Not yet implemented")
-    }
-
     companion object {
         const val READ = 1 shl 0
         const val WRITE = 1 shl 1

@@ -90,11 +90,6 @@ data class RolePermission(
         }
     }
 
-
-    override fun showDifferences(newer: Hash, oldest: Hash): String {
-        TODO("Not yet implemented")
-    }
-
     companion object {
         const val CREATE_ROLE = 1 shl 0
         const val MODIFY_ROLE = 1 shl 1

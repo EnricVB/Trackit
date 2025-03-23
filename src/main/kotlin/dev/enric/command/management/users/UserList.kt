@@ -15,7 +15,20 @@ import picocli.CommandLine.Command
  */
 @Command(
     name = "user-list",
-    description = ["List all users"]
+    description = ["Displays all users registered in the system with their assigned roles and contact info."],
+    footer = [
+        "",
+        "Description:",
+        "  Lists all users along with:",
+        "    - Assigned roles",
+        "    - Permission levels",
+        "    - Contact details (email and phone)",
+        "",
+        "Examples:",
+        "  trackit user-list",
+        "",
+    ],
+    mixinStandardHelpOptions = true,
 )
 class UserList : TrackitCommand() {
 

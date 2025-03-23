@@ -17,8 +17,17 @@ import picocli.CommandLine.Option
  */
 @Command(
     name = "user-modify",
-    description = ["Modifies an existing user"],
+    description = ["Modifies an existing user in the Trackit system by updating their details."],
     mixinStandardHelpOptions = true,
+    footer = [
+        "Examples:",
+        "  trackit user-modify --name alice --password currentPass --new-password newPass --new-mail alice@newmail.com",
+        "  trackit user-modify --name bob --password oldPass --new-phone 1234567890",
+        "Notes:",
+        "  - Password fields are interactive if not provided.",
+        "  - If the '--delete-previous-roles' flag is used, the user will lose their previous roles.",
+        "  - Multiple roles can be assigned at once using the '--role' option."
+    ]
 )
 class UserModify : TrackitCommand() {
 

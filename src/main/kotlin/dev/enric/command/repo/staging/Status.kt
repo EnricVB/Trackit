@@ -21,6 +21,22 @@ import picocli.CommandLine.Command
     name = "status",
     description = ["Show the status of the working directory"],
     mixinStandardHelpOptions = true,
+    footer = [
+        "",
+        "Example:",
+        "  trackit status",
+        "    Displays the current status of modified, untracked, and staged files.",
+        "",
+        "Notes:",
+        "  - '?' indicates untracked files. These are not added to the repository yet.",
+        "  - '*' indicates unmodified files. These have no changes since the last commit.",
+        "  - 'M' indicates modified files. These have changes that are not staged for commit.",
+        "  - 'S' indicates files staged for commit. These changes will be included in the next commit.",
+        "  - 'D' indicates deleted files. These files have been deleted and will be removed in the next commit.",
+        "  - 'R' indicates renamed files. These files have been renamed and will be included in the next commit.",
+        "  - 'I' indicates ignored files. These files are not being tracked by the repository.",
+        "",
+    ]
 )
 class Status : TrackitCommand() {
 
