@@ -15,6 +15,18 @@ import kotlin.io.path.*
     name = "unstage",
     description = ["Remove a file from the staging area"],
     mixinStandardHelpOptions = true,
+    footer = [
+        "",
+        "Example:",
+        "  trackit unstage <file>",
+        "    Removes the specified file from the staging area, making it unstaged.",
+        "",
+        "Notes:",
+        "  - This command undoes the 'stage' operation for a file.",
+        "  - The file will remain in the working directory but will not be included in the next commit.",
+        "  - Use 'trackit status' to see the current state of your files.",
+        "",
+    ]
 )
 class Unstage : TrackitCommand() {
 

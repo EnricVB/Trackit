@@ -22,9 +22,32 @@ import picocli.CommandLine.Option
  */
 @Command(
     name = "log",
-    description = ["Shows the commit history of the repository"],
+    description = ["Show the commit history with filtering options by author, date, and message."],
+    footer = [
+        "",
+        "Examples:",
+        "  trackit log",
+        "    Show the last 3 commits (default).",
+        "",
+        "  trackit log --limit 10",
+        "    Show the 10 most recent commits.",
+        "",
+        "  trackit log --author alice",
+        "    Show commits authored by 'alice'.",
+        "",
+        "  trackit log --since 2024-01-01 --until 2024-03-01",
+        "    Show commits between January and March 2024.",
+        "",
+        "  trackit log --message 'bugfix'",
+        "    Show commits containing 'bugfix' in their message.",
+        "",
+        "Notes:",
+        "  - Date format: YYYY-MM-DD or YYYY-MM-DDTHH:MM (e.g., 2024-01-01T10:00).",
+        "  - All filters can be combined."
+    ],
     mixinStandardHelpOptions = true,
 )
+
 class Log : TrackitCommand() {
 
     /**

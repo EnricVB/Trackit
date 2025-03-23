@@ -30,7 +30,28 @@ import picocli.CommandLine.Option
  */
 @Command(
     name = "role-create",
-    description = ["Creates a new role"],
+    description = ["Create a new role with specific permission and access levels."],
+    footer = [
+        "",
+        "Examples:",
+        "  trackit role-create --name Developer --permission-level 1 --role-permission mus- --branch-permission main rw",
+        "  trackit role-create -n Reviewer -l 2 -r ---- -b main r- -b dev '--'",
+        "",
+        "Role Permissions (4-character string):",
+        "  m → Modify roles (below current level)",
+        "  u → Create/modify users",
+        "  s → Assign roles",
+        "  a → Create new roles",
+        "  - → No permission",
+        "",
+        "Branch Permissions (format: <branch> <permission>):",
+        "  Example: --branch-permission feature rw",
+        "  Use '--' (in quotes) to denote no permissions.",
+        "",
+        "Notes:",
+        "  - Role permission level must be lower than your current level.",
+        "  - Multiple --branch-permission flags can be used."
+    ],
     mixinStandardHelpOptions = true,
 )
 class RoleCreation : TrackitCommand() {

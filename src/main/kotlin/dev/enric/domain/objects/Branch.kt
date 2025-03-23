@@ -50,13 +50,6 @@ class Branch(val name: String = "") : TrackitObject<Branch>(), Serializable {
         }
     }
 
-    override fun showDifferences(newer: Hash, oldest: Hash): String {
-        val newerContent = decode(newer)
-        val oldestContent = decode(oldest)
-
-        return "Newer content: ${newerContent.name}\nOldest content: ${oldestContent.name}" // TODO: Implement a better way to show differences
-    }
-
     fun getPermissions(): List<BranchPermission> {
         return BranchPermissionIndex.getBranchPermissionsByBranch(name).map { BranchPermission.newInstance(it) }
     }

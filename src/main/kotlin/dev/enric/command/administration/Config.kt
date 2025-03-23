@@ -25,7 +25,26 @@ import java.io.Console
  */
 @Command(
     name = "config",
-    description = ["Configure common settings for the repository or whole system"],
+    description = [
+        "Configure user credentials and session settings locally or globally.",
+        "Supports persistent sessions and scoped configuration."
+    ],
+    footer = [
+        "",
+        "Examples:",
+        "  trackit config --username alice --keep-session",
+        "    Save session locally for user 'alice'.",
+        "",
+        "  trackit config --global --keep-session",
+        "    Prompt for credentials, save session globally.",
+        "",
+        "  trackit config --username bob --password pass --global",
+        "    Save session globally for user 'bob'.",
+        "",
+        "Notes:",
+        "  - If no credentials are provided via options, you will be prompted.",
+        "  - Use --local (default) or --global to control scope of configuration."
+    ],
     mixinStandardHelpOptions = true,
 )
 class Config : TrackitCommand() {

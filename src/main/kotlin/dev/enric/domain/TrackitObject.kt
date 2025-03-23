@@ -1,5 +1,6 @@
 package dev.enric.domain
 
+import dev.enric.exceptions.IllegalHashException
 import dev.enric.logger.Logger
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.ByteArrayOutputStream
@@ -132,13 +133,4 @@ abstract class TrackitObject<T : TrackitObject<T>> {
      * @return String with the object information.
      */
     abstract fun printInfo(): String
-
-    /**
-     * Shows the differences between two objects of the same type.
-     * @param newer Hash of the newer object.
-     * @param oldest Hash of the oldest object.
-     * @return String with the differences between the two objects.
-     * @see Hash
-     */
-    abstract fun showDifferences(newer: Hash, oldest: Hash): String
 }

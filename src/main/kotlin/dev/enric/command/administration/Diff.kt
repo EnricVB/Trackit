@@ -34,9 +34,19 @@ import picocli.CommandLine.*
  */
 @Command(
     name = "diff",
-    description = ["Shows the difference between two specified commits or files"],
+    description = ["Compare changes between repository states (commits, branches, staging, working directory)."],
+    header = ["--- Trackit Diff Command ---"],
+    footer = [
+        "",
+        "Examples:",
+        "  trackit diff                           Compare Working Directory vs Staging",
+        "  trackit diff --staged                 Compare Staging Area vs HEAD",
+        "  trackit diff commit1 commit2         Compare two commits",
+        "  trackit diff --file src/Main.kt      Filter by file",
+    ],
     mixinStandardHelpOptions = true,
 )
+
 class Diff : TrackitCommand() {
 
     /**
