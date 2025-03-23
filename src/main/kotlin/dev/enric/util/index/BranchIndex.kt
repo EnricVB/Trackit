@@ -55,7 +55,7 @@ object BranchIndex {
      * @param commitHash The hash of the commit to set as the head of the branch.
      * @return `true` if the branch head was updated, `false` otherwise.
      */
-    fun updateBranchHead(branchHash: Hash, commitHash: Hash) {
+    fun setBranchHead(branchHash: Hash, commitHash: Hash) {
         val branchHeadPath = repositoryFolderManager.getBranchHeadPath()
         val lines = Files.readAllLines(branchHeadPath).toMutableList()
 

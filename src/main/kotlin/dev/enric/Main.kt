@@ -16,6 +16,7 @@ import dev.enric.command.management.users.UserCreation
 import dev.enric.command.management.users.UserList
 import dev.enric.command.management.users.UserModify
 import dev.enric.command.repo.commit.Checkout
+import dev.enric.command.repo.commit.Restore
 import dev.enric.command.repo.staging.Status
 import dev.enric.exceptions.TrackitException
 import dev.enric.logger.Logger
@@ -36,7 +37,7 @@ import picocli.CommandLine.Help.ColorScheme
     subcommands = [
         Init::class, Stage::class, Unstage::class, Status::class,
         Ignore::class, Config::class, Log::class, Diff::class,
-        Commit::class, Checkout::class,
+        Commit::class, Checkout::class, Restore::class,
         UserCreation::class, UserModify::class, UserList::class,
         RoleCreation::class, RoleModify::class, RoleList::class]
 )
