@@ -40,8 +40,7 @@ COPY ./jar/trackit.jar .
 WORKDIR /trackit
 
 # Crea script ejecutable: "trackit"
-RUN echo '#!/bin/bash
-java -jar /home/trackit/trackit.jar "$@"' > /usr/local/bin/trackit && \
+RUN echo -e "#!/bin/bash\njava -jar /home/trackit/trackit.jar \"\$@\"" > /usr/local/bin/trackit && \
     chmod +x /usr/local/bin/trackit
 
 
