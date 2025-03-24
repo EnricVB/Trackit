@@ -1,5 +1,6 @@
 package dev.enric.logger
 
+import dev.enric.logger.Logger.LogLevel.*
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.common.Utility
 import dev.enric.util.repository.RepositoryFolderManager
@@ -16,7 +17,7 @@ object Logger {
     val repositoryFolderManager : RepositoryFolderManager = RepositoryFolderManager()
     val commandLogFile = repositoryFolderManager.getCommandLogsFilePath()
 
-    var logLevel: LogLevel = LogLevel.INFO
+    var logLevel: LogLevel = INFO
     var clazz: String = "COMMAND"
 
     /**
@@ -36,9 +37,10 @@ object Logger {
      */
     fun log(message: String) {
         saveLog("[${getDateTime()}] [INFO] [$clazz] $message")
-        if(logLevel != LogLevel.INFO) return
 
-        println(ColorUtil.message(message))
+        if(logLevel.isAtLeast(INFO)) {
+            println(ColorUtil.message(message))
+        }
     }
 
     /**
@@ -47,9 +49,10 @@ object Logger {
      */
     fun warning(message: String) {
         saveLog("[${getDateTime()}] [WARNING] [$clazz] $message")
-        if(logLevel == LogLevel.QUIET) return
 
-        println(ColorUtil.warning(message))
+        if(logLevel.isAtLeast(INFO)) {
+            println(ColorUtil.warning(message))
+        }
     }
 
     /**
@@ -60,9 +63,10 @@ object Logger {
      */
     fun error(message: String) {
         saveLog("[${getDateTime()}] [ERROR] [$clazz] $message")
-        if(logLevel == LogLevel.QUIET) return
 
-        System.err.println(ColorUtil.error(message))
+        if(logLevel.isAtLeast(ERRORS)) {
+            System.err.println(ColorUtil.error(message))
+        }
     }
 
     /**
@@ -73,9 +77,10 @@ object Logger {
      */
     fun trace(message: String) {
         saveLog("[${getDateTime()}] [TRACE] [$clazz] $message")
-        if(logLevel != LogLevel.VERBOSE) return
 
-        System.err.println(ColorUtil.error(message))
+        if(logLevel.isAtLeast(VERBOSE)) {
+            System.err.println(ColorUtil.error(message))
+        }
     }
 
     /**
@@ -101,10 +106,14 @@ object Logger {
     /**
      * The log levels available
      */
-    enum class LogLevel {
-        INFO,
-        ERRORS,
-        VERBOSE,
-        QUIET
+    enum class LogLevel(val level: Int) {
+        VERBOSE(4),
+        INFO(3),
+        ERRORS(2),
+        QUIET(1);
+
+        fun isAtLeast(level: LogLevel): Boolean {
+            return logLevel.level >= level.level
+        }
     }
 }
