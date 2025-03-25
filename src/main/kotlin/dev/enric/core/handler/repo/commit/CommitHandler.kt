@@ -48,7 +48,8 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
      */
     private fun checkWritePermissionOnBranch(user: User) {
         if (!hasWritePermissionOnBranch(user)) {
-            throw InvalidPermissionException("User does not have write permission on branch ${BranchIndex.getCurrentBranch().encode().first}")
+            val branch = BranchIndex.getCurrentBranch()
+            throw InvalidPermissionException("User does not have permission to write on branch ${branch.name} (${branch.encode().first})")
         }
     }
 
