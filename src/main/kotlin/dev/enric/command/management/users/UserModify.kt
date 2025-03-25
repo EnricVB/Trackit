@@ -2,6 +2,7 @@ package dev.enric.command.management.users
 
 import dev.enric.command.TrackitCommand
 import dev.enric.core.handler.management.users.UserModifyHandler
+import dev.enric.logger.Logger
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 
@@ -13,16 +14,16 @@ import picocli.CommandLine.Option
  * and role reassignment.
  *
  * Usage example:
- *   trackit user-modify --name alice --password <current> --new-password <new> --new-mail alice@newmail.com
+ *   trackit modify-user --name alice --password <current> --new-password <new> --new-mail alice@newmail.com
  */
 @Command(
-    name = "user-modify",
+    name = "modify-user",
     description = ["Modifies an existing user in the Trackit system by updating their details."],
     mixinStandardHelpOptions = true,
     footer = [
         "Examples:",
-        "  trackit user-modify --name alice --password currentPass --new-password newPass --new-mail alice@newmail.com",
-        "  trackit user-modify --name bob --password oldPass --new-phone 1234567890",
+        "  trackit modify-user --name alice --password currentPass --new-password newPass --new-mail alice@newmail.com",
+        "  trackit modify-user --name bob --password oldPass --new-phone 1234567890",
         "Notes:",
         "  - Password fields are interactive if not provided.",
         "  - If the '--delete-previous-roles' flag is used, the user will lose their previous roles.",
@@ -32,7 +33,7 @@ import picocli.CommandLine.Option
 class UserModify : TrackitCommand() {
 
     /** The username of the user to modify. */
-    @Option(names = ["--name", "-n"], description = ["Name of the user to modify"], required = true)
+    @Option(names = ["--name", "-n"], description = ["Name of the user to modify"], interactive = true)
     var name: String = ""
 
     /** Current password for authentication. */
@@ -40,7 +41,7 @@ class UserModify : TrackitCommand() {
         names = ["--password", "-p"],
         description = ["Password of the user to modify"],
         interactive = true,
-        required = true
+        echo = false
     )
     var password: String = ""
 
@@ -86,6 +87,8 @@ class UserModify : TrackitCommand() {
     override fun call(): Int {
         super.call()
 
+        askUserInteractiveData()
+
         val handler = UserModifyHandler(
             name,
             password,
@@ -105,5 +108,23 @@ class UserModify : TrackitCommand() {
         handler.modifyUser()
 
         return 0
+    }
+
+    private fun askUserInteractiveData() {
+        if (name.isBlank()) {
+            do {
+                name = askForUsername()
+
+                if (name.isBlank()) Logger.error("Username is required.")
+            } while (name.isBlank())
+        }
+
+        if (password.isBlank()) {
+            do {
+                password = askForPassword()
+
+                if (password.isBlank()) Logger.error("Password is required.")
+            } while (password.isBlank())
+        }
     }
 }

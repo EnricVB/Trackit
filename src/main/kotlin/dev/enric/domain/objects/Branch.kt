@@ -37,6 +37,9 @@ class Branch(val name: String = "") : TrackitObject<Branch>(), Serializable {
         return buildString {
             appendLine(ColorUtil.title("Branch Details"))
 
+            append(ColorUtil.label("  Hash: "))
+            appendLine(ColorUtil.text(generateKey().toString()))
+
             append(ColorUtil.label("  Branch Name: "))
             appendLine(
                 if (name.isNotEmpty()) ColorUtil.text(name)

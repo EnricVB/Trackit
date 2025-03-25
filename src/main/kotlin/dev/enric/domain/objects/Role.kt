@@ -56,6 +56,9 @@ data class Role(
         return buildString {
             appendLine(ColorUtil.title("Role Details"))
 
+            append(ColorUtil.label("  Hash: "))
+            appendLine(ColorUtil.text(generateKey().toString()))
+
             append(ColorUtil.label("  Name: "))
             appendLine(
                 if (name.isNotEmpty()) ColorUtil.text(name)
