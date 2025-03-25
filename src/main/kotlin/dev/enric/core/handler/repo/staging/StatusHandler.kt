@@ -1,7 +1,5 @@
 package dev.enric.core.handler.repo.staging
 
-import dev.enric.core.handler.repo.ignore.IgnoreHandler
-import dev.enric.domain.objects.Content
 import dev.enric.domain.objects.User
 import dev.enric.logger.Logger
 import dev.enric.util.common.ColorUtil

@@ -28,8 +28,8 @@ object BranchPermissionIndex {
         getBranchPermissionsByBranch(branchName).forEach {
             val branchPermissions = BranchPermission.newInstance(it)
 
-            if (permissions.length != 2 || permissions.any { ch -> ch !in listOf('r', 'w', '-') }) {
-                throw IllegalArgumentException("Invalid permission format. Use 'r', 'w' or '-' in a 2-character string.")
+            require(!(permissions.length != 2 || permissions.any { ch -> ch !in listOf('r', 'w', '-') })) {
+                "Invalid permission format. Use 'r', 'w' or '-' in a 2-character string."
             }
 
             if (branchPermissions.toString().take(2) == permissions) {
