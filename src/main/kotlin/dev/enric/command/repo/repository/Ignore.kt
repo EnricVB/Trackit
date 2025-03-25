@@ -3,9 +3,9 @@ package dev.enric.command.repo.repository
 import dev.enric.command.TrackitCommand
 import dev.enric.core.handler.repo.ignore.IgnoreHandler
 import dev.enric.logger.Logger
-import dev.enric.util.repository.RepositoryFolderManager
 import picocli.CommandLine.Command
 import picocli.CommandLine.Parameters
+import java.nio.file.Path
 
 /**
  * Command to ignore a specific file or directory in the repository.
@@ -52,12 +52,7 @@ class Ignore : TrackitCommand() {
      * - To ignore a directory and all its contents: `folder/`
      */
     @Parameters(index = "0", paramLabel = "path", description = ["The path of the file/directory to be ignored"])
-    lateinit var path: String
-
-    /**
-     * Root folder of the repository, obtained from RepositoryFolderManager.
-     */
-    private val repositoryFolder = RepositoryFolderManager().getInitFolderPath()
+    lateinit var path: Path
 
     /**
      * Executes the ignore command logic.
@@ -71,11 +66,8 @@ class Ignore : TrackitCommand() {
     override fun call(): Int {
         super.call()
 
-        // Resolve the path relative to the repository root
-        val targetPath = repositoryFolder.resolve(path)
-
         // Handle the ignore operation
-        IgnoreHandler.ignore(targetPath)
+        IgnoreHandler.ignore(path)
 
         // Log the action
         Logger.log("File ignored")

@@ -1,6 +1,7 @@
 package dev.enric
 
 import dev.enric.command.TrackitCommand
+import dev.enric.command.administration.Blame
 import dev.enric.command.administration.Config
 import dev.enric.command.administration.Diff
 import dev.enric.command.administration.Log
@@ -36,7 +37,7 @@ import picocli.CommandLine.Help.ColorScheme
     description = ["Track your files"],
     subcommands = [
         Init::class, Stage::class, Unstage::class, Status::class,
-        Ignore::class, Config::class, Log::class, Diff::class,
+        Ignore::class, Config::class, Log::class, Diff::class, Blame::class,
         Commit::class, Checkout::class, Restore::class,
         UserCreation::class, UserModify::class, UserList::class,
         RoleCreation::class, RoleModify::class, RoleList::class]
