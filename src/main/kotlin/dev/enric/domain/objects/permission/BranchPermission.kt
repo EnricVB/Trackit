@@ -57,6 +57,10 @@ data class BranchPermission(
     override fun printInfo(): String {
         return buildString {
             appendLine(ColorUtil.title("Branch Permission Details"))
+
+            append(ColorUtil.label("  Hash: "))
+            appendLine(ColorUtil.text(generateKey().toString()))
+
             append(ColorUtil.label("  Branch: "))
             appendLine(ColorUtil.text(Branch.newInstance(branch).name))
 

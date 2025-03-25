@@ -64,6 +64,9 @@ data class Commit(
         return buildString {
             appendLine(ColorUtil.title("commit ${generateKey().string}"))
 
+            append(ColorUtil.label("  Hash: "))
+            appendLine(ColorUtil.text(generateKey().toString()))
+
             append("Author: \t${author.name}")
             if (author.mail.isNotBlank()) append(" <${author.mail}>")
             if (author.phone.isNotBlank()) append(" <${author.phone}>")

@@ -43,6 +43,9 @@ data class Tree(
         return buildString {
             appendLine(ColorUtil.title("Tree Details"))
 
+            append(ColorUtil.label("  Hash: "))
+            appendLine(ColorUtil.text(generateKey().toString()))
+
             append(ColorUtil.label("  Path: "))
             appendLine(
                 if (serializablePath.toString().isNotEmpty()) ColorUtil.text(serializablePath.toString())

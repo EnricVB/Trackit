@@ -47,6 +47,9 @@ data class User(
         val userDetails = buildString {
             appendLine(ColorUtil.title("User Details"))
 
+            append(ColorUtil.label("  Hash: "))
+            appendLine(ColorUtil.text(generateKey().toString()))
+
             append(ColorUtil.label("  Name: "))
             appendLine(
                 if (name.isNotEmpty()) ColorUtil.text(name)

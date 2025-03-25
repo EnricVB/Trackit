@@ -45,6 +45,9 @@ data class ComplexTag(
         return buildString {
             appendLine(ColorUtil.title("Complex Tag Details"))
 
+            append(ColorUtil.label("  Hash: "))
+            appendLine(ColorUtil.text(generateKey().toString()))
+
             append(ColorUtil.label("  Name: "))
             appendLine(if (name.isNotEmpty()) ColorUtil.text(name) else ColorUtil.message("No name assigned"))
 
