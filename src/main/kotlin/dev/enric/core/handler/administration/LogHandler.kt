@@ -32,13 +32,13 @@ class LogHandler {
      *
      * @throws IllegalStateException if no commits are found in the repository.
      */
-    fun showLog(limit: Int?, authorFilter: String?, since: LocalDateTime?, until: LocalDateTime?, message: String) {
+    fun showLog(limit: Int, authorFilter: String?, since: LocalDateTime?, until: LocalDateTime?, message: String) {
         val branchHead = BranchIndex.getBranchHead(BranchIndex.getCurrentBranch().generateKey())
         var commit: Commit? = branchHead
         var shownCount = 0
 
         // Determine if we use interactive mode
-        val interactive = (limit == null)
+        val interactive = (limit == 0)
 
         // Initial size for interactive pagination
         var commitShowSize = 1
@@ -58,7 +58,7 @@ class LogHandler {
             shownCount++
 
             // Exit if limit reached (non-interactive mode)
-            if (!interactive && shownCount >= (limit ?: 0)) break
+            if (!interactive && shownCount >= limit) break
 
             // Pagination prompt if needed
             if (interactive && shownCount >= commitShowSize) {
