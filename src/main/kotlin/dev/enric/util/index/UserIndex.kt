@@ -6,7 +6,6 @@ import dev.enric.core.security.PasswordHash
 import dev.enric.domain.objects.User
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.File
-import java.nio.file.Files
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.PathWalkOption
 import kotlin.io.path.isDirectory

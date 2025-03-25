@@ -40,7 +40,7 @@ object BlameHandler {
     }
 
     fun blame(file: File, commit: Commit): String {
-        val originalString = Files.readAllLines(file.toPath())
+        val originalString = Files.readAllLines(file.toPath()).toList()
         val blameString = StringBuilder()
 
         var currentCommit: Commit? = commit

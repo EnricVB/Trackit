@@ -24,9 +24,11 @@ enum class FileStatus(val symbol: String, val description: String) {
     /**
      * The file is not being tracked by Trackit. It exists in the working directory but has not been added to the index.
      */
-    UNTRACKED("?",
+    UNTRACKED(
+        "?",
         """Untracked files:
-            |   (use "trackit stage <file>..." to include in what will be committed)""".trimMargin()),
+            |   (use "trackit stage <file>..." to include in what will be committed)""".trimMargin()
+    ),
 
     /**
      * The file is tracked and has not been modified since the last commit.
@@ -36,38 +38,48 @@ enum class FileStatus(val symbol: String, val description: String) {
     /**
      * The file has been modified but is not yet staged for commit.
      */
-    MODIFIED("M",
+    MODIFIED(
+        "M",
         """Files with changes:
-            |   (use "trackit stage <file>..." to update what will be committed)""".trimMargin()),
+            |   (use "trackit stage <file>..." to update what will be committed)""".trimMargin()
+    ),
 
     /**
      * The file has been modified and staged for the next commit.
      */
-    STAGED("S",
+    STAGED(
+        "S",
         """Changes to be committed:
             |   (use "trackit commit" to commit changes)
-            |   (use "trackit unstage" to unstage changes)""".trimMargin()),
+            |   (use "trackit unstage" to unstage changes)""".trimMargin()
+    ),
 
     /**
      * The file has been deleted and the deletion has been staged.
      */
-    DELETE("D",
+    DELETE(
+        "D",
         """Deleted files:
-            |   (use "trackit restore <file>..." to restore the file)""".trimMargin()),
+            |   (use "trackit restore <file>..." to restore the file)""".trimMargin()
+    ),
 
     /**
      * The file has been renamed or moved.
      */
-    RENAMED("R",
+    RENAMED(
+        "R",
         """Renamed files:
-            |   (use "trackit restore <file>..." to restore the file)""".trimMargin()),
+            |   (use "trackit restore <file>..." to restore the file)""".trimMargin()
+    ),
 
     /**
      * The file is ignored based on `.ignore` rules and will not be tracked.
      */
-    IGNORED("I",
+    IGNORED(
+        "I",
         """Ignored files:
-            |   (use "trackit unignore <file>..." to start tracking)""".trimMargin());
+            |   (use "trackit unignore <file>..." to start tracking)""".trimMargin()
+    );
 
     companion object {
         /**
@@ -112,7 +124,7 @@ enum class FileStatus(val symbol: String, val description: String) {
 
             return runBlocking {
                 currentCommit.tree.map { treeHash ->
-                    async (Dispatchers.IO) {
+                    async(Dispatchers.IO) {
                         val treeObject = Tree.newInstance(treeHash)
                         val treePathRelative = treeObject.serializablePath.relativePath(initFolderPath)
                         val filePath = initFolderPath.resolve(treePathRelative)
@@ -140,10 +152,8 @@ enum class FileStatus(val symbol: String, val description: String) {
                 val treePath = treeObject.serializablePath.relativePath(repositoryFolderManager.getInitFolderPath())
                 val filePath = SerializablePath.of(file.path).relativePath(repositoryFolderManager.getInitFolderPath())
 
-                if (treePath == filePath) {
-                    if (!file.exists()) {
-                        return true
-                    }
+                if (treePath == filePath && !file.exists()) {
+                    return true
                 }
             }
 
