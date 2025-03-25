@@ -13,8 +13,8 @@ import picocli.CommandLine.Option
  * to control operations such as user management, role management, and branch-specific actions.
  *
  * Usage examples:
- *   trackit role-create --name Developer --permission-level 1 --role-permission mus- --branch-permission main rw
- *   trackit role-create -n Reviewer -l 2 -r ---- -b main r- -b dev '--'
+ *   trackit create-role --name Developer --permission-level 1 --role-permission mus- --branch-permission main rw
+ *   trackit create-role -n Reviewer -l 2 -r ---- -b main r- -b dev '--'
  *
  * Available permissions:
  * - Role Permissions:
@@ -29,13 +29,13 @@ import picocli.CommandLine.Option
  *      Use '--' (between quotes) to denote no permissions
  */
 @Command(
-    name = "role-create",
+    name = "create-role",
     description = ["Create a new role with specific permission and access levels."],
     footer = [
         "",
         "Examples:",
-        "  trackit role-create --name Developer --permission-level 1 --role-permission mus- --branch-permission main rw",
-        "  trackit role-create -n Reviewer -l 2 -r ---- -b main r- -b dev '--'",
+        "  trackit create-role --name Developer --permission-level 1 --role-permission mus- --branch-permission main rw",
+        "  trackit create-role -n Reviewer -l 2 -r ---- -b main r- -b dev '--'",
         "",
         "Role Permissions (4-character string):",
         "  m → Modify roles (below current level)",

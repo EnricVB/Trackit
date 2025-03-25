@@ -14,22 +14,22 @@ import picocli.CommandLine.Option
  *
  * Usage examples:
  *   - Modify role permission level:
- *     trackit role-modify -n Developer -l 2
+ *     trackit modify-role -n Developer -l 2
  *
  *   - Add role permissions:
- *     trackit role-modify -n Maintainer -r mus-
+ *     trackit modify-role -n Maintainer -r mus-
  *
  *   - Add branch permissions:
- *     trackit role-modify -n QA -b feature rw
+ *     trackit modify-role -n QA -b feature rw
  *
  *   - Remove branch permissions:
- *     trackit role-modify -n QA -rb feature hotfix
+ *     trackit modify-role -n QA -rb feature hotfix
  *
  *   - Overwrite all role permissions:
- *     trackit role-modify -n Admin -r mus- -o
+ *     trackit modify-role -n Admin -r mus- -o
  */
 @Command(
-    name = "role-modify",
+    name = "modify-role",
     description = ["Modify an existing role’s permissions and configuration."],
     footer = [
         "",
@@ -48,11 +48,11 @@ import picocli.CommandLine.Option
         "  Use '--' (in quotes) for no permission.",
         "",
         "Examples:",
-        "  trackit role-modify -n Developer -l 2",
-        "  trackit role-modify -n Maintainer -r mus-",
-        "  trackit role-modify -n QA -b feature rw",
-        "  trackit role-modify -n QA -rb feature hotfix",
-        "  trackit role-modify -n Admin -r mus- -o",
+        "  trackit modify-role -n Developer -l 2",
+        "  trackit modify-role -n Maintainer -r mus-",
+        "  trackit modify-role -n QA -b feature rw",
+        "  trackit modify-role -n QA -rb feature hotfix",
+        "  trackit modify-role -n Admin -r mus- -o",
         ""
     ],
     mixinStandardHelpOptions = true,
