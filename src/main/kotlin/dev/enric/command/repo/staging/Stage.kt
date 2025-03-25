@@ -11,6 +11,7 @@ import dev.enric.util.common.SerializablePath
 import picocli.CommandLine.*
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.*
 
 
@@ -47,10 +48,11 @@ class Stage : TrackitCommand() {
      * If the file is being ignored, it will not be staged unless the --force flag is used.
      */
     @Parameters(index = "0", paramLabel = "path", description = ["The path of the file/directory to be staged"])
-    lateinit var path: String
+    lateinit var stagePath: Path
 
     private val repositoryFolder = RepositoryFolderManager().getInitFolderPath()
     private val stagingHandler = StagingHandler(force)
+    private val stagedFilesCache = ConcurrentHashMap<Path, String>()
 
     /**
      * Stage the file or folder. This will add the file to the staging index.
@@ -59,12 +61,11 @@ class Stage : TrackitCommand() {
      */
     override fun call(): Int {
         super.call()
-        val file = repositoryFolder.resolve(path)
 
-        if (file.isDirectory()) {
-            stageFolder(file)
+        if (stagePath.isDirectory()) {
+            stageFolder(stagePath)
         } else {
-            stageFile(file)
+            stageFile(stagePath)
         }
 
         return 0
@@ -84,19 +85,30 @@ class Stage : TrackitCommand() {
      * @param path The file to stage
      */
     fun stageFile(path: Path) {
+        if (stagedFilesCache.containsKey(path)) {
+            Logger.log("File already staged: $path")
+            return
+        }
+
         val file = path.toFile()
         val status = FileStatus.getStatus(file)
-        val paramFile = repositoryFolder.resolve(this.path)
 
         when (status) {
             MODIFIED, UNTRACKED -> {
                 val content = Content(Files.readAllBytes(path))
                 val relativePath = SerializablePath.of(path).relativePath(repositoryFolder)
 
+                // Stage the content, cache the result, and log
                 stagingHandler.stage(content, path)
+                stagedFilesCache[path] = content.generateKey().toString()
                 Logger.log("Staging file: $relativePath")
             }
-            IGNORED -> if (force) stageFile(path) else if (path == paramFile) Logger.error("The file is being ignored")
+            IGNORED -> if (force) {
+                stageFile(path) // Force staging even if the file is ignored
+            } else if (stagePath.toFile() == file) {
+                Logger.error("The file is being ignored: $path")
+            }
+
             else -> {}
         }
     }

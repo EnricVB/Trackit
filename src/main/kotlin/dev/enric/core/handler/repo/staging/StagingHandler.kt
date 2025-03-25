@@ -8,8 +8,8 @@ import dev.enric.util.repository.RepositoryFolderManager
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Manages the staging area in Trackit, handling the addition and removal of files before committing.
@@ -19,6 +19,7 @@ import java.nio.file.StandardOpenOption
 data class StagingHandler(val force: Boolean = false) {
     private val repositoryFolderManager = RepositoryFolderManager()
     private val stagingIndex = repositoryFolderManager.getStagingIndexPath()
+    private val stagedFilesCache = ConcurrentHashMap<String, Path>()
 
     /**
      * Stages a file to be committed by storing its hash and path in the staging index.
@@ -42,8 +43,13 @@ data class StagingHandler(val force: Boolean = false) {
         val hash = content.encode(true).first
         val relativePath = SerializablePath.of(path).relativePath(repositoryFolderManager.getInitFolderPath())
 
-        if (checkIfOutdated(hash, relativePath)) return replaceOutdatedFile(hash, relativePath)
-        if (!checkIfStaged(hash, relativePath)) return stageNewFile(hash, relativePath)
+        if (checkIfOutdated(hash, relativePath)) {
+            return replaceOutdatedFile(hash, relativePath)
+        }
+
+        if (!checkIfStaged(hash, relativePath)) {
+            return stageNewFile(hash, relativePath)
+        }
 
         return false
     }
@@ -55,30 +61,24 @@ data class StagingHandler(val force: Boolean = false) {
      * @return True if the replacement was successful, false otherwise.
      */
     private fun replaceOutdatedFile(hash: Hash, path: Path): Boolean {
-        val tempFile = Files.createTempFile("temp", ".temp")
-
         return try {
-            Files.newBufferedReader(stagingIndex).use { reader ->
-                Files.newBufferedWriter(tempFile, StandardOpenOption.WRITE).use { writer ->
-                    reader.forEachLine { line ->
-                        val (lineHash, linePath) = line.split(" : ").let { Hash(it[0]) to Path.of(it[1]) }
-                        val changedHash = (lineHash != hash && linePath == path)
-                        val changedPath = (lineHash == hash && linePath != path)
+            // Read and replace file content in memory first, then write to the file at once
+            val stagingIndexContent = Files.readAllLines(stagingIndex).toMutableList()
 
-                        if (changedHash || changedPath) {
-                            writer.write("$hash : $path")
-                        } else {
-                            writer.write(line)
-                        }
-                        writer.newLine()
-                    }
+            // Update the index content in memory
+            stagingIndexContent.replaceAll { line ->
+                val (lineHash, linePath) = line.split(" : ").let { Hash(it[0]) to Path.of(it[1]) }
+                if (lineHash != hash && linePath == path || lineHash == hash && linePath != path) {
+                    "$hash : $path"
+                } else {
+                    line
                 }
             }
 
-            Files.move(tempFile, stagingIndex, StandardCopyOption.REPLACE_EXISTING)
+            Files.write(stagingIndex, stagingIndexContent)
             true
-        } catch (e: IOException) {
-            Logger.error("Error replacing outdated staged file $path: ${e.message}")
+        } catch (e: Exception) {
+            Logger.error("Failed to replace outdated file: $e")
             false
         }
     }
@@ -90,16 +90,13 @@ data class StagingHandler(val force: Boolean = false) {
      * @return True if the file was successfully staged, false otherwise.
      */
     private fun stageNewFile(hash: Hash, relativePath: Path): Boolean {
-        return try {
-            Files.writeString(
-                stagingIndex,
-                "$hash : $relativePath\n",
-                StandardOpenOption.APPEND
-            )
-            true
-        } catch (e: IOException) {
-            Logger.error("Error staging file $relativePath: ${e.message}")
-            false
+        try {
+            Files.write(stagingIndex, "$hash : $relativePath\n".toByteArray(), StandardOpenOption.APPEND)
+            stagedFilesCache[hash.toString()] = relativePath
+            return true
+        } catch (e: Exception) {
+            Logger.error("Failed to stage new file: $e")
+            return false
         }
     }
 
@@ -109,65 +106,51 @@ data class StagingHandler(val force: Boolean = false) {
      * @return True if the file was successfully unstaged, false otherwise.
      */
     fun unstage(hash: Hash): Boolean {
-        val tempFile = Files.createTempFile("temp", ".temp")
-
-        return try {
-            Files.newBufferedReader(stagingIndex).use { reader ->
-                Files.newBufferedWriter(tempFile, StandardOpenOption.WRITE).use { writer ->
-                    reader.forEachLine { line ->
-                        if (!line.startsWith(hash.toString())) {
-                            writer.write(line)
-                            writer.newLine()
-                        }
-                    }
-                }
-            }
-
-            Files.move(tempFile, stagingIndex, StandardCopyOption.REPLACE_EXISTING)
-            true
-        } catch (e: IOException) {
-            Logger.error("Error unstaging file $hash: ${e.message}")
-            false
+        return unstageStagingIndex { line ->
+            !line.startsWith(hash.toString())
         }
     }
 
     /**
-     * Removes a file from the staging index.
+     * Removes a file from the staging index by its path.
      * @param unstagePath The path of the file to be unstaged.
      * @return True if the file was successfully unstaged, false otherwise.
      */
     fun unstage(unstagePath: Path): Boolean {
-        val tempFile = Files.createTempFile("temp", ".temp")
         val relativeUnstagePath = SerializablePath.of(unstagePath).relativePath(RepositoryFolderManager().getInitFolderPath())
-
-        return try {
-            Files.newBufferedReader(stagingIndex).use { reader ->
-                Files.newBufferedWriter(tempFile, StandardOpenOption.WRITE).use { writer ->
-                    reader.forEachLine { line ->
-                        val linePath = Path.of(line.split(" : ")[1])
-
-                        if (!linePath.startsWith(relativeUnstagePath)) {
-                            writer.write(line)
-                            writer.newLine()
-                        }
-                    }
-                }
-            }
-
-            Files.move(tempFile, stagingIndex, StandardCopyOption.REPLACE_EXISTING)
-            true
-        } catch (e: IOException) {
-            Logger.error("Error unstaging file $unstagePath ${e.printStackTrace()}")
-            false
+        return unstageStagingIndex { line ->
+            val linePath = Path.of(line.split(" : ")[1])
+            !linePath.startsWith(relativeUnstagePath)
         }
     }
 
     /**
-     * Shows the differences between the working directory and the staging area.
-     * @return A string with the differences between the working directory and the staging area
+     * Unstage the staging index by filtering out lines based on a condition.
+     * This approach avoids using temporary files by updating the file in place.
+     * @param filterCondition A function that determines whether a line should be included.
+     * @return True if the modification was successful, false otherwise.
      */
-    fun showDifferences(): String {
-        return "Showing differences"
+    private fun unstageStagingIndex(filterCondition: (String) -> Boolean): Boolean {
+        return try {
+            Files.newBufferedReader(stagingIndex).use { reader ->
+                // This allows us to overwrite the file directly with updated content
+                val writer = Files.newBufferedWriter(stagingIndex, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)
+                var firstLine = true
+                reader.forEachLine { line ->
+                    if (filterCondition(line)) {
+                        // Write the line back to the file if it satisfies the filter condition
+                        if (!firstLine) writer.newLine()
+                        writer.write(line)
+                        firstLine = false
+                    }
+                }
+                writer.flush() // Ensure all data is written
+            }
+            true
+        } catch (e: IOException) {
+            Logger.error("Error modifying the staging index: ${e.message}")
+            false
+        }
     }
 
     /**

@@ -12,6 +12,7 @@ import dev.enric.util.common.FileStatus
 import dev.enric.util.common.SerializablePath
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.CommitIndex
+import dev.enric.util.repository.RepositoryFolderManager
 import java.io.File
 import java.nio.channels.FileChannel
 import java.nio.file.Path
@@ -220,7 +221,7 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
 
         val stageCommand = Stage()
 
-        stageCommand.path = "."
+        stageCommand.stagePath = RepositoryFolderManager().getInitFolderPath()
         stageCommand.force = false
 
         stageCommand.call()
