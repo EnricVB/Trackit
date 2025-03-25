@@ -158,7 +158,7 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
         val commitHash = commit.encode(true).first
 
         CommitIndex.setCurrentCommit(commitHash)
-        BranchIndex.setBranchHead(commitHash, commit.branch)
+        BranchIndex.setBranchHead(commit.branch, commitHash)
 
         // TODO: Implement tags
 
