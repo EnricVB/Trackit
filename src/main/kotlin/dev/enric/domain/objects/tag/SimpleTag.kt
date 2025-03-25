@@ -40,6 +40,9 @@ data class SimpleTag(
         return buildString {
             appendLine(ColorUtil.title("Simple Tag Details"))
 
+            append(ColorUtil.label("  Hash: "))
+            appendLine(ColorUtil.text(generateKey().toString()))
+
             append(ColorUtil.label("  Name: "))
             appendLine(if (name.isNotEmpty()) ColorUtil.text(name) else ColorUtil.message("No name assigned"))
 

@@ -78,6 +78,9 @@ data class RolePermission(
         return buildString {
             appendLine(ColorUtil.title("Role Permission Details"))
 
+            append(ColorUtil.label("  Hash: "))
+            appendLine(ColorUtil.text(generateKey().toString()))
+
             append(ColorUtil.label("  Permissions: "))
             appendLine(
                 ColorUtil.text(

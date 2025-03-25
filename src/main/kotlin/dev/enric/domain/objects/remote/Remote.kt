@@ -39,6 +39,9 @@ data class Remote(
         return buildString {
             appendLine(ColorUtil.title("Remote Details"))
 
+            append(ColorUtil.label("  Hash: "))
+            appendLine(ColorUtil.text(generateKey().toString()))
+
             append(ColorUtil.label("  Protocol: "))
             appendLine(protocol?.let { ColorUtil.text(it.toString()) } ?: ColorUtil.message("No protocol assigned"))
 

@@ -54,6 +54,9 @@ class Content(val content: ByteArray = ByteArray(0)) : TrackitObject<Content>(),
         return buildString {
             appendLine(ColorUtil.title("Content Details"))
 
+            append(ColorUtil.label("  Hash: "))
+            appendLine(ColorUtil.text(generateKey().toString()))
+
             appendLine(ColorUtil.text(String(content)))
         }
     }
