@@ -68,9 +68,7 @@ data class DiffHandler(
      */
     fun executeDiffBetweenBranches(branch1: Branch, branch2: Branch) {
         val commit1 = BranchIndex.getBranchHead(branch1.generateKey())
-            ?: throw CommitNotFoundException("Branch Head for ${branch1.name} not found")
         val commit2 = BranchIndex.getBranchHead(branch2.generateKey())
-            ?: throw CommitNotFoundException("Branch Head for ${branch2.name} not found")
 
         val allPaths = getAllFilesInTrees(commit1.tree, commit2.tree, onlyCommonFiles = false)
         showDiffs(allPaths)

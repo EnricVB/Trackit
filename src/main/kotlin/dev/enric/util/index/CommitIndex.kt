@@ -42,15 +42,6 @@ object CommitIndex {
     }
 
     /**
-     * Checks if the given hash is the full hash or if it has been abbreviated into a shorter form.
-     *
-     * @return True in case it has been abbreviated
-     */
-    fun isAbbreviatedHash(abbreviatedHash: String): Boolean {
-        return abbreviatedHash.trim().length <= 15
-    }
-
-    /**
      * Retrieves a commit based on the first X letters of the hash.
      * In case multiple commits start with the same pattern, returns all.
      *

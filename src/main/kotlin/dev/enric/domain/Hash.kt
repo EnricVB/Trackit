@@ -30,6 +30,10 @@ data class Hash(val string: String) : Serializable {
         return string.hashCode()
     }
 
+    fun abbreviate(): String {
+        return string.substring(0, 7)
+    }
+
     companion object {
         private fun blake3Hash(data: ByteArray, length: Int = 16): String {
             val hasher = Blake3.newInstance()
@@ -59,6 +63,15 @@ data class Hash(val string: String) : Serializable {
         @JvmStatic
         fun empty32(): Hash {
             return Hash("0".repeat(32))
+        }
+
+        /**
+         * Checks if the given hash is the full hash or if it has been abbreviated into a shorter form.
+         *
+         * @return True in case it has been abbreviated
+         */
+        fun isAbbreviatedHash(abbreviatedHash: String): Boolean {
+            return abbreviatedHash.trim().length <= 15
         }
     }
 
