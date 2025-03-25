@@ -124,7 +124,7 @@ class Diff : TrackitCommand() {
                 val currentBranch = BranchIndex.getCurrentBranch()
                 val headCommit = currentBranch.let { BranchIndex.getBranchHead(it.generateKey()) }
 
-                headCommit?.let { diffHandler.executeDiffBetweenWorkdirAndCommit(it) }
+                headCommit.let { diffHandler.executeDiffBetweenWorkdirAndCommit(it) }
             }
 
             hashes.size == 1 -> {
