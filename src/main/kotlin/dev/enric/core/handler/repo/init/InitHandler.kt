@@ -1,5 +1,6 @@
 package dev.enric.core.handler.repo.init
 
+import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Role
@@ -12,7 +13,7 @@ import dev.enric.util.repository.RepositoryFolderManager
  * InitHandler is an object that handles the initialization of a new repository.
  * It is responsible for creating the necessary repository folders, default roles, the first user, and the main branch.
  */
-object InitHandler {
+object InitHandler : CommandHandler() {
 
 
     /**

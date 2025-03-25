@@ -1,5 +1,6 @@
 package dev.enric.core.handler.administration
 
+import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.objects.Commit
 import dev.enric.domain.objects.User
 import dev.enric.exceptions.IllegalArgumentValueException
@@ -18,7 +19,7 @@ import java.util.*
  * Handles the logging functionality for displaying commit history.
  * Commits are displayed in a paginated format, with support for filters.
  */
-class LogHandler {
+class LogHandler : CommandHandler() {
 
     /**
      * Displays the commit log starting from the current branch head.
