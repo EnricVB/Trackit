@@ -4,7 +4,6 @@ import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.objects.*
 import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.logger.Logger
-import dev.enric.util.index.BranchIndex
 import dev.enric.util.repository.RepositoryFolderManager
 import java.nio.file.Files
 import java.nio.file.Path
@@ -35,7 +34,8 @@ class CheckoutHandler(
      */
     private fun checkReadPermissionOnBranch(user: User) {
         if (!hasReadPermissionOnBranch(user)) {
-            throw InvalidPermissionException("User does not have read permission on branch ${BranchIndex.getCurrentBranch().encode().first}")
+            val branch = Branch.newInstance(commit.branch)
+            throw InvalidPermissionException("User does not have permissions to read branch ${branch.name} (${commit.branch})")
         }
     }
 
