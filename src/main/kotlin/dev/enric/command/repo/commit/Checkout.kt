@@ -48,9 +48,12 @@ class Checkout : TrackitCommand() {
     override fun call(): Int {
         super.call()
 
-        // TODO: Add branch-level permission check before allowing checkout.
-
         val checkoutHandler = CheckoutHandler(getCommitByHash(), sudoArgs)
+
+        // Will never return 1 because the checkCanCreateRole method will throw an exception if the role can't be created
+        if (!checkoutHandler.canDoCommit()) {
+            return 1
+        }
 
         checkoutHandler.preCheckout()
         checkoutHandler.checkout()

@@ -1,5 +1,6 @@
 package dev.enric.core.handler.config
 
+import dev.enric.core.handler.CommandHandler
 import dev.enric.core.security.AuthUtil
 import dev.enric.core.security.PasswordHash
 import dev.enric.util.common.EnvironmentVariables
@@ -20,7 +21,7 @@ import kotlin.io.path.outputStream
  * @property password The password of the user. Can be null.
  * @property salt The salt used for password hashing. Can be null.
  */
-class KeepSession(val username: String, val password: String?, val salt: ByteArray?) {
+class KeepSession(val username: String, val password: String?, val salt: ByteArray?) : CommandHandler() {
     private val repositoryManager = RepositoryFolderManager()
     private val configFile: Path = repositoryManager.getConfigFilePath()
 

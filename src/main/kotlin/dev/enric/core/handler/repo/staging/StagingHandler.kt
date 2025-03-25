@@ -1,5 +1,6 @@
 package dev.enric.core.handler.repo.staging
 
+import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Content
 import dev.enric.logger.Logger
@@ -16,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap
  * It interacts with the staging index, which keeps track of staged files and their hashes.
  * @param force If true, allows forcing changes in staging.
  */
-data class StagingHandler(val force: Boolean = false) {
+data class StagingHandler(val force: Boolean = false) : CommandHandler() {
     private val repositoryFolderManager = RepositoryFolderManager()
     private val stagingIndex = repositoryFolderManager.getStagingIndexPath()
     private val stagedFilesCache = ConcurrentHashMap<String, Path>()

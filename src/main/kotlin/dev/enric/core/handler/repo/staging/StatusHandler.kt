@@ -1,5 +1,6 @@
 package dev.enric.core.handler.repo.staging
 
+import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.objects.User
 import dev.enric.logger.Logger
 import dev.enric.util.common.ColorUtil
@@ -19,7 +20,7 @@ import kotlin.io.path.walk
  * This class provides functionality to check the state of files in the working directory,
  * determine which files have been modified, staged, or ignored, and display this information.
  */
-object StatusHandler {
+object StatusHandler : CommandHandler() {
     val repositoryFolderManager = RepositoryFolderManager()
 
     /**

@@ -1,5 +1,6 @@
 package dev.enric.core.handler.repo.commit
 
+import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.objects.Commit
 import dev.enric.domain.objects.Content
 import dev.enric.domain.objects.Tree
@@ -22,7 +23,7 @@ class RestoreHandler(
     val commit: Commit? = CommitIndex.getCurrentCommit(),
     val file: Path? = null,
     val sudoArgs: Array<String>? = null
-) {
+) : CommandHandler() {
 
     /**
      * Restores the specified [file] or all files from the [commit] into the Working Directory.

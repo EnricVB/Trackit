@@ -1,5 +1,6 @@
 package dev.enric.core.handler.repo.ignore
 
+import dev.enric.core.handler.CommandHandler
 import dev.enric.logger.Logger
 import dev.enric.util.repository.RepositoryFolderManager
 import dev.enric.util.common.SerializablePath
@@ -13,7 +14,7 @@ import java.nio.file.StandardOpenOption
  * Class that handles the .ignore file in the repository.
  * It allows to ignore files and directories from being tracked.
  */
-object IgnoreHandler {
+object IgnoreHandler : CommandHandler() {
     private val repositoryFolderManager = RepositoryFolderManager()
     private val ignoreFile = repositoryFolderManager.getInitFolderPath().resolve(".ignore")
 
