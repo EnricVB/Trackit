@@ -101,7 +101,7 @@ data class DiffHandler(
             if (version1 == version2) return@forEach
 
             Logger.log("File: $path")
-            val diff = Utility.showDiff(version1, version2)
+            val diff = Utility.fileDiff(version1, version2)
             Logger.log(diff)
             Logger.log("--------------------")
         }

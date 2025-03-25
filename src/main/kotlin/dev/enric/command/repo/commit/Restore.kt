@@ -6,8 +6,8 @@ import dev.enric.core.handler.repo.commit.RestoreHandler
 import dev.enric.domain.objects.Commit
 import dev.enric.exceptions.IllegalArgumentValueException
 import dev.enric.util.index.CommitIndex
-import dev.enric.util.repository.RepositoryFolderManager
 import picocli.CommandLine.*
+import java.nio.file.Path
 
 /**
  * Command to restore the Working Directory to the state of a specified commit.
@@ -53,7 +53,7 @@ class Restore : TrackitCommand() {
      * The file to restore from the commit.
      */
     @Parameters(index = "1", paramLabel = "File", description = ["The file to restore from the commit"], arity = "0..1")
-    var pathString: String? = null
+    var restoreFile: Path? = null
 
     /**
      * Executes the restore process.
@@ -68,9 +68,7 @@ class Restore : TrackitCommand() {
         super.call()
 
         val commit = getCommitByHash()
-        val file = if (pathString.isNullOrEmpty()) null else RepositoryFolderManager().getInitFolderPath().resolve(pathString!!)
-
-        val restoreHandler = RestoreHandler(commit = commit, file = file, sudoArgs = sudoArgs)
+        val restoreHandler = RestoreHandler(commit = commit, file = restoreFile, sudoArgs = sudoArgs)
         restoreHandler.checkout()
 
         return 0
