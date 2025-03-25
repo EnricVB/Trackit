@@ -14,7 +14,7 @@ import picocli.CommandLine.Command
  * permission structure of the repository.
  *
  * Usage example:
- *   trackit role-list
+ *   trackit list-role
  *
  * Output includes:
  *   - Role name
@@ -23,7 +23,7 @@ import picocli.CommandLine.Command
  *   - Branch permissions (e.g., main rw, feature r)
  */
 @Command(
-    name = "role-list",
+    name = "list-role",
     description = ["List all roles in the repository or system."],
     footer = [
         "",
@@ -37,7 +37,7 @@ import picocli.CommandLine.Command
         "  - Branch permissions (e.g., main rw, feature r-)",
         "",
         "Example:",
-        "  trackit role-list"
+        "  trackit list-role"
     ],
     mixinStandardHelpOptions = true,
 )
