@@ -49,6 +49,8 @@ data class SimpleTag(
     }
 
     companion object {
+        private const val serialVersionUID: Long = 1L
+
         @JvmStatic
         fun newInstance(hash : Hash) : SimpleTag {
             return SimpleTag().decode(hash)

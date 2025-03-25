@@ -70,6 +70,8 @@ data class BranchPermission(
     }
 
     companion object {
+        private const val serialVersionUID: Long = 1L
+
         const val READ = 1 shl 0
         const val WRITE = 1 shl 1
 

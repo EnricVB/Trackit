@@ -20,6 +20,8 @@ enum class DataProtocol(
     }
 
     companion object Factory {
+        private const val serialVersionUID: Long = 1L
+
         @JvmStatic
         fun newSSHInstance(user: String, host: String, port: Int, path: String): DataProtocol {
             return SSH.apply {

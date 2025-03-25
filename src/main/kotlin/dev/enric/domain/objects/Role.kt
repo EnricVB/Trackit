@@ -74,6 +74,7 @@ data class Role(
     }
 
     companion object {
+        private const val serialVersionUID: Long = 1L
 
         @JvmStatic
         fun newInstance(hash: Hash): Role {

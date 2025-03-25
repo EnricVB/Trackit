@@ -48,6 +48,8 @@ data class Remote(
     }
 
     companion object {
+        private const val serialVersionUID: Long = 1L
+
         @JvmStatic
         fun newInstance(hash : Hash) : Remote {
             return Remote().decode(hash)
