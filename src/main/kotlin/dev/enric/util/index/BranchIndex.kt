@@ -5,6 +5,7 @@ import dev.enric.domain.Hash.HashType.BRANCH
 import dev.enric.domain.Hash.HashType.USER
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
+import dev.enric.logger.Logger
 import dev.enric.util.index.CommitIndex.repositoryFolderManager
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.File
@@ -82,15 +83,14 @@ object BranchIndex {
      * @param branchHash The hash of the branch.
      * @return A [Commit] representing the head of the branch, or null if not found.
      */
-    fun getBranchHead(branchHash: Hash): Commit? {
+    fun getBranchHead(branchHash: Hash): Commit {
         val branchHeadPath = repositoryFolderManager.getBranchHeadPath()
         val lines = Files.readAllLines(branchHeadPath)
 
-        val targetLine = lines.find { it.startsWith(branchHash.string) }
+        val targetLine = lines.find { it.startsWith(branchHash.string) } ?: throw throw IllegalStateException("Branch head not found for branch $branchHash")
+        val split = targetLine.trim().split(":").takeIf { it.size == 2 } ?: throw IllegalStateException("Branch head file is corrupted: expected ':' separator.")
 
-        return targetLine?.split(":")?.getOrNull(1)?.trim()?.takeIf { it.isNotEmpty() }?.let { commitHashStr ->
-            Commit.newInstance(Hash(commitHashStr))
-        }
+        return Commit.newInstance(Hash(split[1]))
     }
 
     /**
