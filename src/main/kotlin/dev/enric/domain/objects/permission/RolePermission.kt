@@ -91,6 +91,8 @@ data class RolePermission(
     }
 
     companion object {
+        private const val serialVersionUID: Long = 1L
+
         const val CREATE_ROLE = 1 shl 0
         const val MODIFY_ROLE = 1 shl 1
         const val ASSIGN_ROLE = 1 shl 2

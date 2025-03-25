@@ -55,6 +55,8 @@ class Branch(val name: String = "") : TrackitObject<Branch>(), Serializable {
     }
 
     companion object {
+        private const val serialVersionUID: Long = 1L
+
         @JvmStatic
         fun newInstance(hash: Hash): Branch {
             return Branch().decode(hash)
