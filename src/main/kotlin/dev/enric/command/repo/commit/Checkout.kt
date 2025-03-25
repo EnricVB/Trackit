@@ -68,7 +68,7 @@ class Checkout : TrackitCommand() {
      * @return The resolved Commit instance.
      */
     private fun getCommitByHash(): Commit {
-        val hashes = if (CommitIndex.isAbbreviatedHash(commitHash)) {
+        val hashes = if (Hash.isAbbreviatedHash(commitHash)) {
             CommitIndex.getAbbreviatedCommit(commitHash)
         } else {
             listOf(Hash(commitHash))
