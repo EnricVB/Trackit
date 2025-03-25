@@ -1,5 +1,6 @@
 package dev.enric.core.handler.administration
 
+import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.objects.Commit
 import dev.enric.domain.objects.Content
 import dev.enric.domain.objects.Tree
@@ -9,7 +10,7 @@ import dev.enric.util.repository.RepositoryFolderManager
 import java.io.File
 import java.nio.file.Files
 
-object BlameHandler {
+object BlameHandler : CommandHandler() {
 
     fun getCommitContent(commit: Commit, file: File): List<String>? {
         val repositoryFolderManager = RepositoryFolderManager()
