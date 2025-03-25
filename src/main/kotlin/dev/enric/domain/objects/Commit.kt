@@ -62,15 +62,15 @@ data class Commit(
         val confirmer = User.newInstance(confirmer)
 
         return buildString {
-            appendLine(ColorUtil.title("commit ${generateKey().string}"))
-
-            append(ColorUtil.label("  Hash: "))
+            append(ColorUtil.label("Hash: "))
             appendLine(ColorUtil.text(generateKey().toString()))
+
+            appendLine()
 
             append("Author: \t${author.name}")
             if (author.mail.isNotBlank()) append(" <${author.mail}>")
             if (author.phone.isNotBlank()) append(" <${author.phone}>")
-            appendLine(" : ${author.encode().first}")
+            appendLine(" - ${author.encode().first}")
 
             if (confirmer != author) {
                 append("Confirmer: \t${confirmer.name}")
