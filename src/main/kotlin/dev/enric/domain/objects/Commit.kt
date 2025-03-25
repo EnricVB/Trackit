@@ -84,6 +84,8 @@ data class Commit(
     }
 
     companion object {
+        private const val serialVersionUID: Long = 1L
+
         @JvmStatic
         fun newInstance(hash : Hash) : Commit {
             return Commit().decode(hash)

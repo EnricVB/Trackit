@@ -59,6 +59,8 @@ class Content(val content: ByteArray = ByteArray(0)) : TrackitObject<Content>(),
     }
 
     companion object {
+        private const val serialVersionUID: Long = 1L
+
         @JvmStatic
         fun newInstance(hash: Hash): Content {
             return Content().decode(hash)
