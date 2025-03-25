@@ -5,7 +5,6 @@ import dev.enric.core.handler.management.users.UserCreationHandler
 import dev.enric.logger.Logger
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
-import java.io.Console
 
 /**
  * Command to create a new user in the Trackit system.
@@ -18,13 +17,13 @@ import java.io.Console
  *
  * Usage examples:
  *   - Create user with password argument:
- *     trackit user-create -n Alice -m alice@example.com -P 123456789 -r Developer Tester
+ *     trackit create-user -n Alice -m alice@example.com -P 123456789 -r Developer Tester
  *
  *   - Create user interactively:
- *     trackit user-create -n Bob -p secretPass -r Admin
+ *     trackit create-user -n Bob -p secretPass -r Admin
  */
 @Command(
-    name = "user-create",
+    name = "create-user",
     description = ["Create a new user account with optional contact info and role assignment."],
     footer = [
         "",
@@ -33,8 +32,8 @@ import java.io.Console
         "  If password is omitted, it will be prompted interactively (if supported).",
         "",
         "Examples:",
-        "  trackit user-create -n Alice -p secretPass -m alice@example.com -P 123456789 -r Developer Tester",
-        "  trackit user-create -n Bob -p myPassword -r Admin",
+        "  trackit create-user -n Alice -p secretPass -m alice@example.com -P 123456789 -r Developer Tester",
+        "  trackit create-user -n Bob -p myPassword -r Admin",
         "",
         "Notes:",
         "  - Use '-r' followed by one or more roles separated by space.",
@@ -49,15 +48,15 @@ class UserCreation : TrackitCommand() {
      * The username for the new user.
      * Must be unique within the system.
      */
-    @Option(names = ["--name", "-n"], description = ["User name."], required = true)
+    @Option(names = ["--name", "-n"], description = ["User name."], interactive = true)
     var name: String = ""
 
     /**
      * The password for the user.
      * If omitted, the password will be prompted interactively (if environment supports it).
      */
-    @Option(names = ["--password", "-p"], description = ["User password."], interactive = true)
-    var password: String? = null
+    @Option(names = ["--password", "-p"], description = ["User password."], interactive = true, echo = false)
+    var password: String = ""
 
     /**
      * Optional email contact for the user.
@@ -91,12 +90,11 @@ class UserCreation : TrackitCommand() {
     override fun call(): Int {
         super.call()
 
-        // Handle interactive password input if none was provided via argument
-        password = assignInteractivePassword() ?: return 1
+        askUserInteractiveData()
 
         val handler = UserCreationHandler(
             name,
-            password!!,
+            password,
             mail,
             phone,
             roles,
@@ -113,23 +111,21 @@ class UserCreation : TrackitCommand() {
         return 0
     }
 
-    /**
-     * Prompts the user to enter a password interactively via the console.
-     * Returns the entered password or null if interactive input is not possible.
-     */
-    fun assignInteractivePassword(): String? {
-        if (password.isNullOrBlank()) {
-            val console: Console? = System.console()
+    private fun askUserInteractiveData() {
+        if (name.isBlank()) {
+            do {
+                name = askForUsername()
 
-            return if (console != null) {
-                // Read password securely without echoing to console
-                String(console.readPassword("Enter password: "))
-            } else {
-                Logger.error("Password is required but cannot be read in this environment")
-                null
-            }
+                if (name.isBlank()) Logger.error("Username is required.")
+            } while (name.isBlank())
         }
 
-        return password
+        if (password.isBlank()) {
+            do {
+                password = askForPassword()
+
+                if (password.isBlank()) Logger.error("Password is required.")
+            } while (password.isBlank())
+        }
     }
 }

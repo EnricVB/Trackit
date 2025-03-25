@@ -3,6 +3,7 @@ package dev.enric.command
 import dev.enric.core.commandconsumer.SudoArgsParameterConsumer
 import dev.enric.logger.Logger
 import picocli.CommandLine.Option
+import java.util.*
 import java.util.concurrent.Callable
 
 /**
@@ -94,5 +95,27 @@ abstract class TrackitCommand : Callable<Int> {
             },
             this.javaClass.simpleName
         )
+    }
+
+    protected fun askForUsername() : String {
+        val console = System.console()
+
+        if (console != null) { // This is running in a terminal
+            return String(console.readPassword("Enter username: "))
+        } else { // This is running in an IDE
+            Logger.log("Enter username: ")
+            return Scanner(System.`in`).nextLine()
+        }
+    }
+
+    protected fun askForPassword() : String {
+        val console = System.console()
+
+        if (console != null) { // This is running in a terminal
+            return String(console.readPassword("Enter password: "))
+        } else { // This is running in an IDE
+            Logger.log("Enter password: ")
+            return Scanner(System.`in`).nextLine()
+        }
     }
 }

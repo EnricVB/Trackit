@@ -31,7 +31,7 @@ open class CommandHandler {
             }
         }
 
-        throw UserNotFoundException("Couldn't log in. celTry keeping session with 'trackit config --keep-session' or use '--sudo' option.")
+        throw UserNotFoundException("Couldn't log in. Try keeping session with 'trackit config --keep-session' or use '--sudo' option.")
     }
 
     /**
