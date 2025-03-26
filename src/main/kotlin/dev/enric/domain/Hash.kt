@@ -85,8 +85,8 @@ data class Hash(val string: String) : Serializable {
         CONTENT(parseText("Content", 1)),                   // cd
         TREE(parseText("Tree", 1)),                         // 89
         COMMIT(parseText("Commit", 1)),                     // c0
-        SIMPLE_TAG(parseText("SimpleTag", 1)),              //
-        COMPLEX_TAG(parseText("ComplexTag", 1)),            //
+        SIMPLE_TAG(parseText("SimpleTag", 1)),              // 3e
+        COMPLEX_TAG(parseText("ComplexTag", 1)),            // dd
         USER(parseText("User", 1)),                         // 7b
         BRANCH(parseText("Branch", 1)),                     // 21
         REMOTE(parseText("Remote", 1)),                     //

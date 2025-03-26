@@ -1,10 +1,13 @@
 package dev.enric.domain.objects
 
 import dev.enric.domain.Hash
-import dev.enric.domain.Hash.HashType.COMMIT
+import dev.enric.domain.Hash.HashType.*
 import dev.enric.domain.TrackitObject
+import dev.enric.domain.objects.tag.ComplexTag
+import dev.enric.domain.objects.tag.SimpleTag
 import dev.enric.exceptions.IllegalHashException
 import dev.enric.util.common.ColorUtil
+import dev.enric.util.index.TagIndex
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
@@ -20,8 +23,7 @@ data class Commit(
     var confirmer: Hash = Hash.empty32(),
     var date: Timestamp = Timestamp.from(Instant.now()),
     var title: String = "",
-    var message: String = "",
-    var tag: String = ""
+    var message: String = ""
 ) : TrackitObject<Commit>(), Serializable {
 
     override fun decode(hash: Hash): Commit {
@@ -70,13 +72,24 @@ data class Commit(
             append("Author: \t${author.name}")
             if (author.mail.isNotBlank()) append(" <${author.mail}>")
             if (author.phone.isNotBlank()) append(" <${author.phone}>")
-            appendLine(" - ${author.encode().first}")
+            appendLine(" - ${author.generateKey()}")
 
             if (confirmer != author) {
                 append("Confirmer: \t${confirmer.name}")
                 if (confirmer.mail.isNotBlank()) append(" <${confirmer.mail}>")
                 if (confirmer.phone.isNotBlank()) append(" <${confirmer.phone}>")
-                appendLine(" : ${confirmer.encode().first}")
+                appendLine(" : ${confirmer.generateKey()}")
+            }
+
+            TagIndex.getTagsByCommit(generateKey()).forEach {
+                val isComplexTag = it.string.startsWith(COMPLEX_TAG.hash.string)
+                val isSimpleTag = it.string.startsWith(SIMPLE_TAG.hash.string)
+
+                if (isComplexTag) {
+                    appendLine("Tag: ${ComplexTag.newInstance(it).name}")
+                } else if (isSimpleTag) {
+                    appendLine("Tag: ${SimpleTag.newInstance(it).name}")
+                }
             }
 
             appendLine("Date: $date")

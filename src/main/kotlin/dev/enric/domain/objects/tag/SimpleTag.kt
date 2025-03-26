@@ -11,7 +11,6 @@ import java.nio.file.Files
 
 data class SimpleTag(
     override val name: String = "",
-    override val commit: Hash? = null
 ) : Tag, TrackitObject<SimpleTag>(), Serializable {
 
     override fun decode(hash: Hash): SimpleTag {
@@ -45,9 +44,6 @@ data class SimpleTag(
 
             append(ColorUtil.label("  Name: "))
             appendLine(if (name.isNotEmpty()) ColorUtil.text(name) else ColorUtil.message("No name assigned"))
-
-            append(ColorUtil.label("  Commit: "))
-            appendLine(commit?.let { ColorUtil.text(it.toString()) } ?: ColorUtil.message("No commit assigned"))
         }
     }
 
