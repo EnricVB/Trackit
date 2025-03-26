@@ -34,7 +34,6 @@ data class RepositoryFolderManager(private val initFolder: Path = Path.of(System
         const val REMOTE_POINTER = "REMOTE_POINTER"
         const val BRANCH_HEAD = "BRANCH_HEAD"
         const val TAG_INDEX = "TAG_INDEX"
-        const val PERMISSION_INDEX = "PERMISSION_INDEX"
     }
 
     private val trackitFolder: Path by lazy { initFolder.resolve(TRACKIT_FOLDER) }
@@ -68,7 +67,6 @@ data class RepositoryFolderManager(private val initFolder: Path = Path.of(System
         getRemotePointerPath().toFile().createNewFile()
         getBranchHeadPath().toFile().createNewFile()
         getTagIndexPath().toFile().createNewFile()
-        getPermissionIndexPath().toFile().createNewFile()
 
         assignInitialStagingIndex()
         assignSecretKey()
@@ -137,10 +135,6 @@ data class RepositoryFolderManager(private val initFolder: Path = Path.of(System
 
     fun getTagIndexPath(): Path {
         return getIndexFolderPath().resolve(TAG_INDEX)
-    }
-
-    fun getPermissionIndexPath(): Path {
-        return getIndexFolderPath().resolve(PERMISSION_INDEX)
     }
 
     fun getSecretKeyPath(): Path {
