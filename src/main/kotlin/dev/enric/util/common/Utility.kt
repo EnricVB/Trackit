@@ -28,10 +28,10 @@ object Utility {
 
         rows.forEach {
             when (it.tag ?: EQUAL) {
-                INSERT -> diff.append("+ ${ColorUtil.insertLine(it.newLine)}\n")
-                DELETE -> diff.append("- ${ColorUtil.deleteLine(it.oldLine)}\n")
-                CHANGE -> diff.append("- ${it.oldLine}\n+ ${it.newLine}\n")
-                else -> diff.append("  ${it.oldLine}\n")
+                INSERT -> diff.appendLine("+ ${ColorUtil.insertLine(it.newLine)}")
+                DELETE -> diff.appendLine("- ${ColorUtil.deleteLine(it.oldLine)}")
+                CHANGE -> diff.appendLine("- ${ColorUtil.deleteLine(it.oldLine)}\n+ ${ColorUtil.insertLine(it.newLine)}")
+                else -> diff.appendLine("  ${it.oldLine}")
             }
         }
 

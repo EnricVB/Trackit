@@ -38,8 +38,8 @@ import picocli.CommandLine.*
     footer = [
         "",
         "Examples:",
-        "  trackit diff                           Compare Working Directory vs Staging",
-        "  trackit diff --staged                 Compare Staging Area vs HEAD",
+        "  trackit diff                         Compare Working Directory vs Staging",
+        "  trackit diff --staged                Compare Staging Area vs HEAD",
         "  trackit diff commit1 commit2         Compare two commits",
         "  trackit diff --file src/Main.kt      Filter by file",
     ],
@@ -83,7 +83,7 @@ class Diff : TrackitCommand() {
      */
     @Parameters(
         index = "0..1",
-        paramLabel = "COMMITS/BRANCHES",
+        paramLabel = "Hash",
         description = ["Specify one or two commits/branches to compare. If only one is specified, it is compared with Working Area."],
         arity = "0..2"
     )
