@@ -123,7 +123,7 @@ data class User(
             val mail: String
             val phone: String
             val password: String
-            val rolesHash = roles.map { it.encode().first }.toMutableList()
+            val rolesHash = roles.map { it.generateKey() }.toMutableList()
             val salt = PasswordHash.generateSalt()
 
             if (console != null) { // This is running in a terminal
@@ -148,7 +148,7 @@ data class User(
 
         @JvmStatic
         fun createUser(username: String, password: String, mail: String, phone: String, roles: List<Role>): User {
-            val rolesHash = roles.map { it.encode().first }.toMutableList()
+            val rolesHash = roles.map { it.generateKey() }.toMutableList()
             val salt = PasswordHash.generateSalt()
 
             return User(username, PasswordHash.hash(password, salt), salt, mail, phone, rolesHash)
