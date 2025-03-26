@@ -35,7 +35,6 @@ import picocli.CommandLine.*
 @Command(
     name = "diff",
     description = ["Compare changes between repository states (commits, branches, staging, working directory)."],
-    header = ["--- Trackit Diff Command ---"],
     footer = [
         "",
         "Examples:",
