@@ -129,7 +129,7 @@ class UserModifyHandler(
                 roles.add(RoleIndex.UNDEFINED_ROLE)
             }
 
-            user.roles.addAll(roles.map { it.encode().first })
+            user.roles.addAll(roles.map { it.generateKey() })
         }
 
         user.encode(true)

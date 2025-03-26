@@ -38,7 +38,7 @@ object StatusHandler : CommandHandler() {
         Logger.log("On branch ${branch.name}")
 
         if (currentCommit != null) {
-            Logger.log("Current commit: ${currentCommit.encode().first}")
+            Logger.log("Current commit: ${currentCommit.generateKey()}")
             Logger.log("Author: ${User.newInstance(currentCommit.author).name}")
             Logger.log("Date: ${currentCommit.date}")
         }
