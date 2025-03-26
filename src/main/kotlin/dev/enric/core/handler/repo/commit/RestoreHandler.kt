@@ -7,6 +7,7 @@ import dev.enric.domain.objects.Tree
 import dev.enric.exceptions.CommitNotFoundException
 import dev.enric.logger.Logger
 import dev.enric.util.index.CommitIndex
+import dev.enric.util.repository.RepositoryFolderManager
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
@@ -61,7 +62,7 @@ class RestoreHandler(
                 StandardOpenOption.WRITE
             )
 
-            println("Restored file: ${tree.serializablePath.pathString}")
+            Logger.log("Restored file: ${tree.serializablePath.relativePath(RepositoryFolderManager().getInitFolderPath())}")
         }
 
         Logger.log("Restore successful.")

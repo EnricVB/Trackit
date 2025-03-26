@@ -46,13 +46,23 @@ class Restore : TrackitCommand() {
      * The hash of the commit to restore from.
      * Supports full and abbreviated hashes.
      */
-    @Parameters(index = "0", paramLabel = "Hash", description = ["The hash of the commit to restore from"], arity = "0..1")
+    @Option(
+        names = ["-c", "--commit"],
+        paramLabel = "Commit Hash",
+        description = ["The hash of the commit to restore from"],
+        required = false
+    )
     var commitHash: String? = null
 
     /**
      * The file to restore from the commit.
      */
-    @Parameters(index = "1", paramLabel = "File", description = ["The file to restore from the commit"], arity = "0..1")
+    @Option(
+        names = ["-f", "--file"],
+        paramLabel = "File path",
+        description = ["The file to restore from the commit"],
+        required = true
+    )
     var restoreFile: Path? = null
 
     /**
