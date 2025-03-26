@@ -15,7 +15,6 @@ import java.nio.file.Path
 @Command(
     name = "blame",
     description = ["Indicates who is responsible for the changes in a file."],
-    header = ["--- Trackit Blame Command ---"],
     footer = [
     ],
     mixinStandardHelpOptions = true,
