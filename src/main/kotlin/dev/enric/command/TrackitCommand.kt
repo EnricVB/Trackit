@@ -97,17 +97,28 @@ abstract class TrackitCommand : Callable<Int> {
         )
     }
 
+    /**
+     * Prompts the user for a username.
+     *
+     * @return The entered username
+     */
     protected fun askForUsername() : String {
         val console = System.console()
 
         if (console != null) { // This is running in a terminal
-            return String(console.readPassword("Enter username: "))
+            return console.readLine("Enter username: ")
         } else { // This is running in an IDE
             Logger.log("Enter username: ")
             return Scanner(System.`in`).nextLine()
         }
     }
 
+    /**
+     * Prompts the user for a password.
+     * This method hides the password input.
+     *
+     * @return The entered password
+     */
     protected fun askForPassword() : String {
         val console = System.console()
 

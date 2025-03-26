@@ -66,6 +66,13 @@ class Commit : TrackitCommand() {
     var stageAllFiles: Boolean = false
 
     /**
+     * Adds a tag to the commit.
+     * If the tag already exists, it will be assigned to him, otherwise will create a new SimpleTag.
+     */
+    @Option(names = ["--tag", "-t"], description = ["Adds a tag to the commit"])
+    var tag: String? = null
+
+    /**
      * Allows confirming the commit as a different user.
      * Requires two arguments (username and password).
      * This supports administrative overrides or peer confirmation.
@@ -100,7 +107,7 @@ class Commit : TrackitCommand() {
         // Initialize commit metadata such as author and confirmer
         commitHandler.initializeCommitProperties(sudoArgs, confirmerArgs)
 
-        // Stage all files if the flag is set
+        // Stage all files if the flag is set and serialize the tree structure
         commitHandler.preCommit(stageAllFiles)
 
         // Check if commit is allowed; will throw if invalid
@@ -110,6 +117,7 @@ class Commit : TrackitCommand() {
 
         // Execute the commit process
         commitHandler.processCommit()
+        commitHandler.assignTag(tag ?: "")
         commitHandler.postCommit()
 
         return 0

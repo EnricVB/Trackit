@@ -5,6 +5,7 @@ import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.Hash
 import dev.enric.core.handler.repo.staging.StagingHandler
 import dev.enric.domain.objects.*
+import dev.enric.domain.objects.tag.SimpleTag
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.logger.Logger
@@ -12,6 +13,7 @@ import dev.enric.util.common.FileStatus
 import dev.enric.util.common.SerializablePath
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.CommitIndex
+import dev.enric.util.index.TagIndex
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.File
 import java.nio.channels.FileChannel
@@ -49,7 +51,7 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
     private fun checkWritePermissionOnBranch(user: User) {
         if (!hasWritePermissionOnBranch(user)) {
             val branch = BranchIndex.getCurrentBranch()
-            throw InvalidPermissionException("User does not have permission to write on branch ${branch.name} (${branch.encode().first})")
+            throw InvalidPermissionException("User does not have permission to write on branch ${branch.name} (${branch.generateKey()})")
         }
     }
 
@@ -86,13 +88,13 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
      */
     fun initializeCommitProperties(author: Array<String>?, confirmer: Array<String>?) {
         commit.previousCommit = CommitIndex.getCurrentCommit()?.encode()?.first
-        commit.branch = BranchIndex.getCurrentBranch().encode().first
+        commit.branch = BranchIndex.getCurrentBranch().generateKey()
 
         Logger.log("Logging for author...")
-        commit.author = isValidSudoUser(author).encode().first
+        commit.author = isValidSudoUser(author).generateKey()
 
         Logger.log("Logging for confirmer...")
-        commit.confirmer = isValidSudoUser(confirmer).encode().first
+        commit.confirmer = isValidSudoUser(confirmer).generateKey()
 
         commit.date = Timestamp.from(java.time.Instant.now())
     }
@@ -118,6 +120,30 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
     }
 
     /**
+     * Assigns a tag to the commit.
+     * If the tag already exists, it will be assigned to the commit.
+     * Otherwise, a new SimpleTag will be created.
+     *
+     * @see SimpleTag
+     * @see TagIndex
+     */
+    fun assignTag(tagName : String) {
+        if (tagName.isNotBlank()) {
+            Logger.log("Adding tag $tagName for commit ${commit.generateKey()}")
+
+            // Obtain the tag hash or create a new one if it does not exist
+            val tag : Hash = if (TagIndex.existsTag(tagName)) {
+                TagIndex.getTag(tagName)!!                       // Get the tag hash from the index
+            } else {
+                SimpleTag(tagName).encode(true).first // Create a new tag hash
+            }
+
+            // Assign the tag to the commit in the TagIndex
+            TagIndex.addTagToCommit(tag, commit.generateKey())
+        }
+    }
+
+    /**
      * Commits the tree structure to the commit object.
      * This is done by creating a tree structure based on the staged files.
      *
@@ -135,13 +161,16 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
     private fun keepPreviousCommitTree() {
         val previousCommit = CommitIndex.getCurrentCommit() ?: return
 
+        // Remove deleted files from the previous commit tree
         previousCommit.tree.removeIf { treeHash ->
             val tree = Tree.newInstance(treeHash)
             return@removeIf FileStatus.hasBeenDeleted(tree.serializablePath.toPath().toFile())
         }
 
+        // Add new files to the current commit tree
         val currentPaths = commit.tree.map { Tree.newInstance(it).serializablePath.toPath() }.toSet()
 
+        // Add files that are not in the current commit tree but are in the previous commit tree
         previousCommit.tree.forEach { treeHash ->
             val tree = Tree.newInstance(treeHash)
             val treePath = tree.serializablePath.toPath()
