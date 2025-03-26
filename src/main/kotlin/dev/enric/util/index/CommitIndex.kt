@@ -61,7 +61,7 @@ object CommitIndex {
         return getAllCommit()
             .map { Commit.newInstance(it) }
             .filter { Branch.newInstance(it.branch).name == branchName }
-            .map { it.encode().first }
+            .map { it.generateKey() }
     }
 
     /**
