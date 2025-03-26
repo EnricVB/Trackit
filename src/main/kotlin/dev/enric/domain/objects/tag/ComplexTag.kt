@@ -13,7 +13,6 @@ import java.time.Instant
 
 data class ComplexTag(
     override val name: String = "",
-    override val commit: Hash? = null,
     val user: Hash = Hash.empty32(),
     val date: Timestamp = Timestamp.from(Instant.now()),
     val message: String = ""
@@ -50,9 +49,6 @@ data class ComplexTag(
 
             append(ColorUtil.label("  Name: "))
             appendLine(if (name.isNotEmpty()) ColorUtil.text(name) else ColorUtil.message("No name assigned"))
-
-            append(ColorUtil.label("  Commit: "))
-            appendLine(commit?.let { ColorUtil.text(it.toString()) } ?: ColorUtil.message("No commit assigned"))
 
             append(ColorUtil.label("  User: "))
             appendLine(ColorUtil.text(user.toString()))
