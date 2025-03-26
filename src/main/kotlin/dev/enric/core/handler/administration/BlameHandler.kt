@@ -10,8 +10,20 @@ import dev.enric.util.repository.RepositoryFolderManager
 import java.io.File
 import java.nio.file.Files
 
+
+/**
+ * BlameHandler allows identifying the author of changes in a file within a repository.
+ * It is based on the commit history to track the authorship of each line in the file.
+ */
 object BlameHandler : CommandHandler() {
 
+    /**
+     * Retrieves the content of a file within a specific commit.
+     *
+     * @param commit The commit where the file will be searched.
+     * @param file The file to look for within the commit.
+     * @return A list with the file's lines if found, or `null` if it does not exist in the commit.
+     */
     fun getCommitContent(commit: Commit, file: File): List<String>? {
         val repositoryFolderManager = RepositoryFolderManager()
 
@@ -28,6 +40,14 @@ object BlameHandler : CommandHandler() {
         }
     }
 
+    /**
+     * Compares the lines of the current file with the version stored in the commit and assigns authorship.
+     *
+     * @param originalString List of lines from the current file.
+     * @param commitString List of lines from the file in the analyzed commit.
+     * @param commit The commit where changes will be analyzed.
+     * @param blameString StringBuilder where the analysis result will be stored.
+     */
     fun compareLines(originalString: List<String>, commitString: List<String>, commit: Commit, blameString: StringBuilder) {
         val author = User.newInstance(commit.author)
 
@@ -40,6 +60,13 @@ object BlameHandler : CommandHandler() {
         }
     }
 
+    /**
+     * Generates a history of changes in a file, indicating the author of each line.
+     *
+     * @param file The file to be analyzed.
+     * @param commit Commit from which the search for changes will begin.
+     * @return A string with the authorship of each line in the file.
+     */
     fun blame(file: File, commit: Commit): String {
         val originalString = Files.readAllLines(file.toPath()).toList()
         val blameString = StringBuilder()
