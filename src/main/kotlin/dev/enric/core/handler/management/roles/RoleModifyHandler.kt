@@ -179,7 +179,7 @@ class RoleModifyHandler(
      */
     fun assignRolePermissions(role: Role, rolePermissions: String = this.rolePermissions) {
         // Remove all role permissions to replace them with the new ones
-        role.permissions.removeAll(role.getRolePermissions().map { it.encode().first })
+        role.permissions.removeAll(role.getRolePermissions().map { it.generateKey() })
 
         val rolePermission = RolePermissionIndex.getRolePermission(rolePermissions)?.encode(true)?.first
             ?: RolePermission(rolePermissions).encode(true).first
@@ -214,7 +214,7 @@ class RoleModifyHandler(
             val branchPermission = BranchPermissionIndex
                 .getBranchPermission(updatedBranchPermissionString, branchName)
                 ?.encode(true)?.first
-                ?: BranchPermission(updatedBranchPermissionString, branch.encode().first).encode(true).first
+                ?: BranchPermission(updatedBranchPermissionString, branch.generateKey()).encode(true).first
 
             role.permissions.add(branchPermission)
         }
@@ -238,7 +238,7 @@ class RoleModifyHandler(
                 if (isBranchPermission) {
                     val branchPermission = BranchPermission.newInstance(permission)
 
-                    return@removeIf branchPermission.branch == branch.encode().first
+                    return@removeIf branchPermission.branch == branch.generateKey()
                 }
 
                 return@removeIf false

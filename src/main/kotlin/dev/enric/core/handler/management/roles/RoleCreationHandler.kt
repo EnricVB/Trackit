@@ -185,7 +185,7 @@ class RoleCreationHandler(
             val branchPermission = BranchPermissionIndex
                 .getBranchPermission(updatedBranchPermissionString, branchName)
                 ?.encode(true)?.first
-                ?: BranchPermission(updatedBranchPermissionString, branch.encode().first).encode(true).first
+                ?: BranchPermission(updatedBranchPermissionString, branch.generateKey()).encode(true).first
 
             role.permissions.add(branchPermission)
         }
