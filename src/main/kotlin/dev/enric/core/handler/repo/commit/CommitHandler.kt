@@ -1,7 +1,7 @@
 package dev.enric.core.handler.repo.commit
 
 import dev.enric.command.repo.staging.Stage
-import dev.enric.command.repo.tag.TagHandler
+import dev.enric.core.handler.repo.tag.TagHandler
 import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.Hash
 import dev.enric.core.handler.repo.staging.StagingHandler
