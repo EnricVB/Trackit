@@ -64,15 +64,6 @@ enum class FileStatus(val symbol: String, val description: String) {
     ),
 
     /**
-     * The file has been renamed or moved.
-     */
-    RENAMED(
-        "R",
-        """Renamed files:
-            |   (use "trackit restore <file>..." to restore the file)""".trimMargin()
-    ),
-
-    /**
      * The file is ignored based on `.ignore` rules and will not be tracked.
      */
     IGNORED(
