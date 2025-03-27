@@ -128,6 +128,29 @@ object TagIndex {
     }
 
     /**
+     * Removes a tag from the repository index.
+     * This method removes the specified tag from the tag index, effectively deleting the tag from the repository.
+     * All associations between the tag and commits are removed.
+     *
+     * @param tag The tag hash to remove from the repository.
+     */
+    fun removeTag(tag: Hash) {
+        val tagIndex = repositoryFolderManager.getTagIndexPath().toFile()
+        val tags = tagIndex.readLines().toMutableList()
+
+        // Find the line where the tag is present
+        val tagLineIndex = tags.indexOfFirst { it.startsWith("${tag.string}:") }
+
+        if (tagLineIndex != -1) {
+            // If the tag is found, remove the entire line
+            tags.removeAt(tagLineIndex)
+        }
+
+        // Write the updated tag index back to the file
+        tagIndex.writeText(tags.joinToString("\n"))
+    }
+
+    /**
      * Gets a list of commits associated with a tag.
      * This method searches the tag index for the given tag and returns a list of all commit hashes associated with it.
      * If the tag does not exist, an empty list is returned.

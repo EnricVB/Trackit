@@ -70,7 +70,7 @@ class Commit : TrackitCommand() {
      * If the tag already exists, it will be assigned to him, otherwise will create a new SimpleTag.
      */
     @Option(names = ["--tag", "-t"], description = ["Adds a tag to the commit"])
-    var tag: String? = null
+    var tag: String = ""
 
     /**
      * Allows confirming the commit as a different user.
@@ -117,8 +117,7 @@ class Commit : TrackitCommand() {
 
         // Execute the commit process
         commitHandler.processCommit()
-        commitHandler.assignTag(tag ?: "")
-        commitHandler.postCommit()
+        commitHandler.postCommit(tag)
 
         return 0
     }

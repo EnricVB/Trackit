@@ -1,11 +1,11 @@
 package dev.enric.core.handler.repo.commit
 
 import dev.enric.command.repo.staging.Stage
+import dev.enric.command.repo.tag.TagHandler
 import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.Hash
 import dev.enric.core.handler.repo.staging.StagingHandler
 import dev.enric.domain.objects.*
-import dev.enric.domain.objects.tag.SimpleTag
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.logger.Logger
@@ -13,7 +13,6 @@ import dev.enric.util.common.FileStatus
 import dev.enric.util.common.SerializablePath
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.CommitIndex
-import dev.enric.util.index.TagIndex
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.File
 import java.nio.channels.FileChannel
@@ -120,30 +119,6 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
     }
 
     /**
-     * Assigns a tag to the commit.
-     * If the tag already exists, it will be assigned to the commit.
-     * Otherwise, a new SimpleTag will be created.
-     *
-     * @see SimpleTag
-     * @see TagIndex
-     */
-    fun assignTag(tagName : String) {
-        if (tagName.isNotBlank()) {
-            Logger.log("Adding tag $tagName for commit ${commit.generateKey()}")
-
-            // Obtain the tag hash or create a new one if it does not exist
-            val tag : Hash = if (TagIndex.existsTag(tagName)) {
-                TagIndex.getTag(tagName)!!                       // Get the tag hash from the index
-            } else {
-                SimpleTag(tagName).encode(true).first // Create a new tag hash
-            }
-
-            // Assign the tag to the commit in the TagIndex
-            TagIndex.addTagToCommit(tag, commit.generateKey())
-        }
-    }
-
-    /**
      * Commits the tree structure to the commit object.
      * This is done by creating a tree structure based on the staged files.
      *
@@ -184,14 +159,17 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
     /**
      * Does all the post commit operations as save into indexes the new commit hash, or replace the branch.
      */
-    fun postCommit() {
+    fun postCommit(tag: String) {
         val commitHash = commit.encode(true).first
 
+        // Updates the commit index and the branch index
         CommitIndex.setCurrentCommit(commitHash)
         BranchIndex.setBranchHead(commit.branch, commitHash)
 
-        // TODO: Implement tags
+        // Assigns a tag to the commit
+        TagHandler(tag).assignTag(commit)
 
+        // Removes all the staged files after the commit
         StagingHandler.clearStagingArea()
     }
 
