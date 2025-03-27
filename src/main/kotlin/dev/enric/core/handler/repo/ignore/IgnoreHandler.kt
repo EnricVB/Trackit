@@ -14,7 +14,7 @@ import java.nio.file.StandardOpenOption
  * Class that handles the .ignore file in the repository.
  * It allows to ignore files and directories from being tracked.
  */
-object IgnoreHandler : CommandHandler() {
+class IgnoreHandler : CommandHandler() {
     private val repositoryFolderManager = RepositoryFolderManager()
     private val ignoreFile = repositoryFolderManager.getInitFolderPath().resolve(".ignore")
 

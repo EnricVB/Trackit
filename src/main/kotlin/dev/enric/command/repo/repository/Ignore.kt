@@ -67,7 +67,7 @@ class Ignore : TrackitCommand() {
         super.call()
 
         // Handle the ignore operation
-        IgnoreHandler.ignore(path)
+        IgnoreHandler().ignore(path)
 
         // Log the action
         Logger.log("File ignored")
