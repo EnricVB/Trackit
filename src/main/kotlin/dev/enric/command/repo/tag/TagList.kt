@@ -15,7 +15,7 @@ class TagList : TrackitCommand() {
     /**
      * Name of the tag to be filtered.
      */
-    @Option(names = ["--name", "-n"], description = ["Tag name to filter."], required = true)
+    @Option(names = ["--name", "-n"], description = ["Tag name to filter."], required = false)
     var name: String = ""
 
     override fun call(): Int {

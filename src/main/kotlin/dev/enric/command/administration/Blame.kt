@@ -41,7 +41,7 @@ class Blame : TrackitCommand() {
         val file = filePath.toFile().takeIf { it.exists() }
             ?: throw IllegalStateException("No file found at $filePath")
 
-        Logger.log(BlameHandler.blame(file, commit))
+        Logger.log(BlameHandler().blame(file, commit))
 
         return 0
     }
