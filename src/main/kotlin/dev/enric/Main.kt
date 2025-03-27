@@ -19,6 +19,10 @@ import dev.enric.command.management.users.UserModify
 import dev.enric.command.repo.commit.Checkout
 import dev.enric.command.repo.commit.Restore
 import dev.enric.command.repo.staging.Status
+import dev.enric.command.repo.tag.TagAssign
+import dev.enric.command.repo.tag.TagCreation
+import dev.enric.command.repo.tag.TagList
+import dev.enric.command.repo.tag.TagRemove
 import dev.enric.exceptions.TrackitException
 import dev.enric.logger.Logger
 import dev.enric.util.repository.RepositoryFolderManager
@@ -40,7 +44,9 @@ import picocli.CommandLine.Help.ColorScheme
         Ignore::class, Config::class, Log::class, Diff::class, Blame::class,
         Commit::class, Checkout::class, Restore::class,
         UserCreation::class, UserModify::class, UserList::class,
-        RoleCreation::class, RoleModify::class, RoleList::class]
+        RoleCreation::class, RoleModify::class, RoleList::class,
+        TagAssign::class, TagCreation::class, TagList::class, TagRemove::class
+    ]
 )
 class Main : TrackitCommand() {
 
