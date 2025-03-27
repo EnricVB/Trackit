@@ -42,9 +42,9 @@ object TagIndex {
             val isSimpleTag = tagHash.startsWith(SIMPLE_TAG.hash.string)
 
             // Create the corresponding tag object based on the type
-            val tag : Tag = if (isComplexTag) {
+            val tag: Tag = if (isComplexTag) {
                 ComplexTag.newInstance(Hash(tagHash))
-            } else if(isSimpleTag) {
+            } else if (isSimpleTag) {
                 SimpleTag.newInstance(Hash(tagHash))
             } else {
                 return@forEach
@@ -183,10 +183,25 @@ object TagIndex {
         val tags = tagIndex.readLines()
 
         // Filter lines that contain the commit and extract the tags
-        return tags.filter { it.contains(commit.string) }
-            .flatMap { line ->
-                // Extract tag hashes before the colon
-                line.split(":")[0].trim().split(",").map { Hash(it) }
+        return tags.filter { it.contains(commit.string) }.map {
+                Hash(it.split(":")[0])
             }
+    }
+
+    /**
+     * Gets the hash of a tag by its name.
+     * This method searches the tag index for the given tag name and returns its associated hash.
+     * If the tag does not exist, it returns null.
+     *
+     * @param tagName The name of the tag to search for.
+     * @return The hash of the tag if found, otherwise null.
+     */
+    fun getTagByName(tagName: String): List<Hash> {
+        val tagIndex = repositoryFolderManager.getTagIndexPath().toFile()
+        val tags = tagIndex.readLines()
+
+        return tags.filter { it.contains(tagName) }.map {
+            Hash(it.split(":")[0])
+        }
     }
 }

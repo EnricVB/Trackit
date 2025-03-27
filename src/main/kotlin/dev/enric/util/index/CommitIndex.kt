@@ -53,6 +53,16 @@ object CommitIndex {
     }
 
     /**
+     * Checks if a commit exists in the index.
+     *
+     * @param hash The hash of the commit to be checked.
+     * @return True if the commit exists, false otherwise.
+     */
+    fun commitExists(hash: Hash): Boolean {
+        return Files.exists(repositoryFolderManager.getObjectsFolderPath().resolve(COMMIT.hash.toString()).resolve(hash.string))
+    }
+
+    /**
      * Retrieves all the commits filtered by his branch name.
      *
      * @return A list of [Hash] objects representing the branch commits.
