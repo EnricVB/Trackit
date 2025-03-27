@@ -15,7 +15,7 @@ import java.nio.file.Files
  * BlameHandler allows identifying the author of changes in a file within a repository.
  * It is based on the commit history to track the authorship of each line in the file.
  */
-object BlameHandler : CommandHandler() {
+class BlameHandler : CommandHandler() {
 
     /**
      * Retrieves the content of a file within a specific commit.

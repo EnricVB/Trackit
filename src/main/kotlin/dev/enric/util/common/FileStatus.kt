@@ -184,7 +184,7 @@ enum class FileStatus(val symbol: String, val description: String) {
          */
         fun getStatus(file: File): FileStatus {
             if (!file.exists()) return DELETE
-            if (IgnoreHandler.isIgnored(file.toPath())) return IGNORED
+            if (IgnoreHandler().isIgnored(file.toPath())) return IGNORED
 
             val hash = Content(file.readBytes()).generateKey()
             val contentExists = FileStatus.contentExists(file)
