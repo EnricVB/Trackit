@@ -204,4 +204,11 @@ object TagIndex {
             Hash(it.split(":")[0])
         }
     }
+
+    fun getUnusedTags(): List<Hash> {
+        val tagIndex = repositoryFolderManager.getTagIndexPath().toFile()
+        val tags = tagIndex.readLines()
+
+        return tags.filter { it.split(":")[1].isBlank() }.map { Hash(it.split(":")[0]) }
+    }
 }
