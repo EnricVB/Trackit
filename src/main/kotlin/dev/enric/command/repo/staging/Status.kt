@@ -3,6 +3,7 @@ package dev.enric.command.repo.staging
 import dev.enric.command.TrackitCommand
 import dev.enric.core.handler.repo.staging.StatusHandler
 import picocli.CommandLine.Command
+import picocli.CommandLine.Option
 
 /**
  * Command to display the status of the working directory and staging area.
@@ -41,6 +42,17 @@ import picocli.CommandLine.Command
 class Status : TrackitCommand() {
 
     /**
+     * Ignored option for the log command.
+     *
+     * This option is used to filter the files shown.
+     * By default, the log doesn't show ignored files.
+     */
+    @Option(
+        names = ["--show-ignored", "-i"], description = ["Shows ignored files"], required = false
+    )
+    var showIgnored: Boolean = false
+
+    /**
      * Executes the status check on the current repository.
      *
      * Flow:
@@ -55,7 +67,7 @@ class Status : TrackitCommand() {
         super.call()
 
         // Delegates status computation and printing to the handler
-        StatusHandler.printStatus()
+        StatusHandler.printStatus(showIgnored)
 
         return 0
     }
