@@ -4,6 +4,8 @@ import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.BRANCH_PERMISSION
 import dev.enric.domain.Hash.HashType.ROLE_PERMISSION
 import dev.enric.domain.objects.Branch
+import dev.enric.domain.objects.Role
+import dev.enric.domain.objects.User
 import dev.enric.domain.objects.permission.BranchPermission
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.File
@@ -78,5 +80,22 @@ object BranchPermissionIndex {
 
             branch.name == branchName
         }.toList()
+    }
+
+    /**
+     * Retrieves all the branch permissions that are not being used by any user.
+     *
+     * @return A list of [Hash] objects representing the unused branch permissions.
+     */
+    fun getUnusedPermissions(): List<Hash> {
+        val usedPermissions = UserIndex.getAllUsers()
+            .asSequence()
+            .map { User.newInstance(it) }
+            .flatMap { user -> user.roles.asSequence() }
+            .map { Role.newInstance(it) }
+            .flatMap { role -> role.getBranchPermissions().asSequence() }
+            .toSet()
+
+        return getAllBranchPermissions().filterNot { usedPermissions.contains(BranchPermission.newInstance(it)) }
     }
 }

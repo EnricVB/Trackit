@@ -3,6 +3,7 @@ package dev.enric.util.index
 import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.ROLE
 import dev.enric.domain.objects.Role
+import dev.enric.domain.objects.User
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.File
 import kotlin.io.path.ExperimentalPathApi
@@ -61,5 +62,20 @@ object RoleIndex {
         }.map {
             Hash(it.toString().substringAfterLast(File.separator + ROLE.hash + File.separator))
         }.toList()
+    }
+
+    /**
+     * Retrieves all the role permissions that are not being used by any user.
+     *
+     * @return A list of [Hash] objects representing the unused role permissions.
+     */
+    fun getUnusedRoles(): List<Hash> {
+        val usedRoles = UserIndex.getAllUsers()
+            .asSequence()
+            .map { User.newInstance(it) }
+            .flatMap { user -> user.roles.asSequence() }
+            .toSet()
+
+        return getAllRoles().filterNot { usedRoles.contains(it) }
     }
 }
