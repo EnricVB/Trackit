@@ -30,7 +30,7 @@ object StatusHandler : CommandHandler() {
      * - The latest commit details (hash, author, date).
      * - The list of files grouped by their status (modified, staged, untracked, etc.).
      */
-    fun printStatus() {
+    fun printStatus(showIgnored: Boolean) {
         val statusMap = getFilesStatus()
         val branch = BranchIndex.getCurrentBranch()
         val currentCommit = CommitIndex.getCurrentCommit()
@@ -51,7 +51,7 @@ object StatusHandler : CommandHandler() {
             Logger.log("")
             Logger.log(status.description)
 
-            pathToShow.forEach { file -> Logger.log("\t[${status.symbol}] ${ColorUtil.message(file)}") }
+            pathToShow.forEach { file -> if(showIgnored || status != IGNORED) Logger.log("\t[${status.symbol}] ${ColorUtil.message(file)}") }
         }
 
         if (StagingHandler.getStagedFiles().isEmpty()) {
@@ -86,8 +86,8 @@ object StatusHandler : CommandHandler() {
                 statusMap.getOrPut(status) { mutableListOf() }.add(file)
             }
 
-        FileStatus.getDeletedFiles().forEach {
-            statusMap.getOrPut(DELETE) { mutableListOf() }.add(it)
+        FileStatus.getDeletedFiles().forEach { file ->
+            statusMap.getOrPut(DELETE) { mutableListOf() }.add(file)
         }
 
         return statusMap.mapValues { (_, files) -> files.sortedBy { it.path } }

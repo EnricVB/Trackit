@@ -6,7 +6,6 @@ import com.github.difflib.text.DiffRowGenerator
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-
 object Utility {
 
     fun getLogDateFormat(format: String): String {
@@ -30,7 +29,10 @@ object Utility {
             when (it.tag ?: EQUAL) {
                 INSERT -> diff.appendLine("+ ${ColorUtil.insertLine(it.newLine)}")
                 DELETE -> diff.appendLine("- ${ColorUtil.deleteLine(it.oldLine)}")
-                CHANGE -> diff.appendLine("- ${ColorUtil.deleteLine(it.oldLine)}\n+ ${ColorUtil.insertLine(it.newLine)}")
+                CHANGE -> diff.appendLine("""
+                    - ${if(it.oldLine.isNotBlank()) ColorUtil.deleteLine(it.oldLine) else ""}
+                    + ${if(it.newLine.isNotBlank()) ColorUtil.deleteLine(it.oldLine) else ""}"""
+                    .trimIndent())
                 else -> diff.appendLine("  ${it.oldLine}")
             }
         }
