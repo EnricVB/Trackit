@@ -4,6 +4,7 @@ import dev.enric.core.handler.repo.init.InitHandler
 import dev.enric.core.security.PasswordHash
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.User
+import dev.enric.util.common.console.SystemConsoleInput
 import dev.enric.util.index.*
 import org.junit.Before
 import org.junit.Test
@@ -23,7 +24,7 @@ class InitCommandTest : CommandTest() {
 
     @Before
     fun setUpInput() {
-        System.setIn("$USERNAME\n$MAIL\n$PHONE\n$PASSWORD\n".byteInputStream())
+        SystemConsoleInput.setInput("$USERNAME\n$MAIL\n$PHONE\n$PASSWORD\n$PASSWORD\n")
     }
 
     @Test
