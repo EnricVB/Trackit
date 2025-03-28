@@ -49,7 +49,7 @@ class Stage : TrackitCommand() {
      * If the file is being ignored, it will not be staged unless the --force flag is used.
      */
     @Parameters(index = "0", paramLabel = "path", description = ["The path of the file/directory to be staged"])
-    lateinit var stagePath: Path
+    var stagePath: Path = Path.of("")
 
     private val repositoryFolder = RepositoryFolderManager().getInitFolderPath()
     private val stagingHandler = StagingHandler(force)
@@ -99,7 +99,12 @@ class Stage : TrackitCommand() {
         val status = FileStatus.getStatus(file)
 
         when (status) {
-            MODIFIED, UNTRACKED -> {
+            MODIFIED, UNTRACKED, IGNORED -> {
+                if (status == IGNORED && !force) {
+                    Logger.error("The file is being ignored: $path")
+                    return
+                }
+
                 val content = Content(Files.readAllBytes(path))
                 val relativePath = SerializablePath.of(path).relativePath(repositoryFolder)
 
@@ -107,11 +112,6 @@ class Stage : TrackitCommand() {
                 stagingHandler.stage(content, path)
                 stagedFilesCache[path] = content.generateKey().toString()
                 Logger.log("Staging file: $relativePath")
-            }
-            IGNORED -> if (force) {
-                stageFile(path) // Force staging even if the file is ignored
-            } else if (stagePath.toFile() == file) {
-                Logger.error("The file is being ignored: $path")
             }
 
             else -> {}
