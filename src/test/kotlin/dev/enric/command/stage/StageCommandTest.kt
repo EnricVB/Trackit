@@ -204,6 +204,6 @@ class StageCommandTest : CommandTest() {
         Unstage().unstageFile(path)
 
         // Then
-        assertEquals(1, StagingHandler.getStagedFiles().size)
+        assertEquals(1, StagingHandler.getStagedFiles().size) //
     }
 }
