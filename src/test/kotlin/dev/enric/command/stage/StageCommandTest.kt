@@ -2,6 +2,7 @@ package dev.enric.command.stage
 
 import dev.enric.command.CommandTest
 import dev.enric.command.repo.staging.Stage
+import dev.enric.command.repo.staging.Unstage
 import dev.enric.core.handler.repo.init.InitHandler
 import dev.enric.core.handler.repo.staging.StagingHandler
 import dev.enric.domain.objects.Content
@@ -107,6 +108,102 @@ class StageCommandTest : CommandTest() {
         val relativizedPath = RepositoryFolderManager().getInitFolderPath().relativize(path)
 
         assertTrue { StagingHandler.getStagedFiles().find { it.second == relativizedPath } == null }
+        assertEquals(1, StagingHandler.getStagedFiles().size)
+    }
+
+    @Test
+    fun `Stage command does not stage ignored files`() {
+        Logger.log("Executing test: Stage command does not stage ignored files\n")
+
+        // Given
+        val path = RepositoryFolderManager().getSecretKeyPath()
+
+        // When
+        Stage().stageFile(path)
+
+        // Then
+        assertEquals(1, StagingHandler.getStagedFiles().size)
+    }
+
+    @Test
+    fun `Stage command does stage ignored files if forced`() {
+        Logger.log("Executing test: Stage command does stage ignored files if forced\n")
+
+        // Given
+        val path = RepositoryFolderManager().getSecretKeyPath()
+
+        // When
+        val stage = Stage()
+        stage.force = true
+
+        stage.stageFile(path)
+
+        // Then
+        assertEquals(2, StagingHandler.getStagedFiles().size)
+    }
+
+    @Test
+    fun `Unstage command does only unstage specified file`() {
+        Logger.log("Executing test: Unstage command does only unstage specified file\n")
+
+        // Given
+        val path = RepositoryFolderManager().getInitFolderPath().resolve(FILE_PATH)
+        path.toFile().createNewFile()
+        Files.writeString(path, "content")
+
+        Stage().stageFile(path)
+
+        // When
+        Unstage().unstageFile(path)
+
+        // Then
+        val relativizedPath = RepositoryFolderManager().getInitFolderPath().relativize(path)
+
+        assertTrue { StagingHandler.getStagedFiles().find { it.second == relativizedPath } == null }
+        assertEquals(1, StagingHandler.getStagedFiles().size)
+    }
+
+    @Test
+    fun `Unstage command does unstage everything under folder`() {
+        Logger.log("Executing test: Unstage command does unstage everything under folder\n")
+
+        // Given
+        val folder = RepositoryFolderManager().getInitFolderPath().resolve(FOLDER)
+        val file1 = folder.resolve(FILE_PATH)
+        val file2 = folder.resolve(FILE_2_PATH)
+
+        folder.toFile().mkdir()
+        file1.toFile().createNewFile()
+        file2.toFile().createNewFile()
+
+        Files.writeString(file1, "content1")
+        Files.writeString(file2, "content2")
+
+        Stage().stageFolder(folder)
+
+        // When
+        Unstage().unstageFolder(folder)
+
+        // Then
+        val relativizedPath1 = RepositoryFolderManager().getInitFolderPath().relativize(file1)
+        val relativizedPath2 = RepositoryFolderManager().getInitFolderPath().relativize(file2)
+
+        assertTrue { StagingHandler.getStagedFiles().find { it.second == relativizedPath1 } == null }
+        assertTrue { StagingHandler.getStagedFiles().find { it.second == relativizedPath2 } == null }
+        assertEquals(1, StagingHandler.getStagedFiles().size)
+    }
+
+    @Test
+    fun `Unstage command does nothing if file does not exist`() {
+        Logger.log("Executing test: Unstage command does nothing if file does not exist\n")
+
+        // Given
+        val path = RepositoryFolderManager().getInitFolderPath().resolve(FILE_PATH)
+
+        // When
+        Unstage().unstageFile(path)
+
+        // Then
         assertEquals(1, StagingHandler.getStagedFiles().size)
     }
 }
