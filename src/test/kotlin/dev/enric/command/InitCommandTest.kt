@@ -4,6 +4,7 @@ import dev.enric.core.handler.repo.init.InitHandler
 import dev.enric.core.security.PasswordHash
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.User
+import dev.enric.logger.Logger
 import dev.enric.util.common.console.SystemConsoleInput
 import dev.enric.util.index.*
 import org.junit.Before
@@ -29,6 +30,8 @@ class InitCommandTest : CommandTest() {
 
     @Test
     fun `User is created correctly with specified params`() {
+        Logger.log("Executing test: User is created correctly with specified params\n")
+
         // When
         InitHandler.init()
 
@@ -46,6 +49,8 @@ class InitCommandTest : CommandTest() {
 
     @Test
     fun `Main branch is created correctly`() {
+        Logger.log("Executing test: Main branch is created correctly\n")
+
         // When
         InitHandler.init()
 
@@ -60,6 +65,8 @@ class InitCommandTest : CommandTest() {
 
     @Test
     fun `Default roles has been created correctly`() {
+        Logger.log("Executing test: Default roles has been created correctly\n")
+
         // When
         InitHandler.init()
 
