@@ -4,10 +4,10 @@ import dev.enric.command.TrackitCommand
 import dev.enric.core.handler.config.KeepSession
 import dev.enric.logger.Logger
 import dev.enric.core.security.AuthUtil
+import dev.enric.util.common.console.SystemConsoleInput
 import dev.enric.util.index.UserIndex
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
-import java.io.Console
 
 /**
  * Command to configure repository-level or system-wide settings for Trackit.
@@ -138,23 +138,13 @@ class Config : TrackitCommand() {
      */
     private fun validateCredentials(): Boolean {
         if (username.isNullOrBlank()) {
-            val console: Console? = System.console()
-            if (console != null) {
-                username = console.readLine("Enter username: ")
-            } else {
-                Logger.error("Username is required but cannot be read in this environment")
-                return false
-            }
+            val console = SystemConsoleInput.getInstance()
+            username = console.readLine("Enter username: ")
         }
 
         if (password.isNullOrBlank()) {
-            val console: Console? = System.console()
-            if (console != null) {
-                password = String(console.readPassword("Enter password: "))
-            } else {
-                Logger.error("Password is required but cannot be read in this environment")
-                return false
-            }
+            val console = SystemConsoleInput.getInstance()
+            password = String(console.readPassword("Enter password: "))
         }
 
         return AuthUtil.authenticate(username!!, password!!)

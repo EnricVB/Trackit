@@ -2,7 +2,6 @@ package dev.enric.util.index
 
 import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.BRANCH
-import dev.enric.domain.Hash.HashType.USER
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
 import dev.enric.util.index.CommitIndex.repositoryFolderManager
@@ -116,7 +115,7 @@ object BranchIndex {
         return branchFolder.walk(PathWalkOption.INCLUDE_DIRECTORIES).filter {
             !it.isDirectory()
         }.map {
-            Hash(it.toString().substringAfterLast(File.separator + USER.hash + File.separator))
+            Hash(it.toString().substringAfterLast(File.separator + BRANCH.hash + File.separator))
         }.toList()
     }
 }

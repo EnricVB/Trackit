@@ -1,16 +1,15 @@
 package dev.enric.domain.objects
 
-import dev.enric.domain.Hash.HashType.USER
 import dev.enric.core.security.PasswordHash
 import dev.enric.domain.Hash
+import dev.enric.domain.Hash.HashType.USER
 import dev.enric.domain.TrackitObject
 import dev.enric.exceptions.IllegalHashException
-import dev.enric.logger.Logger
 import dev.enric.util.common.ColorUtil
+import dev.enric.util.common.console.SystemConsoleInput
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
-import java.util.*
 
 data class User(
     val name: String = "",
@@ -27,7 +26,7 @@ data class User(
         val userFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(hash.toString().take(2))
         val objectFile = userFolder.resolve(hash.toString())
 
-        if(!Files.exists(objectFile)) throw IllegalHashException("User with hash $hash not found")
+        if (!Files.exists(objectFile)) throw IllegalHashException("User with hash $hash not found")
         val decompressedData = decompressContent(Files.readAllBytes(objectFile))
             ?: return User() // If the file is empty, return an empty user
 
@@ -117,31 +116,15 @@ data class User(
 
         @JvmStatic
         fun createUser(roles: List<Role>): User {
-            val console = System.console()
+            val console = SystemConsoleInput.getInstance()
 
-            val username: String
-            val mail: String
-            val phone: String
-            val password: String
+            val username = console.readLine("Enter username: ")
+            val mail = console.readLine("Enter mail: ")
+            val phone = console.readLine("Enter phone: ")
+            val password = String(console.readPassword("Enter password: "))
+
             val rolesHash = roles.map { it.generateKey() }.toMutableList()
             val salt = PasswordHash.generateSalt()
-
-            if (console != null) { // This is running in a terminal
-                username = console.readLine("Enter username: ")
-                mail = console.readLine("Enter mail: ")
-                phone = console.readLine("Enter phone: ")
-                password = String(console.readPassword("Enter password: "))
-            } else { // This is running in an IDE
-                val scanner = Scanner(System.`in`)
-                Logger.log("Enter username: ")
-                username = scanner.nextLine()
-                Logger.log("Enter mail: ")
-                mail = scanner.nextLine()
-                Logger.log("Enter phone: ")
-                phone = scanner.nextLine()
-                Logger.log("Enter password: ")
-                password = scanner.nextLine()
-            }
 
             return User(username, PasswordHash.hash(password, salt), salt, mail, phone, rolesHash)
         }
