@@ -31,6 +31,7 @@ dependencies {
     implementation("io.github.java-diff-utils:java-diff-utils:4.12")         // Diff algorithm
 
     testImplementation(kotlin("test"))
+    testImplementation("io.mockk:mockk:1.13.17")
 }
 
 java {
@@ -60,7 +61,7 @@ tasks {
             val jarFile = archiveFile.get().asFile
             jarFile.copyTo(outputDir.resolve("trackit.jar").toFile(), overwrite = true)
 
-            println("✅ JAR copiado a docker/jar/trackit.jar")
+            println("JAR copiado a docker/jar/trackit.jar")
         }
     }
 }
