@@ -96,9 +96,8 @@ class Stage : TrackitCommand() {
         }
 
         val file = path.toFile()
-        val status = FileStatus.getStatus(file)
 
-        when (status) {
+        when (val status = FileStatus.getStatus(file)) {
             MODIFIED, UNTRACKED, IGNORED -> {
                 if (status == IGNORED && !force) {
                     Logger.error("The file is being ignored: $path")
