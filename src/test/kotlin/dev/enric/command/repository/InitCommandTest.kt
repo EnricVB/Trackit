@@ -1,5 +1,6 @@
-package dev.enric.command
+package dev.enric.command.repository
 
+import dev.enric.command.CommandTest
 import dev.enric.core.handler.repo.init.InitHandler
 import dev.enric.core.security.PasswordHash
 import dev.enric.domain.objects.Branch

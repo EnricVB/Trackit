@@ -3,6 +3,7 @@ package dev.enric.command.repo.staging
 import dev.enric.command.TrackitCommand
 import dev.enric.core.handler.repo.staging.StagingHandler
 import dev.enric.domain.objects.Content
+import dev.enric.exceptions.IllegalStateException
 import dev.enric.logger.Logger
 import dev.enric.util.common.FileStatus
 import dev.enric.util.common.FileStatus.*
@@ -85,6 +86,10 @@ class Stage : TrackitCommand() {
      * @param path The file to stage
      */
     fun stageFile(path: Path) {
+        if (!path.exists()) {
+            throw IllegalStateException("The file does not exist: $path")
+        }
+
         if (stagedFilesCache.containsKey(path)) {
             Logger.log("File already staged: $path")
             return

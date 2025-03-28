@@ -1,5 +1,6 @@
-package dev.enric.command
+package dev.enric.command.repository
 
+import dev.enric.command.CommandTest
 import dev.enric.core.handler.repo.ignore.IgnoreHandler
 import dev.enric.core.handler.repo.init.InitHandler
 import dev.enric.exceptions.IllegalStateException
@@ -8,6 +9,7 @@ import dev.enric.util.common.console.SystemConsoleInput
 import dev.enric.util.repository.RepositoryFolderManager
 import org.junit.Before
 import org.junit.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -48,7 +50,7 @@ class IgnoreCommandTest : CommandTest() {
 
         // Then
         // Check the file is added to the ignore list
-        assertTrue { IgnoreHandler().getIgnoredFiles().size == 2 } // 2 because key.secret is also added
+        assertEquals(2, IgnoreHandler().getIgnoredFiles().size)
         assertTrue(IgnoreHandler().isIgnored(path))
     }
 
@@ -64,7 +66,7 @@ class IgnoreCommandTest : CommandTest() {
 
         // Then
         // Check the file is not added to the ignore list
-        assertTrue { IgnoreHandler().getIgnoredFiles().size == 1 } // 1 because key.secret is also added
+        assertEquals(1, IgnoreHandler().getIgnoredFiles().size)
         assertFalse (IgnoreHandler().isIgnored(path))
     }
 
@@ -87,7 +89,7 @@ class IgnoreCommandTest : CommandTest() {
         // Then
         // Check the files are added to the ignore list
         IgnoreHandler().getIgnoredFiles().forEach(System.out::println)
-        assertTrue { IgnoreHandler().getIgnoredFiles().size == 2 } // 2 because key.secret is also added and the folder itself
+        assertEquals(2, IgnoreHandler().getIgnoredFiles().size)
 
         assertTrue(IgnoreHandler().isIgnored(file1))
         assertTrue(IgnoreHandler().isIgnored(file2))
