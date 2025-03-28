@@ -1,6 +1,7 @@
 package dev.enric.core.handler.repo.ignore
 
 import dev.enric.core.handler.CommandHandler
+import dev.enric.exceptions.IllegalStateException
 import dev.enric.logger.Logger
 import dev.enric.util.repository.RepositoryFolderManager
 import dev.enric.util.common.SerializablePath
@@ -35,6 +36,10 @@ class IgnoreHandler : CommandHandler() {
 
         try {
             Logger.log("Ignoring $relativePath")
+
+            if (Files.notExists(path)) {
+                throw IllegalStateException("File or directory does not exist")
+            }
 
             Files.writeString(ignoreFile, "$relativePath\n", StandardOpenOption.CREATE, StandardOpenOption.APPEND)
         } catch (e: IOException) {
