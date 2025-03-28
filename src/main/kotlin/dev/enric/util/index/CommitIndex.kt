@@ -8,6 +8,7 @@ import dev.enric.domain.objects.Commit
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.NoSuchFileException
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.PathWalkOption
 import kotlin.io.path.isDirectory
@@ -27,9 +28,13 @@ object CommitIndex {
      * @return The current commit.
      */
     fun getCurrentCommit() : Commit? {
-        val hashString = Files.readString(repositoryFolderManager.getCurrentCommitPath())
+        try {
+            val hashString = Files.readString(repositoryFolderManager.getCurrentCommitPath()) ?: null
 
-        return if(hashString.isNullOrEmpty()) null else Commit.newInstance(Hash(hashString))
+            return if(hashString.isNullOrEmpty()) null else Commit.newInstance(Hash(hashString))
+        } catch (ex : NoSuchFileException) {
+            return null
+        }
     }
 
     /**
