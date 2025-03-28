@@ -2,7 +2,6 @@ package dev.enric.util.index
 
 import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.BRANCH_PERMISSION
-import dev.enric.domain.Hash.HashType.ROLE_PERMISSION
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Role
 import dev.enric.domain.objects.User
@@ -30,13 +29,11 @@ object BranchPermissionIndex {
         getBranchPermissionsByBranch(branchName).forEach {
             val branchPermissions = BranchPermission.newInstance(it)
 
-            require(!(permissions.length != 2 || permissions.any { ch -> ch !in listOf('r', 'w', '-') })) {
+            require(permissions.length == 2 && permissions.all { ch -> ch in listOf('r', 'w', '-') }) {
                 "Invalid permission format. Use 'r', 'w' or '-' in a 2-character string."
             }
 
-            if (branchPermissions.toString().take(2) == permissions) {
-                return branchPermissions
-            }
+            return branchPermissions
         }
 
         return null
@@ -55,7 +52,7 @@ object BranchPermissionIndex {
         return branchPermissionFolder.walk(PathWalkOption.INCLUDE_DIRECTORIES).filter {
             !it.isDirectory()
         }.map {
-            Hash(it.toString().substringAfterLast(File.separator + ROLE_PERMISSION.hash + File.separator))
+            Hash(it.toString().substringAfterLast(File.separator + BRANCH_PERMISSION.hash + File.separator))
         }.toList()
     }
 
@@ -73,7 +70,7 @@ object BranchPermissionIndex {
         return branchPermissionFolder.walk(PathWalkOption.INCLUDE_DIRECTORIES).filter {
             !it.isDirectory()
         }.map {
-            Hash(it.toString().substringAfterLast(File.separator + ROLE_PERMISSION.hash + File.separator))
+            Hash(it.toString().substringAfterLast(File.separator + BRANCH_PERMISSION.hash + File.separator))
         }.filter {
             val branchHash = BranchPermission.newInstance(it).branch
             val branch = Branch.newInstance(branchHash)

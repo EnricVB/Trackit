@@ -48,9 +48,7 @@ object RolePermissionIndex {
                 }
             }
 
-            if (rolePermission.toString().take(4) == permissions) {
-                return rolePermission
-            }
+            return rolePermission
         }
 
         return null
@@ -64,7 +62,8 @@ object RolePermissionIndex {
      */
     @OptIn(ExperimentalPathApi::class)
     fun getAllRolePermissions(): List<Hash> {
-        val rolePermissionFolder = RepositoryFolderManager().getObjectsFolderPath().resolve(ROLE_PERMISSION.hash.toString())
+        val rolePermissionFolder =
+            RepositoryFolderManager().getObjectsFolderPath().resolve(ROLE_PERMISSION.hash.toString())
 
         return rolePermissionFolder.walk(PathWalkOption.INCLUDE_DIRECTORIES).filter {
             !it.isDirectory()

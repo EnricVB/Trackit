@@ -43,4 +43,9 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Trackit ###
 /tktFolder/
+.idea/
+docker/jar
+docker/trackit

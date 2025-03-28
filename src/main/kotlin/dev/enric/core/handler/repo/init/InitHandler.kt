@@ -47,7 +47,7 @@ object InitHandler : CommandHandler() {
         val mainBranchPermissions = BranchPermission("rw", mainBranch).encode(true).first
 
         val owner = Role("owner", 1, mutableListOf(ownerPermissions, mainBranchPermissions)).encode(true).first
-        Role("projectManager", 2, mutableListOf(projectManagerPermissions, mainBranch)).encode(true).first
+        Role("projectManager", 2, mutableListOf(projectManagerPermissions, mainBranchPermissions)).encode(true).first
         Role("undefined", Int.MAX_VALUE, mutableListOf(undefinedPermissions)).encode(true).first
 
         return Role.newInstance(owner)
