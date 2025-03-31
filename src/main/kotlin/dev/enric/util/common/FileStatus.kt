@@ -189,10 +189,9 @@ enum class FileStatus(val symbol: String, val description: String) {
             if (!file.exists()) return DELETE
             if (IgnoreHandler().isIgnored(file.toPath())) return IGNORED
 
-            val hash = Content(file.readBytes()).generateKey()
             val contentExists = FileStatus.contentExists(file)
             val isUpToDate = FileStatus.isUpToDate(file)
-            val isStaged = StagingHandler.getStagedFiles().any { it.first == hash }
+            val isStaged = StagingHandler.getStagedFiles().any { it.second == file }
 
             return when {
                 isStaged -> STAGED
