@@ -16,10 +16,10 @@ import dev.enric.util.index.CommitIndex
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.File
 import java.nio.channels.FileChannel
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.sql.Timestamp
-import kotlin.io.path.pathString
 
 /**
  * Handles the process of committing changes to the repository.
@@ -190,10 +190,10 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
      */
     private fun mapStagedFilesToTree(stagedFiles: List<Pair<Hash, Path>>): List<Tree> {
         return stagedFiles.mapNotNull { stagedFile ->
-            val rootPath = File(".").absoluteFile.toPath()
-            val relativePath = stagedFile.second.pathString.replace("${File.separator}.${File.separator}", "")
-            val path = rootPath.resolve(relativePath)
+            val filePath = stagedFile.second
+            val initPath = RepositoryFolderManager().getInitFolderPath()
 
+            val path = initPath.resolve(filePath)
             val fileContent = safeFileRead(path.toFile())
 
             if (fileContent != null) {
@@ -212,9 +212,8 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
      */
     private fun safeFileRead(file: File): Content? {
         return try {
-            FileChannel.open(file.toPath(), StandardOpenOption.READ).use { channel ->
-                val buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size())
-                Content(ByteArray(buffer.remaining()).apply { buffer[this] })
+            FileChannel.open(file.toPath(), StandardOpenOption.READ).use {
+                Content(Files.readString(file.toPath()).toByteArray())
             }
         } catch (exception: Exception) {
             null

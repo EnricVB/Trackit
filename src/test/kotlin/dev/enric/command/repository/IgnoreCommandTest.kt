@@ -88,7 +88,6 @@ class IgnoreCommandTest : CommandTest() {
 
         // Then
         // Check the files are added to the ignore list
-        IgnoreHandler().getIgnoredFiles().forEach(System.out::println)
         assertEquals(2, IgnoreHandler().getIgnoredFiles().size)
 
         assertTrue(IgnoreHandler().isIgnored(file1))
