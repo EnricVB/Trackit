@@ -4,7 +4,6 @@ import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.BRANCH
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
-import dev.enric.util.index.CommitIndex.repositoryFolderManager
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.File
 import java.nio.file.Files
@@ -55,7 +54,7 @@ object BranchIndex {
      * @return `true` if the branch head was updated, `false` otherwise.
      */
     fun setBranchHead(branchHash: Hash, commitHash: Hash) {
-        val branchHeadPath = repositoryFolderManager.getBranchHeadPath()
+        val branchHeadPath = RepositoryFolderManager().getBranchHeadPath()
         val lines = Files.readAllLines(branchHeadPath).toMutableList()
 
         var updated = false
@@ -82,7 +81,7 @@ object BranchIndex {
      * @return A [Commit] representing the head of the branch, or null if not found.
      */
     fun getBranchHead(branchHash: Hash): Commit {
-        val branchHeadPath = repositoryFolderManager.getBranchHeadPath()
+        val branchHeadPath = RepositoryFolderManager().getBranchHeadPath()
         val lines = Files.readAllLines(branchHeadPath).toMutableList()
 
         val targetLine = lines.find { it.startsWith(branchHash.string) } ?: throw throw IllegalStateException("Commit HEAD not found for branch $branchHash. Try commiting a change first.")

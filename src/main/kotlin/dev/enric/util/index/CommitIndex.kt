@@ -43,7 +43,7 @@ object CommitIndex {
      * @param commit A [Hash] object representing the new current commit.
      */
     fun setCurrentCommit(commit: Hash) {
-        Files.writeString(repositoryFolderManager.getCurrentCommitPath(), commit.string)
+        Files.writeString(RepositoryFolderManager().getCurrentCommitPath(), commit.string)
     }
 
     /**

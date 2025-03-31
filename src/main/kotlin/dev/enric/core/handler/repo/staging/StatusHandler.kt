@@ -21,8 +21,6 @@ import kotlin.io.path.walk
  * determine which files have been modified, staged, or ignored, and display this information.
  */
 object StatusHandler : CommandHandler() {
-    val repositoryFolderManager = RepositoryFolderManager()
-
     /**
      * Prints the current repository status to the logger.
      * It displays:
@@ -45,7 +43,7 @@ object StatusHandler : CommandHandler() {
 
         statusMap.forEach { (status, files) ->
             val pathToShow = files.map {
-                SerializablePath.of(it.path).relativePath(repositoryFolderManager.getInitFolderPath()).toString()
+                SerializablePath.of(it.path).relativePath(RepositoryFolderManager().getInitFolderPath()).toString()
             }
 
             Logger.log("")
@@ -69,6 +67,7 @@ object StatusHandler : CommandHandler() {
     @OptIn(ExperimentalPathApi::class)
     fun getFilesStatus(): Map<FileStatus, List<File>> {
         val statusMap = mutableMapOf<FileStatus, MutableList<File>>()
+        val repositoryFolderManager = RepositoryFolderManager()
 
         repositoryFolderManager.getInitFolderPath()
             .walk(PathWalkOption.INCLUDE_DIRECTORIES)

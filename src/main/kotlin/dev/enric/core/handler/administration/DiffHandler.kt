@@ -2,7 +2,6 @@ package dev.enric.core.handler.administration
 
 import dev.enric.core.handler.CommandHandler
 import dev.enric.core.handler.repo.staging.StagingHandler
-import dev.enric.core.handler.repo.staging.StatusHandler.repositoryFolderManager
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
@@ -13,6 +12,7 @@ import dev.enric.logger.Logger
 import dev.enric.util.common.SerializablePath
 import dev.enric.util.common.Utility
 import dev.enric.util.index.BranchIndex
+import dev.enric.util.repository.RepositoryFolderManager
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.PathWalkOption
@@ -87,7 +87,7 @@ data class DiffHandler(
 
         allPaths.forEach {
             val versions = it.value
-            val path = SerializablePath.of(it.key).relativePath(repositoryFolderManager.getInitFolderPath())
+            val path = SerializablePath.of(it.key).relativePath(RepositoryFolderManager().getInitFolderPath())
 
             // Skip if path doesn't match filter
             if (!fileFilter.isNullOrEmpty() && !path.toString().contains(fileFilter)) return@forEach
@@ -123,7 +123,7 @@ data class DiffHandler(
         val map1 = mutableMapOf<Path, Hash>()
         val map2 = mutableMapOf<Path, Hash>()
 
-        val repoRoot = repositoryFolderManager.getInitFolderPath()
+        val repoRoot = RepositoryFolderManager().getInitFolderPath()
 
         // Populate map1 with paths and hashes from treeList1
         treeList1.forEach { hash ->
@@ -162,6 +162,8 @@ data class DiffHandler(
      */
     @OptIn(ExperimentalPathApi::class)
     private fun getWorkDirHashes(): List<Hash> {
+        val repositoryFolderManager = RepositoryFolderManager()
+
         return repositoryFolderManager.getInitFolderPath()
             .walk(PathWalkOption.INCLUDE_DIRECTORIES)
             .toMutableList()
