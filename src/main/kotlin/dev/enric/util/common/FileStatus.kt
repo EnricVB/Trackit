@@ -87,7 +87,7 @@ enum class FileStatus(val symbol: String, val description: String) {
          * @param file The file to check.
          * @return `true` if the content exists in the repository, `false` otherwise.
          */
-        fun contentExists(file: File): Boolean {
+        fun fileExists(file: File): Boolean {
             val currentCommit = CommitIndex.getCurrentCommit() ?: return false
             val repositoryFolderManager = RepositoryFolderManager()
 
@@ -189,9 +189,11 @@ enum class FileStatus(val symbol: String, val description: String) {
             if (!file.exists()) return DELETE
             if (IgnoreHandler().isIgnored(file.toPath())) return IGNORED
 
-            val contentExists = FileStatus.contentExists(file)
+            val hash = Content(file.readBytes()).generateKey()
+
+            val contentExists = FileStatus.fileExists(file)
             val isUpToDate = FileStatus.isUpToDate(file)
-            val isStaged = StagingHandler.getStagedFiles().any { it.second == file }
+            val isStaged = StagingHandler.getStagedFiles().any { it.first == hash }
 
             return when {
                 isStaged -> STAGED
