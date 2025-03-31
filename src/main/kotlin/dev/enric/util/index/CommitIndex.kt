@@ -20,7 +20,6 @@ import kotlin.io.path.walk
  * Also allows to get a specific commit based on his hash abreviation.
  */
 object CommitIndex {
-    val repositoryFolderManager = RepositoryFolderManager()
 
     /**
      * Retrieves the current commit the Working Direcotry has.
@@ -29,7 +28,7 @@ object CommitIndex {
      */
     fun getCurrentCommit() : Commit? {
         try {
-            val hashString = Files.readString(repositoryFolderManager.getCurrentCommitPath()) ?: null
+            val hashString = Files.readString(RepositoryFolderManager().getCurrentCommitPath()) ?: null
 
             return if(hashString.isNullOrEmpty()) null else Commit.newInstance(Hash(hashString))
         } catch (ex : NoSuchFileException) {
@@ -64,7 +63,7 @@ object CommitIndex {
      * @return True if the commit exists, false otherwise.
      */
     fun commitExists(hash: Hash): Boolean {
-        return Files.exists(repositoryFolderManager.getObjectsFolderPath().resolve(COMMIT.hash.toString()).resolve(hash.string))
+        return Files.exists(RepositoryFolderManager().getObjectsFolderPath().resolve(COMMIT.hash.toString()).resolve(hash.string))
     }
 
     /**
