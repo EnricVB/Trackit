@@ -2,10 +2,10 @@ package dev.enric.util.common
 
 import dev.enric.core.handler.repo.ignore.IgnoreHandler
 import dev.enric.core.handler.repo.staging.StagingHandler
-import dev.enric.core.handler.repo.staging.StatusHandler.repositoryFolderManager
 import dev.enric.domain.objects.Content
 import dev.enric.domain.objects.Tree
 import dev.enric.util.index.CommitIndex
+import dev.enric.util.repository.RepositoryFolderManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -89,6 +89,7 @@ enum class FileStatus(val symbol: String, val description: String) {
          */
         fun contentExists(file: File): Boolean {
             val currentCommit = CommitIndex.getCurrentCommit() ?: return false
+            val repositoryFolderManager = RepositoryFolderManager()
 
             currentCommit.tree.forEach { treeHash ->
                 val treeObject = Tree.newInstance(treeHash)
@@ -111,7 +112,7 @@ enum class FileStatus(val symbol: String, val description: String) {
          */
         fun getDeletedFiles(): List<File> {
             val currentCommit = CommitIndex.getCurrentCommit() ?: return emptyList()
-            val initFolderPath = repositoryFolderManager.getInitFolderPath()
+            val initFolderPath = RepositoryFolderManager().getInitFolderPath()
 
             return runBlocking {
                 currentCommit.tree.map { treeHash ->
@@ -137,6 +138,7 @@ enum class FileStatus(val symbol: String, val description: String) {
          */
         fun hasBeenDeleted(file: File): Boolean {
             val currentCommit = CommitIndex.getCurrentCommit() ?: return false
+            val repositoryFolderManager = RepositoryFolderManager()
 
             currentCommit.tree.forEach { tree ->
                 val treeObject = Tree.newInstance(tree)
@@ -159,6 +161,7 @@ enum class FileStatus(val symbol: String, val description: String) {
          */
         fun isUpToDate(file: File): Boolean {
             val currentCommit = CommitIndex.getCurrentCommit() ?: return true
+            val repositoryFolderManager = RepositoryFolderManager()
 
             currentCommit.tree.forEach { tree ->
                 val treeObject = Tree.newInstance(tree)
