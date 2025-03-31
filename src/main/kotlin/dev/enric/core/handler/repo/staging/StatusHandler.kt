@@ -73,10 +73,7 @@ object StatusHandler : CommandHandler() {
             .walk(PathWalkOption.INCLUDE_DIRECTORIES)
             .toMutableList()
             .filterNot {
-                it.toFile().isDirectory ||
-                        it.toRealPath().startsWith(repositoryFolderManager.getTrackitFolderPath()) ||
-                        it.toRealPath().startsWith(repositoryFolderManager.getSecretKeyPath()) ||
-                        it.toRealPath() == repositoryFolderManager.getInitFolderPath()
+                it.toFile().isDirectory || it.toRealPath().toString().contains(".trackit")
             }
             .forEach { path ->
                 val file = path.toFile()
