@@ -159,7 +159,7 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
     /**
      * Does all the post commit operations as save into indexes the new commit hash, or replace the branch.
      */
-    fun postCommit(tag: String) {
+    fun postCommit(tags: List<String>) {
         val commitHash = commit.encode(true).first
 
         // Updates the commit index and the branch index
@@ -167,7 +167,9 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
         BranchIndex.setBranchHead(commit.branch, commitHash)
 
         // Assigns a tag to the commit
-        TagHandler(tag).assignTag(commit)
+        tags.forEach {
+            TagHandler(it).assignTag(commit)
+        }
 
         // Removes all the staged files after the commit
         StagingHandler.clearStagingArea()
