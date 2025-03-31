@@ -60,6 +60,10 @@ object AuthUtil {
      * @return The authentication token, or null if it is not found.
      */
     fun getToken(): String? {
+        if (!configFile.toFile().exists()) {
+            return EnvironmentVariables.getEnv("TRACKIT_AUTH")
+        }
+
         val properties = Properties().apply { load(configFile.inputStream()) }
 
         return properties.getProperty("TRACKIT_AUTH")

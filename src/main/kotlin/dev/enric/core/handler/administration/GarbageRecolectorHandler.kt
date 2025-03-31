@@ -1,15 +1,15 @@
 package dev.enric.core.handler.administration
 
 import dev.enric.core.handler.CommandHandler
-import dev.enric.core.handler.repo.staging.StatusHandler.repositoryFolderManager
 import dev.enric.domain.Hash.HashType.*
 import dev.enric.domain.objects.Commit
 import dev.enric.logger.Logger
 import dev.enric.util.index.*
+import dev.enric.util.repository.RepositoryFolderManager
 import java.nio.file.Path
 
 class GarbageRecolectorHandler : CommandHandler() {
-    val repositoryPath: Path = repositoryFolderManager.getObjectsFolderPath()
+    val repositoryPath: Path = RepositoryFolderManager().getObjectsFolderPath()
 
     /**
      * Removes all tags that are not associated with any commit.
