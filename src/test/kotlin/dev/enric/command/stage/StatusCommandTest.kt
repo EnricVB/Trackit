@@ -11,7 +11,6 @@ import dev.enric.util.common.console.SystemConsoleInput
 import dev.enric.util.repository.RepositoryFolderManager
 import org.junit.Before
 import org.junit.Test
-import java.nio.file.Files
 import kotlin.io.path.createFile
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -35,6 +34,21 @@ class StatusCommandTest : CommandTest() {
         InitHandler.init()
     }
 
+    private fun createAndWriteFile(content: String = "Hello world!") =
+        RepositoryFolderManager().getInitFolderPath().resolve(FILE_PATH).createFile().toFile().apply {
+            writeText(content)
+        }
+
+    private fun commitFile() {
+        Commit().apply {
+            title = "Initial commit"
+            message = "Initial commit message"
+            stageAllFiles = true
+            sudoArgs = arrayOf(USERNAME, PASSWORD)
+            confirmerArgs = arrayOf(USERNAME, PASSWORD)
+        }.call()
+    }
+
     @Test
     fun `File status must not include trackit directory`() {
         // When
@@ -48,8 +62,7 @@ class StatusCommandTest : CommandTest() {
     @Test
     fun `File non added to repository must be UNTRACKED`() {
         // Given
-        val file = RepositoryFolderManager().getInitFolderPath().resolve(FILE_PATH).createFile().toFile()
-        Files.writeString(file.toPath(), "Hello world!")
+        val file = createAndWriteFile()
 
         // When
         val files = StatusHandler.getFilesStatus().flatMap { it.value }
@@ -62,19 +75,11 @@ class StatusCommandTest : CommandTest() {
     @Test
     fun `File added to repository on previous commit and without changes must be UNMODIFIED`() {
         // Given
-        val file = RepositoryFolderManager().getInitFolderPath().resolve(FILE_PATH).createFile().toFile()
-        Files.writeString(file.toPath(), "Hello world!")
+        val file = createAndWriteFile()
 
         // When
         // Create a commit with the staged file
-        val commitCommand = Commit()
-        commitCommand.title = "Initial commit"
-        commitCommand.message = "Initial commit message"
-        commitCommand.stageAllFiles = true
-        commitCommand.sudoArgs = arrayOf(USERNAME, PASSWORD)
-        commitCommand.confirmerArgs = arrayOf(USERNAME, PASSWORD)
-
-        commitCommand.call()
+        commitFile()
 
         // Obtain the status of the files
         val files = StatusHandler.getFilesStatus().flatMap { it.value }
@@ -87,22 +92,14 @@ class StatusCommandTest : CommandTest() {
     @Test
     fun `File added to repository on previous commit and with changes must be MODIFIED`() {
         // Given
-        val file = RepositoryFolderManager().getInitFolderPath().resolve(FILE_PATH).createFile().toFile()
-        Files.writeString(file.toPath(), "Hello world!")
+        val file = createAndWriteFile()
 
         // When
         // Create a commit with the staged file
-        val commitCommand = Commit()
-        commitCommand.title = "Initial commit"
-        commitCommand.message = "Initial commit message"
-        commitCommand.stageAllFiles = true
-        commitCommand.sudoArgs = arrayOf(USERNAME, PASSWORD)
-        commitCommand.confirmerArgs = arrayOf(USERNAME, PASSWORD)
-
-        commitCommand.call()
+        commitFile()
 
         // Modify the file
-        Files.writeString(file.toPath(), "Hello world! Modified")
+        file.writeText("Hello world! Modified")
 
         // Obtain the status of the files
         val files = StatusHandler.getFilesStatus().flatMap { it.value }
@@ -115,8 +112,7 @@ class StatusCommandTest : CommandTest() {
     @Test
     fun `File added to staging area, no matter if committed, must be STAGED`() {
         // Given
-        val file = RepositoryFolderManager().getInitFolderPath().resolve(FILE_PATH).createFile().toFile()
-        Files.writeString(file.toPath(), "Hello world!")
+        val file = createAndWriteFile()
 
         // When
         StagingHandler().stage(file.toPath())
@@ -132,19 +128,11 @@ class StatusCommandTest : CommandTest() {
     @Test
     fun `File added to repository on previous commit and deleted must be DELETED`() {
         // Given
-        val file = RepositoryFolderManager().getInitFolderPath().resolve(FILE_PATH).createFile().toFile()
-        Files.writeString(file.toPath(), "Hello world!")
+        val file = createAndWriteFile()
 
         // When
         // Create a commit with the staged file
-        val commitCommand = Commit()
-        commitCommand.title = "Initial commit"
-        commitCommand.message = "Initial commit message"
-        commitCommand.stageAllFiles = true
-        commitCommand.sudoArgs = arrayOf(USERNAME, PASSWORD)
-        commitCommand.confirmerArgs = arrayOf(USERNAME, PASSWORD)
-
-        commitCommand.call()
+        commitFile()
 
         // Delete the file
         file.delete()
@@ -160,8 +148,7 @@ class StatusCommandTest : CommandTest() {
     @Test
     fun `File added to ignore must be IGNORED`() {
         // Given
-        val file = RepositoryFolderManager().getInitFolderPath().resolve(FILE_PATH).createFile().toFile()
-        Files.writeString(file.toPath(), "Hello world!")
+        val file = createAndWriteFile()
 
         // When
         IgnoreHandler().ignore(file.toPath())
