@@ -89,10 +89,10 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
         commit.previousCommit = CommitIndex.getCurrentCommit()?.encode()?.first
         commit.branch = BranchIndex.getCurrentBranch().generateKey()
 
-        Logger.log("Logging for author...")
+        Logger.log("Log in for author...")
         commit.author = isValidSudoUser(author).generateKey()
 
-        Logger.log("Logging for confirmer...")
+        Logger.log("Log in for confirmer...")
         commit.confirmer = isValidSudoUser(confirmer).generateKey()
 
         commit.date = Timestamp.from(java.time.Instant.now())

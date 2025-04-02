@@ -80,7 +80,7 @@ class LogHandler : CommandHandler() {
         }
 
         if (shownCount == 0) {
-            Logger.log("No commits found with the specified filters.")
+            Logger.warning("No commits found with the specified filters.")
         }
     }
 

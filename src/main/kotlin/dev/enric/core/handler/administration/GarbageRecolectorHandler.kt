@@ -32,7 +32,7 @@ class GarbageRecolectorHandler : CommandHandler() {
                 tagFile.deleteRecursively()
                 Logger.log("Tag $tag removed successfully from the filesystem.")
             } else {
-                Logger.log("Tag $tag does not exist in the filesystem.")
+                Logger.warning("Tag $tag does not exist in the filesystem.")
             }
         }
     }
@@ -57,7 +57,7 @@ class GarbageRecolectorHandler : CommandHandler() {
                     commitFile.deleteRecursively()
                     Logger.log("Commit $commitHash removed successfully.")
                 } else {
-                    Logger.log("Commit $commitHash does not exist in the filesystem.")
+                    Logger.warning("Commit $commitHash does not exist in the filesystem.")
                 }
             }
         }
@@ -79,7 +79,7 @@ class GarbageRecolectorHandler : CommandHandler() {
                 permissionFile.deleteRecursively()
                 Logger.log("Role permission $permission removed successfully.")
             } else {
-                Logger.log("Role permission $permission does not exist in the filesystem.")
+                Logger.warning("Role permission $permission does not exist in the filesystem.")
             }
         }
 
@@ -92,7 +92,7 @@ class GarbageRecolectorHandler : CommandHandler() {
                 permissionFile.deleteRecursively()
                 Logger.log("Branch permission $permission removed successfully.")
             } else {
-                Logger.log("Branch permission $permission does not exist in the filesystem.")
+                Logger.warning("Branch permission $permission does not exist in the filesystem.")
             }
         }
     }
@@ -112,7 +112,7 @@ class GarbageRecolectorHandler : CommandHandler() {
                 roleFile.deleteRecursively()
                 Logger.log("Role $role removed successfully.")
             } else {
-                Logger.log("Role $role does not exist in the filesystem.")
+                Logger.warning("Role $role does not exist in the filesystem.")
             }
         }
     }

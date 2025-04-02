@@ -90,16 +90,9 @@ class Stage : TrackitCommand() {
             throw IllegalStateException("The file does not exist: $path")
         }
 
-        if (stagedFilesCache.containsKey(path)) {
-            Logger.log("File already staged: $path")
-            return
-        }
-
-        val file = path.toFile()
-
-        when (val status = FileStatus.getStatus(file)) {
+        when (val status = FileStatus.getStatus(path.toFile())) {
             MODIFIED, UNTRACKED, IGNORED -> {
-                if (status == IGNORED && !force) {
+                if (!force && status == IGNORED && path == stagePath) {
                     Logger.error("The file is being ignored: $path")
                     return
                 }

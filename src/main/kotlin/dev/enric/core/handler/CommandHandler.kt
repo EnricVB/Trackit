@@ -18,20 +18,22 @@ open class CommandHandler {
         val sudo = UserIndex.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "")
         val loggedUser = AuthUtil.getLoggedUser()
 
+        val user: User?
+
         if (sudo != null) {
-            Logger.log("Logged in with sudo user: ${sudo.name}")
-            return sudo
-
-        } else {
-            Logger.log("Trying to log in with logged user...")
-
-            if (loggedUser != null) {
-                Logger.log("Logged in with logged user: ${loggedUser.name}")
-                return loggedUser
+            user = sudo
+        } else if (loggedUser != null) {
+            if (!sudoArgs.isNullOrEmpty()) {
+                Logger.warning("Couldn't log in with sudo credentials. Login with logged user")
             }
+
+            user = loggedUser
+        } else {
+            throw UserNotFoundException("User ${sudoArgs?.first()} not found. Try keeping session with 'trackit config --keep-session' or use '--sudo' option.")
         }
 
-        throw UserNotFoundException("User ${sudoArgs?.first()} not found. Try keeping session with 'trackit config --keep-session' or use '--sudo' option.")
+        Logger.log("Logged in with ${user.name}")
+        return user
     }
 
     /**
