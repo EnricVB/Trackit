@@ -62,9 +62,9 @@ class CheckoutHandler(
         repositoryFolderManager.getInitFolderPath()
             .walk(PathWalkOption.INCLUDE_DIRECTORIES)
             .forEach {
-                val isTrackitFolder = it.toRealPath().startsWith(repositoryFolderManager.getTrackitFolderPath())
-                val isSecretKey = it.toRealPath().startsWith(repositoryFolderManager.getSecretKeyPath())
-                val isRootFolder = it.toRealPath() == repositoryFolderManager.getInitFolderPath()
+                val isTrackitFolder = it.toRealPath().startsWith(repositoryFolderManager.getTrackitFolderPath().toRealPath())
+                val isSecretKey = it.toRealPath().startsWith(repositoryFolderManager.getSecretKeyPath().toRealPath())
+                val isRootFolder = it.toRealPath() == repositoryFolderManager.getInitFolderPath().toRealPath()
 
                 val isValidFolder = !isTrackitFolder && !isSecretKey && !isRootFolder
                 val canDelete = it.toFile().exists()
