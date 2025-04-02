@@ -2,9 +2,10 @@ package dev.enric.command.commit
 
 import dev.enric.command.CommandTest
 import dev.enric.core.handler.management.users.UserCreationHandler
-import dev.enric.core.handler.repo.commit.CheckoutHandler
 import dev.enric.core.handler.repo.commit.CommitHandler
+import dev.enric.core.handler.repo.commit.RestoreHandler
 import dev.enric.core.handler.repo.init.InitHandler
+import dev.enric.core.handler.repo.staging.StagingHandler
 import dev.enric.domain.objects.Commit
 import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.logger.Logger
@@ -18,7 +19,7 @@ import kotlin.io.path.writeText
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-class CheckoutCommandTest : CommandTest() {
+class RestoreCommandTest : CommandTest() {
 
     companion object {
         // Given
@@ -56,7 +57,12 @@ class CheckoutCommandTest : CommandTest() {
         val commit = Commit(title = COMMIT_TITLE, message = COMMIT_MESSAGE)
         val commitHandler = CommitHandler(commit)
 
-        commitHandler.initializeCommitProperties(arrayOf(USERNAME, PASSWORD), arrayOf(USERNAME, PASSWORD))
+        commitHandler.initializeCommitProperties(
+            arrayOf(USERNAME, PASSWORD), arrayOf(
+                USERNAME,
+                PASSWORD
+            )
+        )
         commitHandler.preCommit(true)
 
         commitHandler.canDoCommit()
@@ -71,9 +77,9 @@ class CheckoutCommandTest : CommandTest() {
         assertEquals(FILE_TEXT_V2, file.readText())
 
         // When
-        val checkoutHandler = CheckoutHandler(commit, arrayOf(USERNAME, PASSWORD))
-        checkoutHandler.preCheckout()
-        checkoutHandler.checkout()
+        val restoreHandler = RestoreHandler(commit, file, arrayOf(USERNAME, PASSWORD))
+        restoreHandler.canRestore()
+        restoreHandler.restore()
 
         // Then
         assertEquals(FILE_TEXT_V1, file.readText())
@@ -81,14 +87,22 @@ class CheckoutCommandTest : CommandTest() {
     }
 
     @Test
-    fun `Files are not modified to a previous state if user does not have read permissions`() {
+    fun `Files are not modified if user has no read permissions`() {
+        Logger.log("Executing test: Files are not modified if user has no read permissions\n")
+
         // Given
         val file = RepositoryFolderManager().getInitFolderPath().resolve(FILE)
         file.writeText(FILE_TEXT_V1)
 
         UserCreationHandler(
-            USERNAME_2, PASSWORD_2, null, null, emptyArray(), arrayOf(
-                USERNAME, PASSWORD
+            USERNAME_2,
+            PASSWORD_2,
+            null,
+            null,
+            emptyArray(),
+            arrayOf(
+                USERNAME,
+                PASSWORD
             )
         ).createUser()
 
@@ -96,14 +110,18 @@ class CheckoutCommandTest : CommandTest() {
         val commit = Commit(title = COMMIT_TITLE, message = COMMIT_MESSAGE)
         val commitHandler = CommitHandler(commit)
 
-        commitHandler.initializeCommitProperties(arrayOf(USERNAME, PASSWORD), arrayOf(USERNAME, PASSWORD))
+        commitHandler.initializeCommitProperties(
+            arrayOf(USERNAME, PASSWORD), arrayOf(
+                USERNAME,
+                PASSWORD
+            )
+        )
         commitHandler.preCommit(true)
 
         commitHandler.canDoCommit()
 
         commitHandler.processCommit()
         commitHandler.postCommit(listOf())
-
 
         // Simulate a file modification
         file.writeText(FILE_TEXT_V2)
@@ -112,11 +130,50 @@ class CheckoutCommandTest : CommandTest() {
         assertEquals(FILE_TEXT_V2, file.readText())
 
         // When
-        val checkoutHandler = CheckoutHandler(commit, arrayOf(USERNAME_2, PASSWORD_2))
-        assertFailsWith<InvalidPermissionException> { checkoutHandler.canDoCheckout() }
+        val restoreHandler = RestoreHandler(commit, file, arrayOf(USERNAME_2, PASSWORD_2))
+
+        assertFailsWith<InvalidPermissionException> {
+            restoreHandler.canRestore()
+            restoreHandler.restore()
+        }
 
         // Then
         assertEquals(FILE_TEXT_V2, file.readText())
-        assertEquals(CommitIndex.getCurrentCommit()!!, commit)
+    }
+
+    @Test
+    fun `Files are not modified if they are not in the commit`() {
+        Logger.log("Executing test: Files are not modified if they are not in the commit\n")
+
+        // Given
+        val file = RepositoryFolderManager().getInitFolderPath().resolve(FILE)
+        file.writeText(FILE_TEXT_V1)
+
+        // When
+        val commit = Commit(title = COMMIT_TITLE, message = COMMIT_MESSAGE)
+        val commitHandler = CommitHandler(commit)
+
+        commitHandler.initializeCommitProperties(
+            arrayOf(USERNAME, PASSWORD), arrayOf(
+                USERNAME,
+                PASSWORD
+            )
+        )
+        commitHandler.preCommit(true)
+        StagingHandler().unstage(file)
+
+        commitHandler.canDoCommit()
+
+        commitHandler.processCommit()
+        commitHandler.postCommit(listOf())
+
+        // Then
+        val restoreHandler = RestoreHandler(commit, file, arrayOf(USERNAME, PASSWORD))
+
+        restoreHandler.canRestore()
+        restoreHandler.restore()
+
+        // Then
+        assertEquals(FILE_TEXT_V1, file.readText())
     }
 }

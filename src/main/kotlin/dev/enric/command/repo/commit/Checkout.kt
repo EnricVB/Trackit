@@ -51,7 +51,7 @@ class Checkout : TrackitCommand() {
         val checkoutHandler = CheckoutHandler(getCommitByHash(), sudoArgs)
 
         // Will never return 1 because the checkCanCreateRole method will throw an exception if the role can't be created
-        if (!checkoutHandler.canDoCommit()) {
+        if (!checkoutHandler.canDoCheckout()) {
             return 1
         }
 

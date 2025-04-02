@@ -21,16 +21,16 @@ class CheckoutHandler(
      * - If player has permissions to read on the branch.
      *
      * @return True if can checkout, false otherwise
-     * @throws InvalidPermissionException If the user does not have write permission on the branch.
+     * @throws InvalidPermissionException If the user does not have read permission on the branch.
      */
-    fun canDoCommit(): Boolean {
+    fun canDoCheckout(): Boolean {
         checkReadPermissionOnBranch(isValidSudoUser(sudoArgs))
 
         return true
     }
 
     /**
-     * Checks if the user has the permission to write into the specified branch.
+     * Checks if the user has the permission to read into the specified branch.
      */
     private fun checkReadPermissionOnBranch(user: User) {
         if (!hasReadPermissionOnBranch(user)) {
