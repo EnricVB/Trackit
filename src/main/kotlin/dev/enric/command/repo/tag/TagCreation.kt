@@ -2,6 +2,7 @@ package dev.enric.command.repo.tag
 
 import dev.enric.command.TrackitCommand
 import dev.enric.core.handler.repo.tag.TagCreationHandler
+import dev.enric.domain.Hash
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 
@@ -56,12 +57,12 @@ class TagCreation : TrackitCommand() {
         val handler = TagCreationHandler(
             name,
             message,
-            commits,
+            commits.map { Hash(it) },
             sudoArgs
         )
 
         // checkCanModifyBranch throws an exception if the user lacks permissions, so this will never return 1
-        if (!handler.checkCanAssignTags()) {
+        if (!handler.checkCanModifyTags()) {
             return 1
         }
 

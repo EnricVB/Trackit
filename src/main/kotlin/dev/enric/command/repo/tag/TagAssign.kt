@@ -35,10 +35,10 @@ class TagAssign : TrackitCommand() {
     override fun call(): Int {
         super.call()
 
-        val handler = TagHandler(name, commits, sudoArgs)
+        val handler = TagHandler(name, commits.map { Hash(it) }, sudoArgs)
 
         // checkCanModifyBranch throws an exception if the user lacks permissions, so this will never return 1
-        if (!handler.checkCanAssignTags()) {
+        if (!handler.checkCanModifyTags()) {
             return 1
         }
 
