@@ -1,0 +1,14 @@
+Package: trackit
+Version: 1.0
+Architecture: all
+Maintainer: Enric Velasco Bufi <enricvbufi@gmail.com>
+Depends: default-jre
+Filename: ./trackit-deb.deb
+Size: 10760152
+MD5sum: 4507f9fd64b49a24a2846ee9a2671989
+SHA1: a3e339f1c928f42c4987c1bf2b6d55fb346ca479
+SHA256: 638283b0d129d78eb857e4a41a272ab67fce8a007d74ed2443da04d53be85c2b
+Section: utils
+Priority: optional
+Description: Trackit - Sistema de control de versiones mejorado
+
