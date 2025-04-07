@@ -1,14 +1,20 @@
 package dev.enric.core.handler.administration
 
 import dev.enric.core.handler.CommandHandler
+import dev.enric.domain.Hash.HashType.COMPLEX_TAG
+import dev.enric.domain.Hash.HashType.SIMPLE_TAG
 import dev.enric.domain.objects.Commit
 import dev.enric.domain.objects.User
+import dev.enric.domain.objects.tag.ComplexTag
+import dev.enric.domain.objects.tag.SimpleTag
 import dev.enric.exceptions.IllegalArgumentValueException
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.logger.Logger
 import dev.enric.util.index.BranchIndex
+import dev.enric.util.index.TagIndex
 import java.io.Console
 import java.sql.Timestamp
+import java.text.MessageFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -19,8 +25,7 @@ import java.util.*
  * Handles the logging functionality for displaying commit history.
  * Commits are displayed in a paginated format, with support for filters.
  */
-class LogHandler : CommandHandler() {
-
+class LogHandler(val format: String?) : CommandHandler() {
     /**
      * Displays the commit log starting from the current branch head.
      * Commits can be filtered by author and date, and limited in number.
@@ -157,11 +162,51 @@ class LogHandler : CommandHandler() {
 
     /**
      * Prints commit details to the logger.
+     * The output format can be customized using the provided format string.
      *
      * @param commit The commit whose details are to be displayed.
      */
     fun printCommitData(commit: Commit) {
-        Logger.log(commit.printInfo())
+        if (format == null) {
+            Logger.log("\n${commit.printInfo()}")
+            return
+        }
+
+        val commitHash = commit.generateKey().toString()
+        val commitDate = commit.date.toLocalDateTime().truncatedTo(ChronoUnit.SECONDS)
+        val author = User.newInstance(commit.author)
+        val confirmer = User.newInstance(commit.confirmer)
+        val tags = TagIndex.getTagsByCommit(commit.generateKey())
+        val tagNames = tags.map {
+            val isComplexTag = it.string.startsWith(COMPLEX_TAG.hash.string)
+            val isSimpleTag = it.string.startsWith(SIMPLE_TAG.hash.string)
+
+            return@map when {
+                isComplexTag -> ComplexTag.newInstance(it).name
+                isSimpleTag -> SimpleTag.newInstance(it).name
+                else -> throw IllegalStateException("Invalid tag type")
+            }
+        }.joinToString(", ")
+
+        Logger.log(format
+            .replace("{ch}", commitHash)
+            .replace("{chS}", commitHash.substring(0, 5).plus("^"))
+            .replace("{date}", commitDate.toString())
+            .replace("{title}", commit.title)
+            .replace("{message}", commit.message)
+            .replace("{ah}", author.generateKey().toString())
+            .replace("{ahS}", author.generateKey().toString().substring(0, 5).plus("^"))
+            .replace("{an}", author.name)
+            .replace("{am}", author.mail)
+            .replace("{ap}", author.phone)
+            .replace("{Ch}", confirmer.generateKey().toString())
+            .replace("{ChS}", confirmer.generateKey().toString().substring(0, 5).plus("^"))
+            .replace("{Cn}", confirmer.name)
+            .replace("{Cm}", confirmer.mail)
+            .replace("{Cp}", confirmer.phone)
+            .replace("{Th}", tags.joinToString(", ") { it.string })
+            .replace("{ThS}", tags.joinToString(", ") { it.string.substring(0, 5).plus("^") })
+            .replace("{Tn}", tagNames))
     }
 
     companion object {

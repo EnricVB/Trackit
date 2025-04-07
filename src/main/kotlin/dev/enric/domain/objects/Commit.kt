@@ -67,18 +67,16 @@ data class Commit(
             append(ColorUtil.label("Hash: "))
             appendLine(ColorUtil.text(generateKey().toString()))
 
-            appendLine()
-
-            append("Author: \t${author.name}")
+            append("Author: ${author.name}")
             if (author.mail.isNotBlank()) append(" <${author.mail}>")
             if (author.phone.isNotBlank()) append(" <${author.phone}>")
-            appendLine(" - ${author.generateKey()}")
+            appendLine(" <${author.generateKey()}>")
 
             if (confirmer != author) {
-                append("Confirmer: \t${confirmer.name}")
+                append("Confirmer: ${confirmer.name}")
                 if (confirmer.mail.isNotBlank()) append(" <${confirmer.mail}>")
                 if (confirmer.phone.isNotBlank()) append(" <${confirmer.phone}>")
-                appendLine(" : ${confirmer.generateKey()}")
+                appendLine(" <${confirmer.generateKey()}>")
             }
 
             TagIndex.getTagsByCommit(generateKey()).forEach {
@@ -94,8 +92,8 @@ data class Commit(
 
             appendLine("Date: $date")
 
-            appendLine("\n\t$title")
-            appendLine("\n\t$message")
+            appendLine("\t$title")
+            appendLine("\t$message")
         }
     }
 
