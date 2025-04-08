@@ -26,18 +26,18 @@ Sigue estos pasos para crear un paquete `.deb` para Trackit:
 ### 1. Crear la Estructura del Paquete
 
 ```bash
-    mkdir -p trackit-deb/DEBIAN
-    mkdir -p trackit-deb/usr/local/bin
-    mkdir -p trackit-deb/usr/share/trackit
+  mkdir -p trackit-deb/DEBIAN
+  mkdir -p trackit-deb/usr/local/bin
+  mkdir -p trackit-deb/usr/share/trackit
 ```
 
 ### 2. Mover el Archivo `.jar` y Crear un Ejecutable
 
 ```bash
-    cp path/to/trackit.jar trackit-deb/usr/share/trackit/
-    echo '#!/bin/bash
-    exec java -jar /usr/share/trackit/trackit.jar "$@"' > trackit-deb/usr/local/bin/trackit
-    chmod +x trackit-deb/usr/local/bin/trackit
+  cp path/to/trackit.jar trackit-deb/usr/share/trackit/
+  echo '#!/bin/bash
+  exec java -jar /usr/share/trackit/trackit.jar "$@"' > trackit-deb/usr/local/bin/trackit
+  chmod +x trackit-deb/usr/local/bin/trackit
 ```
 
 ### 3. Crear el Archivo de Control
@@ -58,22 +58,22 @@ Description: Trackit - Enhanced Version Control System
 ### 4. Crear el Script `postinst`
 
 ```bash
-    echo '#!/bin/bash
-    chmod +x /usr/local/bin/trackit' > trackit-deb/DEBIAN/postinst
-    chmod +x trackit-deb/DEBIAN/postinst
+  echo '#!/bin/bash
+  chmod +x /usr/local/bin/trackit' > trackit-deb/DEBIAN/postinst
+  chmod +x trackit-deb/DEBIAN/postinst
 ```
 
 ### 5. Construir el Paquete `.deb`
 
 ```bash
-    dpkg-deb --build trackit-deb
+  dpkg-deb --build trackit-deb
 ```
 
 ### 6. Generar el Índice de Paquetes `dpkg`
 
 ```bash
-    dpkg-scanpackages -m . > Packages
-    gzip -k Packages
+  dpkg-scanpackages -m . > Packages
+  gzip -k Packages
 ```
 
 ## Instalando Trackit en Ubuntu
@@ -97,6 +97,18 @@ instalados en tu sistema.
 
 ```bash
     apt install trackit
+```
+
+### 4. Instalar JDK +22
+Si no tienes Java instalado, puedes instalarlo con SDKMAN:
+
+```bash
+  apt install zip
+    
+  curl -s "https://get.sdkman.io" | bash
+  source "$HOME/.sdkman/bin/sdkman-init.sh"
+    
+  sdk install java 22-open
 ```
 
 ## Uso

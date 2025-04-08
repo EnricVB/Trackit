@@ -86,6 +86,18 @@ To install Trackit via `apt`, follow these steps:
     apt install trackit
 ```
 
+### 4. Install java
+If you don't have Java installed, you can install it using the following commands:
+
+```bash
+  apt install zip
+    
+  curl -s "https://get.sdkman.io" | bash
+  source "$HOME/.sdkman/bin/sdkman-init.sh"
+    
+  sdk install java 22-open
+```
+
 ## Usage
 Once installed, you can run Trackit with:
 ```bash
