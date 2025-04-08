@@ -24,7 +24,13 @@ import picocli.CommandLine.*
     footer = [
         "Examples:",
         "  trackit checkout a1b2c3d           # Checkout to a commit using an abbreviated hash",
-        "  trackit checkout 1234567890abcdef  # Checkout to a commit using a full hash"
+        "  trackit checkout 1234567890abcdef  # Checkout to a commit using a full hash",
+        "  trackit checkout master             # Checkout to a branch named 'master'",
+        "",
+        "Notes:",
+        "  - The commit hash can be abbreviated or full.",
+        "  - If the hash is ambiguous, an error will be thrown.",
+        ""
     ]
 )
 class Checkout : TrackitCommand() {

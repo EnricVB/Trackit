@@ -16,6 +16,23 @@ import picocli.CommandLine.Option
     name = "create-tag",
     description = ["Create a new simple or complex tag."],
     mixinStandardHelpOptions = true,
+    footer = [
+        "",
+        "Examples:",
+        "  trackit create-tag --name v1.0",
+        "    Creates a simple tag named 'v1.0'.",
+        "",
+        "  trackit create-tag --name v1.0 --message 'Version 1.0 release' --commit a1b2c3d e4f5g6h",
+        "    Creates a complex tag named 'v1.0' with the message 'Version 1.0 release' and assigns it to the commits with hashes 'a1b2c3d' and 'e4f5g6h'.",
+        "",
+        "Notes:",
+        "  - The tag name must be unique within the repository.",
+        "  - The commit hashes can be provided in full or as abbreviations, as long as they are unique.",
+        "  - If no commit hashes are provided, the tag will not be assigned to any commits, but will be created.",
+        "  - The message is optional; if not provided, a simple tag will be created.",
+        "  - If the specified commit does not exist, it will be ignored without error.",
+        ""
+    ]
 )
 class TagCreation : TrackitCommand() {
 

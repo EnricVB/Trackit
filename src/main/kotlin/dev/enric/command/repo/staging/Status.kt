@@ -34,7 +34,6 @@ import picocli.CommandLine.Option
         "  - 'M' indicates modified files. These have changes that are not staged for commit.",
         "  - 'S' indicates files staged for commit. These changes will be included in the next commit.",
         "  - 'D' indicates deleted files. These files have been deleted and will be removed in the next commit.",
-        "  - 'R' indicates renamed files. These files have been renamed and will be included in the next commit.",
         "  - 'I' indicates ignored files. These files are not being tracked by the repository.",
         "",
     ]

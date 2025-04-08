@@ -37,8 +37,9 @@ import picocli.CommandLine.*
         "  - The commit title is mandatory, while the message is optional.",
         "  - Use the --all flag to stage all modified and untracked files before committing.",
         "  - The --confirmer option allows an administrative user to confirm the commit on behalf of another user, requiring both username and password.",
-        "  - If no files are staged for commit, the operation will fail.",
+        "  - If no files are staged for commit, the operation will fail. Only exception is if files are deleted.",
         "  - If the commit is invalid or the user lacks permissions, the operation will not proceed.",
+        "  - In case you don't want to use the password directly, keep it empty and it will be asked interactively.",
         "",
         "For more information, see the Trackit documentation or use the '--help' option for each command."
     ]
