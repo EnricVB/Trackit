@@ -16,6 +16,12 @@ import java.nio.file.Path
     name = "blame",
     description = ["Indicates who is responsible for the changes in a file."],
     footer = [
+        "",
+        "Examples:",
+        "  trackit blame src/Main.kt          Identify the author of changes in the 'src/Main.kt' file.",
+        "Notes:",
+        "  - Ensure the file path is correct and exists in the repository.",
+        "  - You can use this command to check the author for any file in the current branch."
     ],
     mixinStandardHelpOptions = true,
 )
@@ -38,8 +44,7 @@ class Blame : TrackitCommand() {
 
         val branch = BranchIndex.getCurrentBranch()
         val commit = BranchIndex.getBranchHead(branch.generateKey())
-        val file = filePath.toFile().takeIf { it.exists() }
-            ?: throw IllegalStateException("No file found at $filePath")
+        val file = filePath.toFile().takeIf { it.exists() } ?: throw IllegalStateException("No file found at $filePath")
 
         Logger.log(BlameHandler().blame(file, commit))
 

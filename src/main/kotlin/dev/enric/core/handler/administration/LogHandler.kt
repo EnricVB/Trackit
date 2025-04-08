@@ -14,7 +14,6 @@ import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.TagIndex
 import java.io.Console
 import java.sql.Timestamp
-import java.text.MessageFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
