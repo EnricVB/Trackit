@@ -40,7 +40,7 @@ import picocli.CommandLine.*
         "Examples:",
         "  trackit diff                         Compare Working Directory vs Staging",
         "  trackit diff --staged                Compare Staging Area vs HEAD",
-        "  trackit diff commit1 commit2         Compare two commits",
+        "  trackit diff commit1 commit2         Compare two commits (Oldest vs Newest)",
         "  trackit diff --file src/Main.kt      Filter by file",
     ],
     mixinStandardHelpOptions = true,
