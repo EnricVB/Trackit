@@ -87,6 +87,18 @@ Description: Trackit - 增强的版本控制系统
     apt install trackit
 ```
 
+### 4. 安装 Java
+如果您没有安装 Java，可以使用以下命令安装：
+
+```bash
+  apt install zip
+    
+  curl -s "https://get.sdkman.io" | bash
+  source "$HOME/.sdkman/bin/sdkman-init.sh"
+    
+  sdk install java 22-open
+```
+
 ## 使用方法
 安装完成后，您可以使用以下命令运行 Trackit：
 ```bash
