@@ -61,7 +61,7 @@ class Restore : TrackitCommand() {
         names = ["-f", "--file"],
         paramLabel = "File path",
         description = ["The file to restore from the commit"],
-        required = true
+        required = false
     )
     var restoreFile: Path? = null
 

@@ -25,12 +25,13 @@ import kotlin.io.path.*
         "Example:",
         "  trackit stage build/",
         "    Stages all files inside the 'build' directory, making them ready to be committed.",
+        "  trackit stage build/main.kt",
+        "    Stages the 'main.kt' file inside the 'build' directory, making it ready to be committed.",
         "",
         "Notes:",
         "  - This command stages files for the next commit. Files can be added individually or entire directories can be staged.",
         "  - If a file is ignored, it will not be staged unless the '--force' flag is used.",
         "  - Directories are processed recursively. All files inside a directory will be staged.",
-        "  - The '--force' option allows staging of files that are ignored (use with caution).",
         "",
     ]
 )

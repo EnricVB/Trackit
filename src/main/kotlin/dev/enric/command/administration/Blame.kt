@@ -15,6 +15,7 @@ import java.nio.file.Path
 @Command(
     name = "blame",
     description = ["Indicates who is responsible for the changes in a file."],
+    mixinStandardHelpOptions = true,
     footer = [
         "",
         "Examples:",
@@ -23,7 +24,6 @@ import java.nio.file.Path
         "  - Ensure the file path is correct and exists in the repository.",
         "  - You can use this command to check the author for any file in the current branch."
     ],
-    mixinStandardHelpOptions = true,
 )
 
 class Blame : TrackitCommand() {

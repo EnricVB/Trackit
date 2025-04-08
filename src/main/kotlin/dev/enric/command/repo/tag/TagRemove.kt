@@ -11,6 +11,19 @@ import picocli.CommandLine.Option
     name = "remove-tag",
     description = ["Removes a tag from one or multiple ."],
     mixinStandardHelpOptions = true,
+    footer = [
+        "",
+        "Examples:",
+        "  trackit repo tag remove-tag --name <tag> --commit <commit1> <commit2>",
+        "       This will remove the tag <tag> from the commits <commit1> and <commit2>",
+        "",
+        "Notes:",
+        "  - The tag name must be unique.",
+        "  - The commit hashes must be valid.",
+        "  - The tag must exist in the repository.",
+        "  - The user must have permission to modify the tag.",
+        "  - The user must have permission to modify the commits.",
+    ]
 )
 class TagRemove : TrackitCommand() {
 
