@@ -39,7 +39,7 @@ import java.nio.file.Path
         "  - This command only affects files tracked by the repository’s ignore settings, not existing commits.",
         "",
     ]
-
+        //TODO: Agregar patrones como *.log
 )
 class Ignore : TrackitCommand() {
 

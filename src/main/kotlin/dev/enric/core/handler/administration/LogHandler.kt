@@ -1,30 +1,36 @@
 package dev.enric.core.handler.administration
 
 import dev.enric.core.handler.CommandHandler
+import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.COMPLEX_TAG
 import dev.enric.domain.Hash.HashType.SIMPLE_TAG
 import dev.enric.domain.objects.Commit
 import dev.enric.domain.objects.User
 import dev.enric.domain.objects.tag.ComplexTag
 import dev.enric.domain.objects.tag.SimpleTag
-import dev.enric.exceptions.IllegalArgumentValueException
-import dev.enric.exceptions.IllegalStateException
 import dev.enric.logger.Logger
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.TagIndex
 import java.io.Console
+import java.io.Serializable
 import java.sql.Timestamp
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.*
 
 /**
- * Handles the logging functionality for displaying commit history.
- * Commits are displayed in a paginated format, with support for filters.
+ * Handles the logging functionality for displaying commit history across one or multiple branches.
+ * It supports filtering by author, date range, and message content, and renders a simple ASCII graph view.
  */
-class LogHandler(val format: String?) : CommandHandler() {
+class LogHandler(
+    val format: String?,
+    val limit: Int,
+    val authorFilter: String?,
+    val since: LocalDateTime?,
+    val until: LocalDateTime?,
+    val message: String
+) : CommandHandler() {
+
     /**
      * Displays the commit log starting from the current branch head.
      * Commits can be filtered by author and date, and limited in number.
@@ -37,13 +43,7 @@ class LogHandler(val format: String?) : CommandHandler() {
      *
      * @throws IllegalStateException if no commits are found in the repository.
      */
-    fun showLog(
-        limit: Int,
-        authorFilter: String?,
-        since: LocalDateTime?,
-        until: LocalDateTime?,
-        message: String
-    ) {
+    fun showFormattedLog() {
         val branchHead = BranchIndex.getBranchHead(BranchIndex.getCurrentBranch().generateKey())
         var commit: Commit? = branchHead
         var shownCount = 0
@@ -59,13 +59,14 @@ class LogHandler(val format: String?) : CommandHandler() {
             if (!isFromAuthor(commit, authorFilter)
                 || !isAfterSince(commit, since)
                 || !isBeforeUntil(commit, until)
-                || !hasMessage(commit, message)) {
+                || !hasMessage(commit, message)
+            ) {
                 commit = decodePrevious(commit)
                 continue
             }
 
             // Show the commit
-            printCommitData(commit)
+            drawFormattedCommit(commit)
             shownCount++
 
             // Exit if limit reached (non-interactive mode)
@@ -89,75 +90,116 @@ class LogHandler(val format: String?) : CommandHandler() {
     }
 
     /**
-     * Checks if a commit was made by a specific author.
+     * Displays the commit log starting from one or more branch heads.
+     * Commits are displayed in topological order and rendered with a simple graph structure.
      *
-     * @param commit The commit being evaluated.
-     * @param authorFilter The name of the author to filter by.
-     *                     If `null`, all authors are accepted.
-     * @return `true` if the commit was made by the specified author
-     *         or if no author filter is provided; `false` otherwise.
+     * @param limit The maximum number of commits to display.
+     * @param authorFilter Filter commits by author name. If null, all authors are included.
+     * @param since Show commits only after this date (inclusive). If null, no lower bound.
+     * @param until Show commits only before this date (inclusive). If null, no upper bound.
+     * @param message Filter commits containing this substring in title or message. Empty means no filter.
      */
-    private fun isFromAuthor(commit: Commit, authorFilter: String?): Boolean {
-        return authorFilter == null || User.newInstance(commit.author).name.equals(authorFilter, ignoreCase = true)
+    fun showInlineLog() {
+        val branchHeads = BranchIndex.getAllBranches().map { BranchIndex.getBranchHead(it) }
+        val commitGraph = buildGraph(branchHeads)
+
+        val filteredCommits = commitGraph.values.filter {
+            isFromAuthor(it.commit, authorFilter)
+                    && isAfterSince(it.commit, since)
+                    && isBeforeUntil(it.commit, until)
+                    && hasMessage(it.commit, message)
+        }
+
+        val sortedCommits = filteredCommits.sortedByDescending { it.commit.date }
+
+        drawGraph(sortedCommits, limit)
     }
 
     /**
-     * Checks if a commit was made after (or at) the specified date.
+     * Internal representation of a commit node for graph construction.
      *
-     * @param commit The commit being evaluated.
-     * @param since The minimum date (inclusive) to accept commits from.
-     *              If `null`, all dates are accepted.
-     * @return `true` if the commit date is after the specified date
-     *         or if no date filter is provided; `false` otherwise.
+     * @property commit The actual commit object.
+     * @property parents List of parent commit hashes.
+     * @property children List of child commit hashes.
      */
-    private fun isAfterSince(commit: Commit, since: LocalDateTime?): Boolean {
-        return since == null || commit.date.isAfter(since)
+    private data class CommitNode(
+        val commit: Commit,
+        val parents: MutableList<Hash> = mutableListOf(),
+        val children: MutableList<Hash> = mutableListOf()
+    )
+
+    /**
+     * Builds a graph of commits starting from a set of head commits.
+     *
+     * @param starts List of head commits to start the traversal from.
+     * @return A map of commit hash to CommitNode representing the graph.
+     */
+    private fun buildGraph(starts: List<Commit>): Map<Hash, CommitNode> {
+        val visited = mutableMapOf<Hash, CommitNode>()
+        val queue = ArrayDeque<Commit>()
+        queue.addAll(starts)
+
+        while (queue.isNotEmpty()) {
+            val current = queue.removeFirst()
+            val node = visited.getOrPut(current.generateKey()) { CommitNode(current) }
+
+            val parentHash = current.previousCommit ?: continue
+            val parent = Commit.newInstance(parentHash)
+            node.parents.add(parentHash)
+
+            val parentNode = visited.getOrPut(parent.generateKey()) { CommitNode(parent) }
+            parentNode.children.add(current.generateKey())
+
+            queue.addLast(parent)
+        }
+
+        return visited
     }
 
     /**
-     * Checks if a commit was made before (or at) the specified date.
+     * Displays the commit graph in ASCII format, simulating a tree structure.
      *
-     * @param commit The commit being evaluated.
-     * @param until The maximum date (inclusive) to accept commits up to.
-     *              If `null`, all dates are accepted.
-     * @return `true` if the commit date is before the specified date
-     *         or if no date filter is provided; `false` otherwise.
+     * @param commits The list of commit nodes to display.
+     * @param limit The maximum number of commits to render.
      */
-    private fun isBeforeUntil(commit: Commit, until: LocalDateTime?): Boolean {
-        return until == null || commit.date.isBefore(until)
+    private fun drawGraph(commits: List<CommitNode>, limit: Int) {
+        val shown = commits.take(limit)
+        val lines = mutableListOf<String>()
+        val activeBranches = mutableListOf<Hash>()
+
+        for (node in shown) {
+            val shortHash = node.commit.generateKey().abbreviate() + "^"
+            val line = buildLinePrefix(node, activeBranches) + shortHash
+            lines.add(line)
+
+            node.parents.forEach {
+                if (!activeBranches.contains(it)) activeBranches.add(it)
+            }
+        }
+
+        lines.forEach { println(it) }
     }
 
     /**
-     * Checks if the commit message contains a given substring.
+     * Constructs a visual prefix for a commit line, indicating its place in the branch graph.
      *
-     * @param commit The commit being evaluated.
-     * @param message The message filter to apply. If empty, all commit messages are accepted.
-     * @return `true` if the commit message contains the specified substring
-     *         or if no message filter is provided; `false` otherwise.
+     * @param node The current commit node.
+     * @param activeBranches List of active branch heads to align columns.
+     * @return A formatted string with ASCII tree structure.
      */
-    private fun hasMessage(commit: Commit, message: String): Boolean {
-        return message.isEmpty() || commit.message.contains(message) || commit.title.contains(message)
+    private fun buildLinePrefix(node: CommitNode, activeBranches: List<Hash>): String {
+        val idx = activeBranches.indexOf<Serializable>(node.commit.generateKey())
+        val builder = StringBuilder()
+
+        for (i in activeBranches.indices) {
+            if (i == idx) builder.append("* ")
+            else builder.append("| ")
+        }
+
+        if (idx == -1) builder.append("* ")
+        return builder.toString()
     }
 
-    /**
-     * Helper to decode the previous commit.
-     */
-    private fun decodePrevious(commit: Commit): Commit? {
-        return commit.previousCommit?.let { Commit().decode(it) }
-    }
-
-    /**
-     * Captures a single key press from the user.
-     *
-     * - **Space (' ')** → Load more commits.
-     * - **'q'** → Exit the log.
-     *
-     * @return The character pressed by the user.
-     */
-    private fun getKey(): Char {
-        val console: Console? = System.console()
-        return console?.reader()?.read()?.toChar() ?: (Scanner(System.`in`).next().firstOrNull() ?: ' ')
-    }
 
     /**
      * Prints commit details to the logger.
@@ -165,7 +207,7 @@ class LogHandler(val format: String?) : CommandHandler() {
      *
      * @param commit The commit whose details are to be displayed.
      */
-    fun printCommitData(commit: Commit) {
+    fun drawFormattedCommit(commit: Commit) {
         if (format == null) {
             Logger.log("\n${commit.printInfo()}")
             return
@@ -187,47 +229,77 @@ class LogHandler(val format: String?) : CommandHandler() {
             }
         }.joinToString(", ")
 
-        Logger.log(format
-            .replace("{ch}", commitHash)
-            .replace("{chS}", commitHash.substring(0, 5).plus("^"))
-            .replace("{date}", commitDate.toString())
-            .replace("{title}", commit.title)
-            .replace("{message}", commit.message)
-            .replace("{ah}", author.generateKey().toString())
-            .replace("{ahS}", author.generateKey().toString().substring(0, 5).plus("^"))
-            .replace("{an}", author.name)
-            .replace("{am}", author.mail)
-            .replace("{ap}", author.phone)
-            .replace("{Ch}", confirmer.generateKey().toString())
-            .replace("{ChS}", confirmer.generateKey().toString().substring(0, 5).plus("^"))
-            .replace("{Cn}", confirmer.name)
-            .replace("{Cm}", confirmer.mail)
-            .replace("{Cp}", confirmer.phone)
-            .replace("{Th}", tags.joinToString(", ") { it.string })
-            .replace("{ThS}", tags.joinToString(", ") { it.string.substring(0, 5).plus("^") })
-            .replace("{Tn}", tagNames))
+        Logger.log(
+            format
+                .replace("{ch}", commitHash)
+                .replace("{chS}", commitHash.substring(0, 5).plus("^"))
+                .replace("{date}", commitDate.toString())
+                .replace("{title}", commit.title)
+                .replace("{message}", commit.message)
+                .replace("{ah}", author.generateKey().toString())
+                .replace("{ahS}", author.generateKey().toString().substring(0, 5).plus("^"))
+                .replace("{an}", author.name)
+                .replace("{am}", author.mail)
+                .replace("{ap}", author.phone)
+                .replace("{Ch}", confirmer.generateKey().toString())
+                .replace("{ChS}", confirmer.generateKey().toString().substring(0, 5).plus("^"))
+                .replace("{Cn}", confirmer.name)
+                .replace("{Cm}", confirmer.mail)
+                .replace("{Cp}", confirmer.phone)
+                .replace("{Th}", tags.joinToString(", ") { it.string })
+                .replace("{ThS}", tags.joinToString(", ") { it.string.substring(0, 5).plus("^") })
+                .replace("{Tn}", tagNames)
+        )
     }
 
-    companion object {
-        /**
-         * Parses a date string in the format yyyy-MM-ddTHH:mm
-         * Example: "2025-03-16T14:30" | "2025-03-16"
-         */
-        fun parseDate(dateStr: String): LocalDateTime {
-            val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")
-            val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    /**
+     * Helper to decode the previous commit.
+     */
+    private fun decodePrevious(commit: Commit): Commit? {
+        return commit.previousCommit?.let { Commit().decode(it) }
+    }
 
-            return try {
-                LocalDateTime.parse(dateStr, dateTimeFormatter)
-            } catch (e: Exception) {
-                try {
-                    val date = LocalDate.parse(dateStr, dateFormatter)
-                    date.atStartOfDay()
-                } catch (e: Exception) {
-                    throw IllegalArgumentValueException("Invalid date format. Use yyyy-MM-dd'T'HH:mm or yyyy-MM-dd")
-                }
-            }
-        }
+    /**
+     * Returns true if the commit was made by the specified author.
+     */
+    private fun isFromAuthor(commit: Commit, authorFilter: String?): Boolean {
+        return authorFilter == null || User.newInstance(commit.author).name.equals(authorFilter, ignoreCase = true)
+    }
+
+    /**
+     * Returns true if the commit was made after the specified start date (inclusive).
+     */
+    private fun isAfterSince(commit: Commit, since: LocalDateTime?): Boolean {
+        return since == null || commit.date.isAfter(since)
+    }
+
+    /**
+     * Returns true if the commit was made before the specified end date (inclusive).
+     */
+    private fun isBeforeUntil(commit: Commit, until: LocalDateTime?): Boolean {
+        return until == null || commit.date.isBefore(until)
+    }
+
+    /**
+     * Returns true if the commit message or title contains the given filter string.
+     */
+    private fun hasMessage(commit: Commit, message: String): Boolean {
+        return message.isEmpty()
+                || commit.message.contains(message, ignoreCase = true)
+                || commit.title.contains(message, ignoreCase = true)
+    }
+
+    /**
+     * Captures a single key press from the user.
+     *
+     * - **Space (' ')** → Load more commits.
+     * - **'q'** → Exit the log.
+     *
+     * @return The character pressed by the user.
+     */
+    private fun getKey(): Char {
+        val console: Console? = System.console()
+        return console?.reader()?.read()?.toChar() ?: (Scanner(System.`in`).next().firstOrNull() ?: ' ')
     }
 }
 
@@ -235,7 +307,7 @@ class LogHandler(val format: String?) : CommandHandler() {
  * Checks if a commit was made after (or at) the specified date.
  *
  * @param since The minimum date (inclusive) to accept commits from.
- * @return `true` if the commit date is after the specified date
+ * @return true if the commit date is after the specified date
  */
 private fun Timestamp.isBefore(since: LocalDateTime): Boolean {
     val localDate = this.toLocalDateTime().truncatedTo(ChronoUnit.DAYS)
@@ -246,7 +318,7 @@ private fun Timestamp.isBefore(since: LocalDateTime): Boolean {
  * Checks if a commit was made before (or at) the specified date.
  *
  * @param until The maximum date (inclusive) to accept commits up to.
- * @return `true` if the commit date is before the specified date
+ * @return true if the commit date is before the specified date
  */
 private fun Timestamp.isAfter(until: LocalDateTime): Boolean {
     val localDate = this.toLocalDateTime().truncatedTo(ChronoUnit.DAYS)
