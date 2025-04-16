@@ -4,6 +4,9 @@ import dev.enric.command.TrackitCommand
 import dev.enric.core.handler.administration.LogHandler
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 
 /**
  * Displays the commit history of the current repository in a structured and readable format.
@@ -131,9 +134,11 @@ class Log : TrackitCommand() {
      * By default, the log shows all commits.
      */
     @Option(
-        names = ["--message", "-m"], description = ["Shows the commits with the specified title/message"], required = false
+        names = ["--message", "-m"],
+        description = ["Shows the commits with the specified title/message"],
+        required = false
     )
-    var message: String? = null
+    var message: String = ""
 
     /**
      * The format in which to show the commits in the log.
@@ -146,9 +151,15 @@ class Log : TrackitCommand() {
     )
     var format: String? = null
 
+
+    @Option(
+        names = ["-i", "--one-line"], description = ["Prints commit graph in one line"], required = false
+    )
+    var oneLine: Boolean = false
+
     /**
      * Entry point for the `log` command execution.
-     * Delegates to [LogHandler.showLog] to print commit information.
+     * Delegates to [LogHandler.showInlineLog] to print commit information.
      *
      * @return 0 on success, other codes for error states.
      */
@@ -156,13 +167,34 @@ class Log : TrackitCommand() {
         super.call()
 
         // Show the commit history
-        LogHandler(format).showLog(
+        val logHandler = LogHandler(
+            format,
             limit,
             author,
-            since?.let { LogHandler.parseDate(it)},
-            until?.let { LogHandler.parseDate(it)},
-            message ?: "")
+            parseDateTime(since),
+            parseDateTime(until),
+            message
+        )
+
+        // Depending if oneline option is introduced, print inline or formatted log
+        if (oneLine) {
+            logHandler.showInlineLog()
+        } else {
+            logHandler.showFormattedLog()
+        }
+
 
         return 0
     }
+}
+
+/**
+ * Parses a date-time string in ISO_LOCAL_DATE_TIME format.
+ *
+ * @param str the input date string.
+ * @return LocalDateTime object or null if input is null or empty.
+ */
+private fun parseDateTime(str: String?): LocalDateTime? {
+    if (str == null || str.isEmpty()) return null
+    return LocalDateTime.parse(str, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 }
