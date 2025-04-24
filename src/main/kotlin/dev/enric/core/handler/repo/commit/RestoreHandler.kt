@@ -46,24 +46,9 @@ class RestoreHandler(
             throw CommitNotFoundException("Commit not found in the repository.")
         }
 
-        if (!hasReadPermissionOnBranch(user)) {
+        if (!hasReadPermissionOnBranch(user, commit.branch)) {
             val branch = Branch.newInstance(commit.branch)
             throw InvalidPermissionException("User does not have permissions to read branch ${branch.name} (${commit.branch})")
-        }
-    }
-
-    /**
-     * Checks if the user has read permission on the commit branch.
-     * @param user The user to check.
-     * @return True if the user has read permission on the branch, false otherwise.
-     */
-    private fun hasReadPermissionOnBranch(user: User) : Boolean {
-        if (commit == null) {
-            throw CommitNotFoundException("Commit not found in the repository.")
-        }
-
-        return user.roles.map { Role.newInstance(it) }.any { role ->
-            role.getBranchPermissions().any { it.branch == commit.branch && it.readPermission }
         }
     }
 

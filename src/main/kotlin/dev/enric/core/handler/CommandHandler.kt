@@ -1,6 +1,9 @@
 package dev.enric.core.handler
 
+import dev.enric.command.branch.Branch
 import dev.enric.core.security.AuthUtil
+import dev.enric.domain.Hash
+import dev.enric.domain.objects.Role
 import dev.enric.domain.objects.User
 import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.exceptions.UserNotFoundException
@@ -61,6 +64,28 @@ open class CommandHandler {
             val validChars = listOf('m', 'u', 's', 'a')
             val expectedChar = validChars.getOrElse(index) { return false }
             char == expectedChar || char == '-'
+        }
+    }
+
+    /**
+     * Checks if the user has write permission on the current branch.
+     * @param user The user to check.
+     * @return True if the user has write permission on the branch, false otherwise.
+     */
+    fun hasWritePermissionOnBranch(user: User, branch: Hash) : Boolean {
+        return user.roles.map { Role.newInstance(it) }.any { role ->
+            role.getBranchPermissions().any { it.branch == branch && it.writePermission }
+        }
+    }
+
+    /**
+     * Checks if the user has read permission on the commit branch.
+     * @param user The user to check.
+     * @return True if the user has read permission on the branch, false otherwise.
+     */
+    fun hasReadPermissionOnBranch(user: User, branch: Hash) : Boolean {
+        return user.roles.map { Role.newInstance(it) }.any { role ->
+            role.getBranchPermissions().any { it.branch == branch && it.readPermission }
         }
     }
 }
