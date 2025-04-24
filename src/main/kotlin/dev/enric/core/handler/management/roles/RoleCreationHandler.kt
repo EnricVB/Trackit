@@ -143,7 +143,7 @@ class RoleCreationHandler(
         assignBranchPermissions(role, branchPermissionsMap)
 
         // Save role
-        Logger.log("Role created")
+        Logger.info("Role created")
         role.encode(true)
     }
 

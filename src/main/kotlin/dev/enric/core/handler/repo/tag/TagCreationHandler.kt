@@ -51,7 +51,7 @@ class TagCreationHandler(
             Timestamp.from(Instant.now())
         )
 
-        Logger.log("Creating complex tag $name")
+        Logger.debug("Created complex tag $name with message: $message, sudoArgs: $sudoArgs")
         return complexTag.encode(true).first
     }
 
@@ -63,7 +63,7 @@ class TagCreationHandler(
     private fun createSimpleTag(): Hash {
         val simpleTag = SimpleTag(name)
 
-        Logger.log("Creating simple tag $name")
+        Logger.debug("Created simple tag $name")
         return simpleTag.encode(true).first
     }
 

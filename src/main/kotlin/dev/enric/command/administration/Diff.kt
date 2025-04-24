@@ -114,12 +114,12 @@ class Diff : TrackitCommand() {
         // Execute the appropriate diff command based on the provided parameters
         when {
             showWorkingAreaDiff -> {
-                Logger.log("Diff STAGING vs WORKDIR\n")
+                Logger.info("Diff STAGING vs WORKDIR\n")
                 diffHandler.executeDiffInWorkdir()
             }
 
             showStagedDiff -> {
-                Logger.log("Diff HEAD vs WORKDIR\n")
+                Logger.info("Diff HEAD vs WORKDIR\n")
                 val currentBranch = BranchIndex.getCurrentBranch()
                 val headCommit = currentBranch.let { BranchIndex.getBranchHead(it.generateKey()) }
 
@@ -127,12 +127,12 @@ class Diff : TrackitCommand() {
             }
 
             hashes.size == 1 -> {
-                Logger.log("Diff ${hashes[0]} vs WORKDIR\n")
+                Logger.info("Diff ${hashes[0]} vs WORKDIR\n")
                 diffHandler.executeDiffBetweenWorkdirAndCommit(Commit.newInstance(Hash(hashes[0])))
             }
 
             hashes.size == 2 -> {
-                Logger.log("Diff ${hashes[0]} vs ${hashes[1]}\n")
+                Logger.info("Diff ${hashes[0]} vs ${hashes[1]}\n")
                 val isFirstHashBranch = hashes[0].startsWith(Hash.HashType.BRANCH.hash.string)
                 val isSecondHashBranch = hashes[1].startsWith(Hash.HashType.BRANCH.hash.string)
 

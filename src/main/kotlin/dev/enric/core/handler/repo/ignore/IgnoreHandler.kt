@@ -34,7 +34,7 @@ class IgnoreHandler : CommandHandler() {
         }
 
         try {
-            Logger.log("Ignoring $relativePath")
+            Logger.info("Ignoring $relativePath")
 
             if (Files.notExists(path)) {
                 throw IllegalStateException("File or directory does not exist")

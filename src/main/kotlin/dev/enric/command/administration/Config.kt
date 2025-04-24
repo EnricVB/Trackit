@@ -162,13 +162,13 @@ class Config : TrackitCommand() {
         val session = KeepSession(username ?: "", password ?: "", salt)
 
         if (global) {
-            Logger.log("Saving session at system level")
+            Logger.info("Saving session at system level")
             session.globalSave()
         } else {
-            Logger.log("Saving session at repository level")
+            Logger.info("Saving session at repository level")
             session.localSave()
         }
 
-        Logger.log("Session saved")
+        Logger.info("Session saved")
     }
 }

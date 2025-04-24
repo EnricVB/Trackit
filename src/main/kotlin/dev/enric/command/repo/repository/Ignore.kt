@@ -70,7 +70,7 @@ class Ignore : TrackitCommand() {
         IgnoreHandler().ignore(path)
 
         // Log the action
-        Logger.log("File is ignored")
+        Logger.info("File or directory '$path' has been ignored successfully.")
 
         return 0
     }

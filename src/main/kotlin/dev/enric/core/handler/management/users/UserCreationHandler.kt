@@ -100,7 +100,7 @@ class UserCreationHandler(
 
         // Create the user
         User.createUser(name, password, mail ?: "", phone ?: "", roles).encode(true)
-        Logger.log("User $name created")
+        Logger.info("User $name created")
     }
 
 

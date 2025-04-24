@@ -31,6 +31,6 @@ class RoleListHandler {
         }
 
         // Print the information of each role
-        roles.forEach { Logger.log(Role.newInstance(it).printInfo()) }
+        roles.forEach { Logger.info(Role.newInstance(it).printInfo()) }
     }
 }

@@ -88,9 +88,9 @@ class RestoreHandler(
                 StandardOpenOption.WRITE
             )
 
-            Logger.log("Restored file: ${tree.serializablePath.relativePath(RepositoryFolderManager().getInitFolderPath())}")
+            Logger.info("Restored file: ${tree.serializablePath.relativePath(RepositoryFolderManager().getInitFolderPath())}")
         }
 
-        Logger.log("Restore successful.")
+        Logger.info("Restore successful.")
     }
 }

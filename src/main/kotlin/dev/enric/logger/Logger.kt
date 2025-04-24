@@ -35,10 +35,22 @@ object Logger {
      *
      * @param message The message to log
      */
-    fun log(message: String) {
+    fun info(message: String) {
         saveLog("[${getDateTime()}] [INFO] [$clazz] $message")
 
         if(logLevel.isAtLeast(INFO)) {
+            println(ColorUtil.message(message))
+        }
+    }
+
+    /**
+     * Logs a verbose message to the console.
+     * In case the log level is set to anything but VERBOSE, the message will not be printed.
+     */
+    fun debug(message: String) {
+        saveLog("[${getDateTime()}] [DEBUG] [$clazz] $message")
+
+        if(logLevel.isAtLeast(VERBOSE)) {
             println(ColorUtil.message(message))
         }
     }

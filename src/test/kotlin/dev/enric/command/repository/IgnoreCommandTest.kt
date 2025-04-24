@@ -39,7 +39,7 @@ class IgnoreCommandTest : CommandTest() {
 
     @Test
     fun `Ignore command adds specific file to the ignore list`() {
-        Logger.log("Executing test: Ignore command adds specific file to the ignore list\n")
+        Logger.info("Executing test: Ignore command adds specific file to the ignore list\n")
 
         // Given
         val path = RepositoryFolderManager().getInitFolderPath().resolve(SPECIFIC_FILE_PATH)
@@ -56,7 +56,7 @@ class IgnoreCommandTest : CommandTest() {
 
     @Test
     fun `Ignore command does not adds specific file to the ignore list if does not exists`() {
-        Logger.log("Executing test: Ignore command adds specific file to the ignore list\n")
+        Logger.info("Executing test: Ignore command adds specific file to the ignore list\n")
 
         // Given
         val path = RepositoryFolderManager().getInitFolderPath().resolve(SPECIFIC_FILE_PATH)
@@ -72,7 +72,7 @@ class IgnoreCommandTest : CommandTest() {
 
     @Test
     fun `Ignore commands adds all files inside folder to the ignore list`() {
-        Logger.log("Executing test: Ignore commands adds all files inside folder to the ignore list\n")
+        Logger.info("Executing test: Ignore commands adds all files inside folder to the ignore list\n")
 
         // Given
         val folderPath = RepositoryFolderManager().getInitFolderPath().resolve(FOLDER_PATH)

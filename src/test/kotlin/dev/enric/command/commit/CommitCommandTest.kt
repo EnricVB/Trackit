@@ -41,7 +41,7 @@ class CommitCommandTest : CommandTest() {
 
     @Test
     fun `Commit with no staged files fails`() {
-        Logger.log("Executing test: Commit with no staged files fails\n")
+        Logger.info("Executing test: Commit with no staged files fails\n")
 
         // Given
         StagingHandler.clearStagingArea()
@@ -60,7 +60,7 @@ class CommitCommandTest : CommandTest() {
 
     @Test
     fun `Clears staging area after commit`() {
-        Logger.log("Executing test: Clears staging area after commit\n")
+        Logger.info("Executing test: Clears staging area after commit\n")
 
         // When
         val commit = Commit(title = COMMIT_TITLE, message = COMMIT_MESSAGE)
@@ -97,7 +97,7 @@ class CommitCommandTest : CommandTest() {
 
     @Test
     fun `User with no branch write permissions cannot commit`() {
-        Logger.log("Executing test: User with no branch write permissions cannot commit\n")
+        Logger.info("Executing test: User with no branch write permissions cannot commit\n")
 
         // Given
         StagingHandler.clearStagingArea()
@@ -118,7 +118,7 @@ class CommitCommandTest : CommandTest() {
 
     @Test
     fun `User with no branch write permissions but different confirmer can commit`() {
-        Logger.log("Executing test: User with no branch write permissions but different confirmer can commit\n")
+        Logger.info("Executing test: User with no branch write permissions but different confirmer can commit\n")
 
         // Given
         StagingHandler.clearStagingArea()
@@ -154,7 +154,7 @@ class CommitCommandTest : CommandTest() {
 
     @Test
     fun `Adding tags to commits`() {
-        Logger.log("Executing test: Adding tags to commits\n")
+        Logger.info("Executing test: Adding tags to commits\n")
 
         // Given
         StagingHandler.clearStagingArea()

@@ -36,7 +36,7 @@ abstract class TrackitCommand : Callable<Int> {
      * Show debug logs.
      * Useful for troubleshooting and detailed output.
      */
-    @Option(names = ["--verbose", "-v"], description = ["Shows debug logs"])
+    @Option(names = ["--verbose"], description = ["Shows debug logs"])
     var verbose: Boolean = false
 
     /**
