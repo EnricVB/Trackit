@@ -48,7 +48,7 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
      * Checks if the user has the permission to write into the specified branch.
      */
     private fun checkWritePermissionOnBranch(user: User) {
-        if (!hasWritePermissionOnBranch(user)) {
+        if (!hasWritePermissionOnBranch(user, commit.branch)) {
             val branch = BranchIndex.getCurrentBranch()
             throw InvalidPermissionException("User does not have permission to write on branch ${branch.name} (${branch.generateKey()})")
         }
@@ -67,16 +67,6 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
         }
     }
 
-    /**
-     * Checks if the user has write permission on the current branch.
-     * @param user The user to check.
-     * @return True if the user has write permission on the branch, false otherwise.
-     */
-    private fun hasWritePermissionOnBranch(user: User) : Boolean {
-        return user.roles.map { Role.newInstance(it) }.any { role ->
-            role.getBranchPermissions().any { it.branch == commit.branch && it.writePermission }
-        }
-    }
 
     /**
      * Initializes the commit properties.

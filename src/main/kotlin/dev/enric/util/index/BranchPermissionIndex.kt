@@ -85,13 +85,9 @@ object BranchPermissionIndex {
      * @return A list of [Hash] objects representing the unused branch permissions.
      */
     fun getUnusedPermissions(): List<Hash> {
-        val usedPermissions = UserIndex.getAllUsers()
-            .asSequence()
-            .map { User.newInstance(it) }
-            .flatMap { user -> user.roles.asSequence() }
-            .map { Role.newInstance(it) }
-            .flatMap { role -> role.getBranchPermissions().asSequence() }
-            .toSet()
+        val usedPermissions = UserIndex.getAllUsers().asSequence().map { User.newInstance(it) }
+            .flatMap { user -> user.roles.asSequence() }.map { Role.newInstance(it) }
+            .flatMap { role -> role.getBranchPermissions().asSequence() }.toSet()
 
         return getAllBranchPermissions().filterNot { usedPermissions.contains(BranchPermission.newInstance(it)) }
     }
