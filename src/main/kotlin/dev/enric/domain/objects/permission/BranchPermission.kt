@@ -49,7 +49,7 @@ data class BranchPermission(
     }
 
     override fun generateKey(): Hash {
-        val hashData = Hash.parseText("${toString().length};${readPermission};${writePermission}", 15)
+        val hashData = Hash.parseText(branch.string, 15)
 
         return BRANCH_PERMISSION.hash.plus(hashData)
     }
