@@ -46,7 +46,7 @@ class Blame : TrackitCommand() {
         val commit = BranchIndex.getBranchHead(branch.generateKey())
         val file = filePath.toFile().takeIf { it.exists() } ?: throw IllegalStateException("No file found at $filePath")
 
-        Logger.log(BlameHandler().blame(file, commit))
+        Logger.info(BlameHandler().blame(file, commit))
 
         return 0
     }

@@ -84,6 +84,6 @@ class CheckoutHandler(
         }
 
         CommitIndex.setCurrentCommit(commit.generateKey())
-        Logger.log("Checkout successful.")
+        Logger.info("Checkout successful.")
     }
 }

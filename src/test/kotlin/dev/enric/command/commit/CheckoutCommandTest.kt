@@ -46,7 +46,7 @@ class CheckoutCommandTest : CommandTest() {
 
     @Test
     fun `Files are modified to a previous state`() {
-        Logger.log("Executing test: Files are modified to a previous state\n")
+        Logger.info("Executing test: Files are modified to a previous state\n")
 
         // Given
         val file = RepositoryFolderManager().getInitFolderPath().resolve(FILE)

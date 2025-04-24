@@ -54,7 +54,7 @@ class Init : TrackitCommand() {
         InitHandler.init()
 
         // Inform the user that initialization succeeded
-        Logger.log("Repository initialized")
+        Logger.info("Repository initialized")
 
         return 0
     }

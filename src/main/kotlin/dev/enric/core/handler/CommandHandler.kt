@@ -1,6 +1,5 @@
 package dev.enric.core.handler
 
-import dev.enric.command.branch.Branch
 import dev.enric.core.security.AuthUtil
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Role
@@ -35,7 +34,7 @@ open class CommandHandler {
             throw UserNotFoundException("User ${sudoArgs?.first()} not found. Try keeping session with 'trackit config --keep-session' or use '--sudo' option.")
         }
 
-        Logger.log("Logged in with ${user.name}")
+        Logger.info("Logged in with ${user.name}")
         return user
     }
 

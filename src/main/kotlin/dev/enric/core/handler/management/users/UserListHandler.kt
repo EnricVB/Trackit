@@ -25,6 +25,6 @@ class UserListHandler {
         }
 
         // Iterate over each user, creating an instance and printing their information
-        users.forEach { Logger.log(User.newInstance(it).printInfo()) }
+        users.forEach { Logger.info(User.newInstance(it).printInfo()) }
     }
 }

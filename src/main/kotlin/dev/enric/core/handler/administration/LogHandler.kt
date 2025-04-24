@@ -21,6 +21,13 @@ import java.util.*
 /**
  * Handles the logging functionality for displaying commit history across one or multiple branches.
  * It supports filtering by author, date range, and message content, and renders a simple ASCII graph view.
+ *
+ * @property format The format string for displaying commit details. If null, uses default formatting.
+ * @property limit The maximum number of commits to display. If 0, uses interactive mode.
+ * @property authorFilter The author name to filter commits by. If null, no filtering is applied.
+ * @property since The minimum date (inclusive) to filter commits. If null, no lower bound is applied.
+ * @property until The maximum date (inclusive) to filter commits. If null, no upper bound is applied.
+ * @property message The message to filter commits by. If empty, no filtering is applied.
  */
 class LogHandler(
     val format: String?,
@@ -34,12 +41,6 @@ class LogHandler(
     /**
      * Displays the commit log starting from the current branch head.
      * Commits can be filtered by author and date, and limited in number.
-     *
-     * @param limit The maximum number of commits to show. If null, uses pagination.
-     * @param authorFilter The author name to filter commits by.
-     * @param since The minimum date (inclusive) to filter commits. Format: yyyy-MM-ddTHH:mm
-     * @param until The maximum date (inclusive) to filter commits. Format: yyyy-MM-ddTHH:mm
-     * @param message The message to filter commits by.
      *
      * @throws IllegalStateException if no commits are found in the repository.
      */
@@ -92,12 +93,6 @@ class LogHandler(
     /**
      * Displays the commit log starting from one or more branch heads.
      * Commits are displayed in topological order and rendered with a simple graph structure.
-     *
-     * @param limit The maximum number of commits to display.
-     * @param authorFilter Filter commits by author name. If null, all authors are included.
-     * @param since Show commits only after this date (inclusive). If null, no lower bound.
-     * @param until Show commits only before this date (inclusive). If null, no upper bound.
-     * @param message Filter commits containing this substring in title or message. Empty means no filter.
      */
     fun showInlineLog() {
         val branchHeads = BranchIndex.getAllBranches().map { BranchIndex.getBranchHead(it) }
@@ -209,7 +204,7 @@ class LogHandler(
      */
     fun drawFormattedCommit(commit: Commit) {
         if (format == null) {
-            Logger.log("\n${commit.printInfo()}")
+            Logger.info("\n${commit.printInfo()}")
             return
         }
 
@@ -229,7 +224,7 @@ class LogHandler(
             }
         }.joinToString(", ")
 
-        Logger.log(
+        Logger.info(
             format
                 .replace("{ch}", commitHash)
                 .replace("{chS}", commitHash.substring(0, 5).plus("^"))

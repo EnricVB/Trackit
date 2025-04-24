@@ -104,7 +104,7 @@ class Stage : TrackitCommand() {
                 // Stage the content, cache the result, and log
                 stagingHandler.stage(content, path)
                 stagedFilesCache[path] = content.generateKey().toString()
-                Logger.log("Staging file: $relativePath")
+                Logger.info("Staging file: $relativePath")
             }
 
             else -> {}

@@ -164,7 +164,7 @@ class RoleModifyHandler(
         removeBranchPermissions(role)
 
         // Save the role
-        Logger.log("Role modified successfully")
+        Logger.info("Role modified successfully")
         role.encode(true)
     }
 

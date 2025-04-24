@@ -47,7 +47,7 @@ class RestoreCommandTest : CommandTest() {
 
     @Test
     fun `Files are modified to a previous state`() {
-        Logger.log("Executing test: Files are modified to a previous state\n")
+        Logger.info("Executing test: Files are modified to a previous state\n")
 
         // Given
         val file = RepositoryFolderManager().getInitFolderPath().resolve(FILE)
@@ -88,7 +88,7 @@ class RestoreCommandTest : CommandTest() {
 
     @Test
     fun `Files are not modified if user has no read permissions`() {
-        Logger.log("Executing test: Files are not modified if user has no read permissions\n")
+        Logger.info("Executing test: Files are not modified if user has no read permissions\n")
 
         // Given
         val file = RepositoryFolderManager().getInitFolderPath().resolve(FILE)
@@ -143,7 +143,7 @@ class RestoreCommandTest : CommandTest() {
 
     @Test
     fun `Files are not modified if they are not in the commit`() {
-        Logger.log("Executing test: Files are not modified if they are not in the commit\n")
+        Logger.info("Executing test: Files are not modified if they are not in the commit\n")
 
         // Given
         val file = RepositoryFolderManager().getInitFolderPath().resolve(FILE)

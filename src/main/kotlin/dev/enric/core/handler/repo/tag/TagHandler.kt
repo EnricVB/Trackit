@@ -80,7 +80,7 @@ open class TagHandler(
      */
     fun assignTag(commit: Commit) {
         if (name.isNotBlank()) {
-            Logger.log("Adding tag $name for commit ${commit.generateKey()}")
+            Logger.debug("Assigning tag $name to commit ${commit.generateKey()}")
 
             // Obtain the tag hash or create a new one if it does not exist
             val tag: Hash = if (TagIndex.existsTag(name)) {
@@ -96,7 +96,7 @@ open class TagHandler(
 
     fun removeTagFromCommit(commit: Commit) {
         if (name.isNotBlank()) {
-            Logger.log("Removing tag $name from commit ${commit.generateKey()}")
+            Logger.debug("Removing tag $name from commit ${commit.generateKey()}")
 
             // Obtain the tag hash or create a new one if it does not exist
             val tag: Hash = if (TagIndex.existsTag(name)) {
@@ -112,7 +112,7 @@ open class TagHandler(
 
     fun removeTag() {
         if (name.isNotBlank()) {
-            Logger.log("Removing tag $name")
+            Logger.info("Removing tag $name")
 
             // Obtain the tag hash or create a new one if it does not exist
             val tag: Hash = if (TagIndex.existsTag(name)) {
