@@ -32,7 +32,7 @@ class IgnoreCommandTest : CommandTest() {
 
     @Before
     fun createRepository() {
-        SystemConsoleInput.setInput("$USERNAME\n$MAIL\n$PHONE\n$PASSWORD\n$PASSWORD\n")
+        SystemConsoleInput.setInput("$USERNAME\n$PASSWORD\n\n$MAIL\n$PHONE")
 
         InitHandler.init()
     }
