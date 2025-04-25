@@ -3,8 +3,8 @@ package dev.enric.command.branch
 import dev.enric.command.TrackitCommand
 import dev.enric.core.handler.branch.BranchHandler
 import dev.enric.core.handler.repo.commit.CheckoutHandler
-import dev.enric.domain.Hash
 import dev.enric.domain.objects.Branch
+import dev.enric.exceptions.BranchNotFoundException
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.CommitIndex
 import picocli.CommandLine.Command
@@ -19,12 +19,12 @@ class Branch : TrackitCommand() {
     @Option(
         names = ["-r", "--remove"], description = ["Will remove the named branch."]
     )
-    var removeBranch: String = ""
+    var removeBranchName: String = ""
 
     @Option(
         names = ["-c", "--create"], description = ["Will create a new branch with the given name."]
     )
-    var createBranch: String = ""
+    var createBranchName: String = ""
 
     @Option(
         names = ["-C", "--checkout"], description = ["Checkout to new created branch."]
@@ -46,34 +46,42 @@ class Branch : TrackitCommand() {
         val currentBranch = CommitIndex.getCurrentCommit()?.branch?.let { Branch.newInstance(it) }
 
         // In case removeBranch is true, will remove the branch from the index, not commits.
-        if (removeBranch.isNotBlank()) {
-            val branch = BranchIndex.getBranch(removeBranch)
+        if (removeBranchName.isNotBlank()) {
+            val branch = BranchIndex.getBranch(removeBranchName)
             BranchHandler(branch, sudoArgs).removeBranch()
 
             return 0
         }
 
-
         // In case createBranch is true
-        if (createBranch.isNotBlank()) {
-            BranchHandler(currentBranch, sudoArgs).createBranch(createBranch)
+        if (createBranchName.isNotBlank()) {
+            BranchHandler(currentBranch, sudoArgs).createBranch(createBranchName)
 
             // In case checkout is true, will call CheckoutHandler to move to branch head.
             if (checkoutBranch) {
-                val branch = BranchIndex.getBranch(createBranch)
-                val head = branch?.let { BranchIndex.getBranchHead(it.generateKey()) }
-
-                if (head == null) return 1
-
-                // Checkout to new branch
-                val checkoutHandler = CheckoutHandler(head, sudoArgs)
-                checkoutHandler.preCheckout()
-                checkoutHandler.checkout()
+                checkoutToBranch(createBranchName)
             }
 
             return 0
         }
 
         return 1
+    }
+
+    /**
+     * Checkout to the branch with the given name.
+     *
+     * @param branchName The name of the branch to checkout to.
+     * @throws BranchNotFoundException if the branch with the given name does not exist.
+     */
+    private fun checkoutToBranch(branchName: String) {
+        val branch = BranchIndex.getBranch(createBranchName)
+            ?: throw BranchNotFoundException("No branch found with name: $branchName")
+
+        val head = BranchIndex.getBranchHead(branch.generateKey())
+
+        val checkoutHandler = CheckoutHandler(head, sudoArgs)
+        checkoutHandler.preCheckout()
+        checkoutHandler.checkout()
     }
 }
