@@ -90,7 +90,7 @@ class Log : TrackitCommand() {
         description = ["Shows the specified quantity directly without pressing enter"],
         required = false
     )
-    var limit: Int = 3
+    var limit: Int = 10
 
     /**
      * The author of the commits to show in the log.
@@ -153,7 +153,7 @@ class Log : TrackitCommand() {
 
 
     @Option(
-        names = ["-i", "--one-line"], description = ["Prints commit graph in one line"], required = false
+        names = ["-g", "--graph"], description = ["Prints commit graph as a graph"], required = false
     )
     var oneLine: Boolean = false
 
