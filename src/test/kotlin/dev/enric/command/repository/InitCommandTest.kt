@@ -26,7 +26,7 @@ class InitCommandTest : CommandTest() {
 
     @Before
     fun setUpInput() {
-        SystemConsoleInput.setInput("$USERNAME\n$MAIL\n$PHONE\n$PASSWORD\n$PASSWORD\n")
+        SystemConsoleInput.setInput("$USERNAME\n$PASSWORD\n$MAIL\n$PHONE")
     }
 
     @Test
