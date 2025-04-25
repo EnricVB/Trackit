@@ -34,7 +34,7 @@ open class CommandHandler {
             throw UserNotFoundException("User ${sudoArgs?.first()} not found. Try keeping session with 'trackit config --keep-session' or use '--sudo' option.")
         }
 
-        Logger.info("Logged in with ${user.name}")
+        Logger.debug("Logged in with ${user.name}")
         return user
     }
 

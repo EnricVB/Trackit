@@ -4,6 +4,7 @@ import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.COMPLEX_TAG
 import dev.enric.domain.Hash.HashType.SIMPLE_TAG
+import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
 import dev.enric.domain.objects.User
 import dev.enric.domain.objects.tag.ComplexTag
@@ -12,7 +13,6 @@ import dev.enric.logger.Logger
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.TagIndex
 import java.io.Console
-import java.io.Serializable
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -57,10 +57,10 @@ class LogHandler(
 
         while (commit != null) {
             // Filter commits
-            if (!isFromAuthor(commit, authorFilter)
-                || !isAfterSince(commit, since)
-                || !isBeforeUntil(commit, until)
-                || !hasMessage(commit, message)
+            if (!isFromAuthor(commit, authorFilter) || !isAfterSince(commit, since) || !isBeforeUntil(
+                    commit,
+                    until
+                ) || !hasMessage(commit, message)
             ) {
                 commit = decodePrevious(commit)
                 continue
@@ -95,106 +95,126 @@ class LogHandler(
      * Commits are displayed in topological order and rendered with a simple graph structure.
      */
     fun showInlineLog() {
-        val branchHeads = BranchIndex.getAllBranches().map { BranchIndex.getBranchHead(it) }
-        val commitGraph = buildGraph(branchHeads)
+        val branches = BranchIndex.getAllBranches()
+        val commits = mutableListOf<Commit>()
 
-        val filteredCommits = commitGraph.values.filter {
-            isFromAuthor(it.commit, authorFilter)
-                    && isAfterSince(it.commit, since)
-                    && isBeforeUntil(it.commit, until)
-                    && hasMessage(it.commit, message)
+        // Collect commits for each branch
+        branches.forEach { branch ->
+            val branchCommits = mutableListOf<Commit>()
+
+            // Start from the branch head and traverse backwards
+            var commit: Commit? = BranchIndex.getBranchHead(branch)
+            while (commit != null) {
+                branchCommits.add(commit)
+
+                commit = decodePrevious(commit)
+            }
+
+            // Filter commits based on user input
+            commits.addAll(branchCommits)
         }
 
-        val sortedCommits = filteredCommits.sortedByDescending { it.commit.date }
-
-        drawGraph(sortedCommits, limit)
-    }
-
-    /**
-     * Internal representation of a commit node for graph construction.
-     *
-     * @property commit The actual commit object.
-     * @property parents List of parent commit hashes.
-     * @property children List of child commit hashes.
-     */
-    private data class CommitNode(
-        val commit: Commit,
-        val parents: MutableList<Hash> = mutableListOf(),
-        val children: MutableList<Hash> = mutableListOf()
-    )
-
-    /**
-     * Builds a graph of commits starting from a set of head commits.
-     *
-     * @param starts List of head commits to start the traversal from.
-     * @return A map of commit hash to CommitNode representing the graph.
-     */
-    private fun buildGraph(starts: List<Commit>): Map<Hash, CommitNode> {
-        val visited = mutableMapOf<Hash, CommitNode>()
-        val queue = ArrayDeque<Commit>()
-        queue.addAll(starts)
-
-        while (queue.isNotEmpty()) {
-            val current = queue.removeFirst()
-            val node = visited.getOrPut(current.generateKey()) { CommitNode(current) }
-
-            val parentHash = current.previousCommit ?: continue
-            val parent = Commit.newInstance(parentHash)
-            node.parents.add(parentHash)
-
-            val parentNode = visited.getOrPut(parent.generateKey()) { CommitNode(parent) }
-            parentNode.children.add(current.generateKey())
-
-            queue.addLast(parent)
-        }
-
-        return visited
+        // Draw the graph
+        drawGraph(commits.sortedByDescending { it.date }.distinct().toMutableList())
     }
 
     /**
      * Displays the commit graph in ASCII format, simulating a tree structure.
-     *
-     * @param commits The list of commit nodes to display.
-     * @param limit The maximum number of commits to render.
      */
-    private fun drawGraph(commits: List<CommitNode>, limit: Int) {
-        val shown = commits.take(limit)
-        val lines = mutableListOf<String>()
-        val activeBranches = mutableListOf<Hash>()
+    private fun drawGraph(commits: MutableList<Commit>) {
+        val branches = BranchIndex.getAllBranches().map { Branch.newInstance(it) }.sortedByDescending { it.name }
+        val branchOrder = branches.map { it.generateKey() }
 
-        for (node in shown) {
-            val shortHash = node.commit.generateKey().abbreviate() + "^"
-            val line = buildLinePrefix(node, activeBranches) + shortHash
-            lines.add(line)
+        // Map to store the structure of lines
+        val lineStructure = mutableMapOf<Hash, MutableList<Pair<Int, Int>>>()
 
-            node.parents.forEach {
-                if (!activeBranches.contains(it)) activeBranches.add(it)
+        // Pre-process branches to determine their order
+        commits.forEach { commit ->
+            val currentBranch = commit.branch
+            val previousCommit = commit.previousCommit?.let { Commit().decode(it) }
+            val parentBranch = previousCommit?.branch
+
+            if (previousCommit != null && parentBranch != currentBranch) {
+                val currentIndex = branchOrder.indexOf(currentBranch)
+                val parentIndex = branchOrder.indexOf(parentBranch)
+
+                // Store the connection between branches
+                val key = commit.generateKey()
+                lineStructure[key] = mutableListOf(Pair(currentIndex, parentIndex))
             }
         }
 
-        lines.forEach { println(it) }
-    }
+        // Draw the graph
+        commits.forEach { commit ->
+            val lines = mutableListOf<StringBuilder>()
+            val mainLine = StringBuilder()
+            lines.add(mainLine)
 
-    /**
-     * Constructs a visual prefix for a commit line, indicating its place in the branch graph.
-     *
-     * @param node The current commit node.
-     * @param activeBranches List of active branch heads to align columns.
-     * @return A formatted string with ASCII tree structure.
-     */
-    private fun buildLinePrefix(node: CommitNode, activeBranches: List<Hash>): String {
-        val idx = activeBranches.indexOf<Serializable>(node.commit.generateKey())
-        val builder = StringBuilder()
+            val currentBranch = commit.branch
+            val currentIndex = branchOrder.indexOf(currentBranch)
 
-        for (i in activeBranches.indices) {
-            if (i == idx) builder.append("* ")
-            else builder.append("| ")
+            // Add commit date
+            mainLine.append(daysBetween(commit.date.toLocalDateTime(), LocalDateTime.now()).toString().plus(" days ago").padEnd(14, ' '))
+
+            // Draw the primary line for the commit
+            branchOrder.forEachIndexed { colIndex, branchKey ->
+                val branch = Branch.newInstance(branchKey)
+                val isBranchOldEnough = branch.creationDate < commit.date
+
+                if (colIndex == currentIndex) {
+                    mainLine.append("* ")
+                } else if (isBranchOldEnough) {
+                    mainLine.append("| ")
+                } else {
+                    mainLine.append("  ")
+                }
+            }
+
+            // Draw the commit hash
+            mainLine.append(commit.generateKey().abbreviate() + "^")
+            mainLine.append("\t${commit.title}")
+
+            // Verify if this commit has special connection lines
+            val commitKey = commit.generateKey()
+            if (lineStructure.containsKey(commitKey)) {
+                val connections = lineStructure[commitKey]!!
+
+                // Add additional lines for each connection
+                connections.forEach { (fromIndex, toIndex) ->
+                    // Check if direction is diagonal
+                    val isRightToLeft = fromIndex < toIndex
+                    val startIndex = minOf(fromIndex, toIndex)
+                    val endIndex = maxOf(fromIndex, toIndex)
+
+                    // Create the correct number of lines for the diagonal connection
+                    val distance = endIndex - startIndex
+                    for (step in 1..distance) {
+                        val line = StringBuilder().append(" ".repeat(14))
+                        val currentStep = if (isRightToLeft) step else distance - step + 1
+
+                        branchOrder.forEachIndexed { colIndex, branchKey ->
+                            val branch = Branch.newInstance(branchKey)
+                            val isBranchOldEnough = branch.creationDate < commit.date
+
+                            if (colIndex == startIndex + currentStep - 1) {
+                                if (isRightToLeft) line.append("\\ ") else line.append("/ ")
+                            } else if (!isBranchOldEnough) {
+                                line.append("  ")
+                            } else if (colIndex in startIndex..endIndex) {
+                                line.append("| ")
+                            } else {
+                                line.append("| ")
+                            }
+                        }
+                        lines.add(line)
+                    }
+                }
+            }
+
+            // Imprimir todas las líneas
+            lines.forEach { println(it) }
         }
-
-        if (idx == -1) builder.append("* ")
-        return builder.toString()
     }
-
 
     /**
      * Prints commit details to the logger.
@@ -225,22 +245,15 @@ class LogHandler(
         }.joinToString(", ")
 
         Logger.info(
-            format
-                .replace("{ch}", commitHash)
-                .replace("{chS}", commitHash.substring(0, 5).plus("^"))
-                .replace("{date}", commitDate.toString())
-                .replace("{title}", commit.title)
-                .replace("{message}", commit.message)
-                .replace("{ah}", author.generateKey().toString())
+            format.replace("{ch}", commitHash).replace("{chS}", commitHash.substring(0, 5).plus("^"))
+                .replace("{date}", commitDate.toString()).replace("{title}", commit.title)
+                .replace("{message}", commit.message).replace("{ah}", author.generateKey().toString())
                 .replace("{ahS}", author.generateKey().toString().substring(0, 5).plus("^"))
                 .replace("{an}", author.name)
-                .replace("{am}", author.mail)
-                .replace("{ap}", author.phone)
+                .replace("{am}", author.mail).replace("{ap}", author.phone)
                 .replace("{Ch}", confirmer.generateKey().toString())
                 .replace("{ChS}", confirmer.generateKey().toString().substring(0, 5).plus("^"))
-                .replace("{Cn}", confirmer.name)
-                .replace("{Cm}", confirmer.mail)
-                .replace("{Cp}", confirmer.phone)
+                .replace("{Cn}", confirmer.name).replace("{Cm}", confirmer.mail).replace("{Cp}", confirmer.phone)
                 .replace("{Th}", tags.joinToString(", ") { it.string })
                 .replace("{ThS}", tags.joinToString(", ") { it.string.substring(0, 5).plus("^") })
                 .replace("{Tn}", tagNames)
@@ -279,9 +292,10 @@ class LogHandler(
      * Returns true if the commit message or title contains the given filter string.
      */
     private fun hasMessage(commit: Commit, message: String): Boolean {
-        return message.isEmpty()
-                || commit.message.contains(message, ignoreCase = true)
-                || commit.title.contains(message, ignoreCase = true)
+        return message.isEmpty() || commit.message.contains(
+            message,
+            ignoreCase = true
+        ) || commit.title.contains(message, ignoreCase = true)
     }
 
     /**
@@ -295,6 +309,18 @@ class LogHandler(
     private fun getKey(): Char {
         val console: Console? = System.console()
         return console?.reader()?.read()?.toChar() ?: (Scanner(System.`in`).next().firstOrNull() ?: ' ')
+    }
+
+    /**
+     * Calculates the number of days between two LocalDateTime instances.
+     *
+     * @param start The start date.
+     * @param end The end date.
+     *
+     * @return The number of days between the two dates.
+     */
+    private fun daysBetween(start: LocalDateTime, end: LocalDateTime): Long {
+        return ChronoUnit.DAYS.between(start, end)
     }
 }
 
