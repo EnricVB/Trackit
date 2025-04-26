@@ -48,6 +48,7 @@ object TagIndex {
                 return@forEach
             }
 
+
             // Check if the tag name matches the requested tag name
             if (tag.name == tagName) {
                 return Hash(tagHash)
@@ -56,6 +57,29 @@ object TagIndex {
 
         // Return null if the tag does not exist
         return null
+    }
+
+    /**
+     * Adds a tag to the repository index.
+     * This method updates the tag index by adding the specified tag hash to the list of tags.
+     * If the tag already exists, it will not be added again.
+     *
+     * @param tagHash The hash of the tag to add to the index.
+     */
+    fun addTag(tagHash: Hash) {
+        val tagIndex = RepositoryFolderManager().getTagIndexPath().toFile()
+        val tags = tagIndex.readLines().toMutableList()
+
+        // Check if the tag already exists in the index
+        if (tags.any { it.startsWith("${tagHash.string}:") }) {
+            return
+        }
+
+        // Add the new tag to the index
+        tags.add("${tagHash.string}:")
+
+        // Write the updated tag index back to the file
+        tagIndex.writeText(tags.joinToString("\n"))
     }
 
     /**
@@ -77,6 +101,11 @@ object TagIndex {
             // If the tag is already present, add the commit to the existing list of commits
             val currentLine = tags[tagLineIndex]
             val existingCommits = currentLine.split(":")[1].trim().split(",").toMutableList()
+
+            // If the commit is already present, do not add it again
+            if (existingCommits.contains(commit.string)) {
+                return
+            }
 
             existingCommits.add(commit.string)
             tags[tagLineIndex] = "${tag.string}:${existingCommits.joinToString(",")}"
@@ -112,13 +141,8 @@ object TagIndex {
             // Remove the commit hash from the list of commits if it exists
             existingCommits.remove(commit.string)
 
-            // If the list of commits is empty after removal, remove the entire line
-            if (existingCommits.isEmpty()) {
-                tags.removeAt(tagLineIndex)
-            } else {
-                // Update the line with the remaining commits
-                tags[tagLineIndex] = "${tag.string}:${existingCommits.joinToString(",")}"
-            }
+            // Update the line with the remaining commits
+            tags[tagLineIndex] = "${tag.string}:${existingCommits.joinToString(",")}"
         }
 
         // Write the updated tag index back to the file
@@ -163,6 +187,9 @@ object TagIndex {
         // Filter lines that start with the given tag and extract the commits
         return tags.filter { it.startsWith("${tag.string}:") }
             .flatMap { line ->
+                if (line.split(":")[1].isBlank()) {
+                    return@flatMap emptyList<Hash>()
+                }
                 // Extract commit hashes after the colon
                 line.split(":")[1].trim().split(",").map { Hash(it) }
             }
@@ -184,6 +211,9 @@ object TagIndex {
         // Filter lines that start with the given tag and extract the commits
         return tags.filter { it.startsWith("$tagHash:") }
             .flatMap { line ->
+                if (line.split(":")[1].isBlank()) {
+                    return@flatMap emptyList<Hash>()
+                }
                 // Extract commit hashes after the colon
                 line.split(":")[1].trim().split(",").map { Hash(it) }
             }
@@ -203,8 +233,8 @@ object TagIndex {
 
         // Filter lines that contain the commit and extract the tags
         return tags.filter { it.contains(commit.string) }.map {
-                Hash(it.split(":")[0])
-            }
+            Hash(it.split(":")[0])
+        }
     }
 
     /**
@@ -215,19 +245,38 @@ object TagIndex {
      * @param tagName The name of the tag to search for.
      * @return The hash of the tag if found, otherwise null.
      */
-    fun getTagByName(tagName: String): List<Hash> {
+    fun getTagsByName(tagName: String): List<Hash> {
         val tagIndex = RepositoryFolderManager().getTagIndexPath().toFile()
         val tags = tagIndex.readLines()
 
-        return tags.filter { it.contains(tagName) }.map {
+        return tags.filter { tagName.isBlank() || it.contains(tagName) }.map {
             Hash(it.split(":")[0])
         }
     }
 
+    /**
+     * Gets a list of unused tags in the repository.
+     * This method searches the tag index for tags that are not associated with any commits
+     *
+     * @return A list of unused tag hashes.
+     */
     fun getUnusedTags(): List<Hash> {
         val tagIndex = RepositoryFolderManager().getTagIndexPath().toFile()
         val tags = tagIndex.readLines()
 
         return tags.filter { it.split(":")[1].isBlank() }.map { Hash(it.split(":")[0]) }
+    }
+
+    /**
+     * Gets a list of all tags in the repository.
+     * This method retrieves all tags from the tag index and returns them as a list.
+     *
+     * @return A list of all tag hashes in the repository.
+     */
+    fun getTags(): List<Hash> {
+        val tagIndex = RepositoryFolderManager().getTagIndexPath().toFile()
+        val tags = tagIndex.readLines()
+
+        return tags.map { Hash(it.split(":")[0]) }
     }
 }

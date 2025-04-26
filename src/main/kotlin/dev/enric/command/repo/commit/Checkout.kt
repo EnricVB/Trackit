@@ -3,8 +3,11 @@ package dev.enric.command.repo.commit
 import dev.enric.command.TrackitCommand
 import dev.enric.domain.Hash
 import dev.enric.core.handler.repo.commit.CheckoutHandler
+import dev.enric.domain.Hash.HashType.BRANCH
+import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
 import dev.enric.exceptions.IllegalArgumentValueException
+import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.CommitIndex
 import picocli.CommandLine.*
 
@@ -24,7 +27,13 @@ import picocli.CommandLine.*
     footer = [
         "Examples:",
         "  trackit checkout a1b2c3d           # Checkout to a commit using an abbreviated hash",
-        "  trackit checkout 1234567890abcdef  # Checkout to a commit using a full hash"
+        "  trackit checkout 1234567890abcdef  # Checkout to a commit using a full hash",
+        "  trackit checkout master             # Checkout to a branch named 'master'",
+        "",
+        "Notes:",
+        "  - The commit hash can be abbreviated or full.",
+        "  - If the hash is ambiguous, an error will be thrown.",
+        ""
     ]
 )
 class Checkout : TrackitCommand() {
@@ -34,7 +43,7 @@ class Checkout : TrackitCommand() {
      * Supports full and abbreviated hashes.
      */
     @Parameters(index = "0", paramLabel = "Hash", description = ["The hash of the commit"])
-    lateinit var commitHash: String
+    lateinit var checkoutDirection: String
 
     /**
      * Executes the checkout process.
@@ -48,10 +57,11 @@ class Checkout : TrackitCommand() {
     override fun call(): Int {
         super.call()
 
-        val checkoutHandler = CheckoutHandler(getCommitByHash(), sudoArgs)
+        val commitToCheckout = getCommitByBranchName() ?: getCommitByHash()!!
+        val checkoutHandler = CheckoutHandler(commitToCheckout, sudoArgs)
 
         // Will never return 1 because the checkCanCreateRole method will throw an exception if the role can't be created
-        if (!checkoutHandler.canDoCommit()) {
+        if (!checkoutHandler.canDoCheckout()) {
             return 1
         }
 
@@ -70,18 +80,44 @@ class Checkout : TrackitCommand() {
      * @throws IllegalArgumentValueException if no matching commit is found or if multiple matches exist.
      * @return The resolved Commit instance.
      */
-    private fun getCommitByHash(): Commit {
-        val hashes = if (Hash.isAbbreviatedHash(commitHash)) {
-            CommitIndex.getAbbreviatedCommit(commitHash)
+    private fun getCommitByHash(): Commit? {
+        val hashes = if (Hash.isAbbreviatedHash(checkoutDirection)) {
+            CommitIndex.getAbbreviatedCommit(checkoutDirection)
         } else {
-            listOf(Hash(commitHash))
+            listOf(Hash(checkoutDirection))
         }
 
+        // Check if abbreviation matches more than 1 commit
         when {
-            hashes.size > 1 -> throw IllegalArgumentValueException("There are many Commits starting with $commitHash")
-            hashes.isEmpty() -> throw IllegalArgumentValueException("There are no Commits starting with $commitHash")
+            hashes.size > 1 -> throw IllegalArgumentValueException("There are many Commits starting with $checkoutDirection")
+            hashes.isEmpty() -> throw IllegalArgumentValueException("There are no Commits starting with $checkoutDirection")
         }
 
-        return Commit.newInstance(hashes.first())
+        // If it is a branch hash, must get the BranchHead
+        val isBranch = hashes.first().string.startsWith(BRANCH.hash.string)
+
+        return if (isBranch) {
+            BranchIndex.getBranchHead(hashes.first())
+        } else {
+            Commit.newInstance(hashes.first())
+        }
+    }
+
+    /**
+     * Resolves the user-provided branch name into his BranchHead Commit.
+     *
+     * @throws IllegalArgumentValueException if no matching commit is found or if multiple matches exist.
+     * @return The resolved Commit instance.
+     */
+    private fun getCommitByBranchName(): Commit? {
+        val branches = BranchIndex.getAllBranches().map { Branch.newInstance(it).name }
+
+        if (checkoutDirection in branches) {
+            val branchHash = BranchIndex.getBranch(checkoutDirection)!!.generateKey()
+
+            return BranchIndex.getBranchHead(branchHash)
+        }
+
+        return null
     }
 }

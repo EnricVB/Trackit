@@ -1,10 +1,9 @@
 package dev.enric.core.handler.repo.commit
 
 import dev.enric.core.handler.CommandHandler
-import dev.enric.domain.objects.Commit
-import dev.enric.domain.objects.Content
-import dev.enric.domain.objects.Tree
+import dev.enric.domain.objects.*
 import dev.enric.exceptions.CommitNotFoundException
+import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.logger.Logger
 import dev.enric.util.index.CommitIndex
 import dev.enric.util.repository.RepositoryFolderManager
@@ -27,6 +26,33 @@ class RestoreHandler(
 ) : CommandHandler() {
 
     /**
+     * Verifies if can restore the file to the commit status by checking
+     * - If player has permissions to read on the branch.
+     *
+     * @return True if can restore, false otherwise
+     * @throws InvalidPermissionException If the user does not have read permission on the branch.
+     */
+    fun canRestore(): Boolean {
+        checkReadPermissionOnBranch(isValidSudoUser(sudoArgs))
+
+        return true
+    }
+
+    /**
+     * Checks if the user has the permission to read into the specified branch.
+     */
+    private fun checkReadPermissionOnBranch(user: User) {
+        if (commit == null) {
+            throw CommitNotFoundException("Commit not found in the repository.")
+        }
+
+        if (!hasReadPermissionOnBranch(user, commit.branch)) {
+            val branch = Branch.newInstance(commit.branch)
+            throw InvalidPermissionException("User does not have permissions to read branch ${branch.name} (${commit.branch})")
+        }
+    }
+
+    /**
      * Restores the specified [file] or all files from the [commit] into the Working Directory.
      * - If [file] is null, all files in the commit are restored.
      * - If [commit] is null and no current commit is found, throws [CommitNotFoundException].
@@ -35,7 +61,7 @@ class RestoreHandler(
      *
      * @throws CommitNotFoundException if no commit is provided or found.
      */
-    fun checkout() {
+    fun restore() {
         // If no commit is provided, get the current commit. If there is no current commit, throw an exception.
         if (commit == null) {
             throw CommitNotFoundException("No commit found.")
@@ -62,9 +88,9 @@ class RestoreHandler(
                 StandardOpenOption.WRITE
             )
 
-            Logger.log("Restored file: ${tree.serializablePath.relativePath(RepositoryFolderManager().getInitFolderPath())}")
+            Logger.info("Restored file: ${tree.serializablePath.relativePath(RepositoryFolderManager().getInitFolderPath())}")
         }
 
-        Logger.log("Restore successful.")
+        Logger.info("Restore successful.")
     }
 }

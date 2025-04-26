@@ -61,7 +61,7 @@ class Restore : TrackitCommand() {
         names = ["-f", "--file"],
         paramLabel = "File path",
         description = ["The file to restore from the commit"],
-        required = true
+        required = false
     )
     var restoreFile: Path? = null
 
@@ -79,7 +79,13 @@ class Restore : TrackitCommand() {
 
         val commit = getCommitByHash()
         val restoreHandler = RestoreHandler(commit = commit, file = restoreFile, sudoArgs = sudoArgs)
-        restoreHandler.checkout()
+
+        // Will throw an exception if the user does not have permission to read the branch
+        if (!restoreHandler.canRestore()) {
+            return 1
+        }
+
+        restoreHandler.restore()
 
         return 0
     }

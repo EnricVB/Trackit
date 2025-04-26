@@ -10,8 +10,10 @@ import dev.enric.util.index.BranchPermissionIndex
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.Serializable
 import java.nio.file.Files
+import java.sql.Timestamp
+import java.time.Instant
 
-class Branch(val name: String = "") : TrackitObject<Branch>(), Serializable {
+class Branch(val name: String = "", val creationDate: Timestamp = Timestamp.from(Instant.now())) : TrackitObject<Branch>(), Serializable {
 
     override fun decode(hash: Hash): Branch {
         if (!hash.string.startsWith(BRANCH.hash.string)) throw IllegalHashException("Hash $hash is not a Branch hash")

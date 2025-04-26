@@ -106,12 +106,12 @@ class UserModifyHandler(
 
         // Modify email and phone number if new values are provided
         if (!newMail.isNullOrEmpty()) {
-            Logger.log("Changing mail to $newMail")
+            Logger.info("Changing mail to $newMail")
             user.mail = newMail
         }
 
         if (!newPhone.isNullOrEmpty()) {
-            Logger.log("Changing phone number to $newPhone")
+            Logger.info("Changing phone number to $newPhone")
             user.phone = newPhone
         }
 
@@ -120,7 +120,7 @@ class UserModifyHandler(
             val roles = assignRoles(sudo)
 
             if (deletePreviousRoles) {
-                Logger.log("Deleting previous roles")
+                Logger.info("Deleting previous roles")
                 user.roles.clear()
             }
 

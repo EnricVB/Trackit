@@ -14,7 +14,7 @@ import dev.enric.util.index.TagIndex
 
 open class TagHandler(
     val name: String,
-    val commits: List<String> = emptyList(),
+    val commits: List<Hash> = emptyList(),
     val sudoArgs: Array<String>? = null
 ) : CommandHandler() {
 
@@ -28,9 +28,10 @@ open class TagHandler(
      * @throws CommitNotFoundException If any of the provided commits do not exist.
      * @throws InvalidPermissionException If the user lacks the necessary permissions.
      */
-    fun checkCanAssignTags(): Boolean {
+    fun checkCanModifyTags(): Boolean {
         commitsExists()
-        hasModifyRolePermissions(isValidSudoUser(sudoArgs))
+        hasModifyBranchPermissions(isValidSudoUser(sudoArgs))
+
         return true
     }
 
@@ -41,9 +42,8 @@ open class TagHandler(
      */
     private fun commitsExists() {
         commits.forEach {
-            val commitHash = Hash(it)
-            if (!CommitIndex.commitExists(commitHash)) {
-                throw CommitNotFoundException("Commit $commitHash does not exist. Create the commit first.")
+            if (!CommitIndex.commitExists(it)) {
+                throw CommitNotFoundException("Commit $it does not exist. Create the commit first.")
             }
         }
     }
@@ -55,15 +55,16 @@ open class TagHandler(
      * @return True if the user has the required permissions, otherwise an exception is thrown.
      * @throws InvalidPermissionException If the user lacks the necessary permissions.
      */
-    private fun hasModifyRolePermissions(user: User): Boolean {
+    private fun hasModifyBranchPermissions(user: User): Boolean {
         val branchPermissions = user.roles
             .flatMap { Role.newInstance(it).getBranchPermissions() }
             .filter { it.writePermission }
             .map { it.branch }
             .toSet()
 
-        if (!commits.map { Commit.newInstance(Hash(it)) }.all { it.branch in branchPermissions }) {
-            throw InvalidPermissionException("You don't have permission to modify the commits' branch.")
+
+        if (branchPermissions.isEmpty() || !commits.map { Commit.newInstance(it) }.all { it.branch in branchPermissions }) {
+            throw InvalidPermissionException("You don't have permission to modify the commit's branch.")
         }
 
         return true
@@ -79,7 +80,7 @@ open class TagHandler(
      */
     fun assignTag(commit: Commit) {
         if (name.isNotBlank()) {
-            Logger.log("Adding tag $name for commit ${commit.generateKey()}")
+            Logger.debug("Assigning tag $name to commit ${commit.generateKey()}")
 
             // Obtain the tag hash or create a new one if it does not exist
             val tag: Hash = if (TagIndex.existsTag(name)) {
@@ -95,7 +96,7 @@ open class TagHandler(
 
     fun removeTagFromCommit(commit: Commit) {
         if (name.isNotBlank()) {
-            Logger.log("Removing tag $name from commit ${commit.generateKey()}")
+            Logger.debug("Removing tag $name from commit ${commit.generateKey()}")
 
             // Obtain the tag hash or create a new one if it does not exist
             val tag: Hash = if (TagIndex.existsTag(name)) {
@@ -111,7 +112,7 @@ open class TagHandler(
 
     fun removeTag() {
         if (name.isNotBlank()) {
-            Logger.log("Removing tag $name")
+            Logger.info("Removing tag $name")
 
             // Obtain the tag hash or create a new one if it does not exist
             val tag: Hash = if (TagIndex.existsTag(name)) {

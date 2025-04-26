@@ -1,6 +1,8 @@
 package dev.enric.core.handler
 
 import dev.enric.core.security.AuthUtil
+import dev.enric.domain.Hash
+import dev.enric.domain.objects.Role
 import dev.enric.domain.objects.User
 import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.exceptions.UserNotFoundException
@@ -18,20 +20,22 @@ open class CommandHandler {
         val sudo = UserIndex.getUser(sudoArgs?.get(0) ?: "", sudoArgs?.get(1) ?: "")
         val loggedUser = AuthUtil.getLoggedUser()
 
+        val user: User?
+
         if (sudo != null) {
-            Logger.log("Logged in with sudo user: ${sudo.name}")
-            return sudo
-
-        } else {
-            Logger.log("Trying to log in with logged user...")
-
-            if (loggedUser != null) {
-                Logger.log("Logged in with logged user: ${loggedUser.name}")
-                return loggedUser
+            user = sudo
+        } else if (loggedUser != null) {
+            if (!sudoArgs.isNullOrEmpty()) {
+                Logger.warning("Couldn't log in with sudo credentials. Login with logged user")
             }
+
+            user = loggedUser
+        } else {
+            throw UserNotFoundException("User ${sudoArgs?.first()} not found. Try keeping session with 'trackit config --keep-session' or use '--sudo' option.")
         }
 
-        throw UserNotFoundException("User ${sudoArgs?.first()} not found. Try keeping session with 'trackit config --keep-session' or use '--sudo' option.")
+        Logger.debug("Logged in with ${user.name}")
+        return user
     }
 
     /**
@@ -59,6 +63,28 @@ open class CommandHandler {
             val validChars = listOf('m', 'u', 's', 'a')
             val expectedChar = validChars.getOrElse(index) { return false }
             char == expectedChar || char == '-'
+        }
+    }
+
+    /**
+     * Checks if the user has write permission on the current branch.
+     * @param user The user to check.
+     * @return True if the user has write permission on the branch, false otherwise.
+     */
+    fun hasWritePermissionOnBranch(user: User, branch: Hash) : Boolean {
+        return user.roles.map { Role.newInstance(it) }.any { role ->
+            role.getBranchPermissions().any { it.branch == branch && it.writePermission }
+        }
+    }
+
+    /**
+     * Checks if the user has read permission on the commit branch.
+     * @param user The user to check.
+     * @return True if the user has read permission on the branch, false otherwise.
+     */
+    fun hasReadPermissionOnBranch(user: User, branch: Hash) : Boolean {
+        return user.roles.map { Role.newInstance(it) }.any { role ->
+            role.getBranchPermissions().any { it.branch == branch && it.readPermission }
         }
     }
 }

@@ -9,7 +9,7 @@ import dev.enric.util.index.TagIndex
 class TagListHandler(name: String) : TagHandler(name) {
 
     fun showTags() {
-        val tagsByName = TagIndex.getTagByName(name)
+        val tagsByName = TagIndex.getTagsByName(name)
 
         if (tagsByName.isEmpty()) {
             Logger.warning("No tags found.")
@@ -26,5 +26,4 @@ class TagListHandler(name: String) : TagHandler(name) {
             }
         }
     }
-
 }

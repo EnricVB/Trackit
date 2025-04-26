@@ -19,7 +19,7 @@ class GarbageRecolectorHandler : CommandHandler() {
         val simpleTagFolder = repositoryPath.resolve(SIMPLE_TAG.hash.string)  // Corrected to SIMPLE_TAG
 
         TagIndex.getUnusedTags().forEach { tag ->
-            Logger.log("Removing tag $tag")
+            Logger.debug("Removing tag $tag from index")
 
             // Remove tag from the index
             TagIndex.removeTag(tag)
@@ -30,9 +30,9 @@ class GarbageRecolectorHandler : CommandHandler() {
 
             if (tagFile.exists()) {
                 tagFile.deleteRecursively()
-                Logger.log("Tag $tag removed successfully from the filesystem.")
+                Logger.info("Tag $tag removed successfully from the filesystem.")
             } else {
-                Logger.log("Tag $tag does not exist in the filesystem.")
+                Logger.warning("Tag $tag does not exist in the filesystem.")
             }
         }
     }
@@ -49,15 +49,15 @@ class GarbageRecolectorHandler : CommandHandler() {
 
             // Only remove commits not on the current branch
             if (commit.branch != currentBranch.generateKey()) {
-                Logger.log("Removing commit $commitHash")
+                Logger.debug("Removing commit $commitHash from index")
 
                 val commitFile = commitFolder.resolve(commitHash.string).toFile()
 
                 if (commitFile.exists()) {
                     commitFile.deleteRecursively()
-                    Logger.log("Commit $commitHash removed successfully.")
+                    Logger.info("Commit $commitHash removed successfully.")
                 } else {
-                    Logger.log("Commit $commitHash does not exist in the filesystem.")
+                    Logger.warning("Commit $commitHash does not exist in the filesystem.")
                 }
             }
         }
@@ -71,28 +71,28 @@ class GarbageRecolectorHandler : CommandHandler() {
         val branchPermissionFolder = repositoryPath.resolve(BRANCH_PERMISSION.hash.string)
 
         RolePermissionIndex.getUnusedPermissions().forEach { permission ->
-            Logger.log("Removing role permission $permission")
+            Logger.debug("Removing role permission $permission from index")
 
             val permissionFile = rolePermissionFolder.resolve(permission.string).toFile()
 
             if (permissionFile.exists()) {
                 permissionFile.deleteRecursively()
-                Logger.log("Role permission $permission removed successfully.")
+                Logger.info("Role permission $permission removed successfully.")
             } else {
-                Logger.log("Role permission $permission does not exist in the filesystem.")
+                Logger.warning("Role permission $permission does not exist in the filesystem.")
             }
         }
 
         BranchPermissionIndex.getUnusedPermissions().forEach { permission ->
-            Logger.log("Removing branch permission $permission")
+            Logger.debug("Removing branch permission $permission from index")
 
             val permissionFile = branchPermissionFolder.resolve(permission.string).toFile()
 
             if (permissionFile.exists()) {
                 permissionFile.deleteRecursively()
-                Logger.log("Branch permission $permission removed successfully.")
+                Logger.info("Branch permission $permission removed successfully.")
             } else {
-                Logger.log("Branch permission $permission does not exist in the filesystem.")
+                Logger.warning("Branch permission $permission does not exist in the filesystem.")
             }
         }
     }
@@ -104,15 +104,15 @@ class GarbageRecolectorHandler : CommandHandler() {
         val roleFolder = repositoryPath.resolve(ROLE.hash.string)
 
         RoleIndex.getUnusedRoles().forEach { role ->
-            Logger.log("Removing role $role")
+            Logger.debug("Removing role $role from index")
 
             val roleFile = roleFolder.resolve(role.string).toFile()
 
             if (roleFile.exists()) {
                 roleFile.deleteRecursively()
-                Logger.log("Role $role removed successfully.")
+                Logger.info("Role $role removed successfully.")
             } else {
-                Logger.log("Role $role does not exist in the filesystem.")
+                Logger.warning("Role $role does not exist in the filesystem.")
             }
         }
     }
