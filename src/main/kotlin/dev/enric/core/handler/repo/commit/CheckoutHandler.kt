@@ -4,6 +4,7 @@ import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.objects.*
 import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.logger.Logger
+import dev.enric.util.index.CommitIndex
 import dev.enric.util.repository.RepositoryFolderManager
 import java.nio.file.Files
 import java.nio.file.Path
@@ -21,32 +22,21 @@ class CheckoutHandler(
      * - If player has permissions to read on the branch.
      *
      * @return True if can checkout, false otherwise
-     * @throws InvalidPermissionException If the user does not have write permission on the branch.
+     * @throws InvalidPermissionException If the user does not have read permission on the branch.
      */
-    fun canDoCommit(): Boolean {
+    fun canDoCheckout(): Boolean {
         checkReadPermissionOnBranch(isValidSudoUser(sudoArgs))
 
         return true
     }
 
     /**
-     * Checks if the user has the permission to write into the specified branch.
+     * Checks if the user has the permission to read into the specified branch.
      */
     private fun checkReadPermissionOnBranch(user: User) {
-        if (!hasReadPermissionOnBranch(user)) {
+        if (!hasReadPermissionOnBranch(user, commit.branch)) {
             val branch = Branch.newInstance(commit.branch)
             throw InvalidPermissionException("User does not have permissions to read branch ${branch.name} (${commit.branch})")
-        }
-    }
-
-    /**
-     * Checks if the user has read permission on the commit branch.
-     * @param user The user to check.
-     * @return True if the user has read permission on the branch, false otherwise.
-     */
-    private fun hasReadPermissionOnBranch(user: User) : Boolean {
-        return user.roles.map { Role.newInstance(it) }.any { role ->
-            role.getBranchPermissions().any { it.branch == commit.branch && it.readPermission }
         }
     }
 
@@ -62,9 +52,9 @@ class CheckoutHandler(
         repositoryFolderManager.getInitFolderPath()
             .walk(PathWalkOption.INCLUDE_DIRECTORIES)
             .forEach {
-                val isTrackitFolder = it.toRealPath().startsWith(repositoryFolderManager.getTrackitFolderPath())
-                val isSecretKey = it.toRealPath().startsWith(repositoryFolderManager.getSecretKeyPath())
-                val isRootFolder = it.toRealPath() == repositoryFolderManager.getInitFolderPath()
+                val isTrackitFolder = it.toRealPath().startsWith(repositoryFolderManager.getTrackitFolderPath().toRealPath())
+                val isSecretKey = it.toRealPath().startsWith(repositoryFolderManager.getSecretKeyPath().toRealPath())
+                val isRootFolder = it.toRealPath() == repositoryFolderManager.getInitFolderPath().toRealPath()
 
                 val isValidFolder = !isTrackitFolder && !isSecretKey && !isRootFolder
                 val canDelete = it.toFile().exists()
@@ -93,6 +83,7 @@ class CheckoutHandler(
             }
         }
 
-        Logger.log("Checkout successful.")
+        CommitIndex.setCurrentCommit(commit.generateKey())
+        Logger.info("Checkout successful.")
     }
 }

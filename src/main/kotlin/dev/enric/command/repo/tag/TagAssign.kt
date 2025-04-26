@@ -11,6 +11,17 @@ import picocli.CommandLine.Option
     name = "assign-tag",
     description = ["Assigns a tag to one or multiple commits."],
     mixinStandardHelpOptions = true,
+    footer = [
+        "",
+        "Examples:",
+        "  trackit assign-tag --name v1.0 --commit a1b2c3d e4f5g6h",
+        "    Assigns the tag 'v1.0' to the commits with hashes 'a1b2c3d' and 'e4f5g6h'.",
+        "",
+        "Notes:",
+        "  - The commit hashes can be provided in full or as abbreviations, as long as they are unique.",
+        "  - If no commit hashes are provided, the tag will not be assigned to any commits.",
+        "",
+    ]
 )
 class TagAssign : TrackitCommand() {
 
@@ -35,10 +46,10 @@ class TagAssign : TrackitCommand() {
     override fun call(): Int {
         super.call()
 
-        val handler = TagHandler(name, commits, sudoArgs)
+        val handler = TagHandler(name, commits.map { Hash(it) }, sudoArgs)
 
         // checkCanModifyBranch throws an exception if the user lacks permissions, so this will never return 1
-        if (!handler.checkCanAssignTags()) {
+        if (!handler.checkCanModifyTags()) {
             return 1
         }
 

@@ -42,7 +42,7 @@ object BranchIndex {
      * @param branchName The name of the branch to check.
      * @return `true` if a branch with the given name exists, `false` otherwise.
      */
-    fun branchAlreadyExists(branchName: String): Boolean {
+    fun exists(branchName: String): Boolean {
         return getAllBranches().any { Branch.newInstance(it).name == branchName }
     }
 

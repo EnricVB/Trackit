@@ -29,12 +29,16 @@ class IgnoreHandler : CommandHandler() {
         val relativePath = SerializablePath.of(path).relativePath(RepositoryFolderManager().getInitFolderPath())
 
         if(isIgnored(relativePath)) {
-            Logger.log("The file or directory is already being ignored")
+            Logger.warning("The file or directory is already being ignored")
             return
         }
 
         try {
-            Logger.log("Ignoring $relativePath")
+            Logger.info("Ignoring $relativePath")
+
+            if (Files.notExists(path)) {
+                throw IllegalStateException("File or directory does not exist")
+            }
 
             if (Files.notExists(path)) {
                 throw IllegalStateException("File or directory does not exist")

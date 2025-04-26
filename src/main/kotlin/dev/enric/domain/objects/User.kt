@@ -119,9 +119,9 @@ data class User(
             val console = SystemConsoleInput.getInstance()
 
             val username = console.readLine("Enter username: ")
+            val password = String(console.readPassword("Enter password: "))
             val mail = console.readLine("Enter mail: ")
             val phone = console.readLine("Enter phone: ")
-            val password = String(console.readPassword("Enter password: "))
 
             val rolesHash = roles.map { it.generateKey() }.toMutableList()
             val salt = PasswordHash.generateSalt()

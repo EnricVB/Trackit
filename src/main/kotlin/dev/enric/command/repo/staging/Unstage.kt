@@ -76,7 +76,7 @@ class Unstage : TrackitCommand() {
             }
 
             else -> {
-                Logger.log("Unstaging file: $file")
+                Logger.info("Unstaging file: $file")
                 stagingHandler.unstage(file)
             }
         }
@@ -96,7 +96,7 @@ class Unstage : TrackitCommand() {
      * @param hash The hash of the file to unstage
      */
     fun unstageHash(hash: Hash) {
-        Logger.log("Staging file with hash: $hash")
+        Logger.info("Unstaging file with hash: $hash")
 
         stagingHandler.unstage(hash)
     }

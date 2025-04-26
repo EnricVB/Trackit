@@ -22,7 +22,7 @@ import java.time.Instant
 class TagCreationHandler(
     name: String,
     val message: String = "",
-    commits: List<String> = emptyList(),
+    commits: List<Hash> = emptyList(),
     sudoArgs: Array<String>? = null
 ) : TagHandler(name, commits, sudoArgs) {
 
@@ -51,7 +51,7 @@ class TagCreationHandler(
             Timestamp.from(Instant.now())
         )
 
-        Logger.log("Creating complex tag $name")
+        Logger.debug("Created complex tag $name with message: $message, sudoArgs: $sudoArgs")
         return complexTag.encode(true).first
     }
 
@@ -63,7 +63,7 @@ class TagCreationHandler(
     private fun createSimpleTag(): Hash {
         val simpleTag = SimpleTag(name)
 
-        Logger.log("Creating simple tag $name")
+        Logger.debug("Created simple tag $name")
         return simpleTag.encode(true).first
     }
 
@@ -73,9 +73,10 @@ class TagCreationHandler(
      * @param tagHash The hash of the tag to be assigned.
      */
     private fun assignCommitsToTag(tagHash: Hash) {
+        TagIndex.addTag(tagHash)
+
         commits.forEach {
-            val commit = Hash(it)
-            TagIndex.addTagToCommit(tagHash, commit)
+            TagIndex.addTagToCommit(tagHash, it)
         }
     }
 }

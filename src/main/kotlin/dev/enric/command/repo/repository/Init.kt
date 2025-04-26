@@ -29,6 +29,7 @@ import picocli.CommandLine.Command
         "  - This command sets up the necessary internal folder structure and configuration files for Trackit.",
         "  - The repository will start tracking changes in the current directory, and you can begin adding files and commits.",
         "  - After running this command, you can use other Trackit commands such as 'trackit add' and 'trackit commit' to start working with the repository.",
+        "  - It is recommended to run 'trackit conifg --keep-session' to keep the session active and not to use sudo on each command.",
         "  - This is similar to how 'git init' works in Git.",
         "",
     ]
@@ -53,7 +54,7 @@ class Init : TrackitCommand() {
         InitHandler.init()
 
         // Inform the user that initialization succeeded
-        Logger.log("Repository initialized")
+        Logger.info("Repository initialized")
 
         return 0
     }

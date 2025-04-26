@@ -33,12 +33,12 @@ object StatusHandler : CommandHandler() {
         val branch = BranchIndex.getCurrentBranch()
         val currentCommit = CommitIndex.getCurrentCommit()
 
-        Logger.log("On branch ${branch.name}")
+        Logger.info("On branch ${branch.name}")
 
         if (currentCommit != null) {
-            Logger.log("Current commit: ${currentCommit.generateKey()}")
-            Logger.log("Author: ${User.newInstance(currentCommit.author).name}")
-            Logger.log("Date: ${currentCommit.date}")
+            Logger.info("Current commit: ${currentCommit.generateKey()}")
+            Logger.info("Author: ${User.newInstance(currentCommit.author).name}")
+            Logger.info("Date: ${currentCommit.date}")
         }
 
         statusMap.forEach { (status, files) ->
@@ -46,15 +46,15 @@ object StatusHandler : CommandHandler() {
                 SerializablePath.of(it.path).relativePath(RepositoryFolderManager().getInitFolderPath()).toString()
             }
 
-            Logger.log("")
-            Logger.log(status.description)
+            Logger.info("")
+            Logger.info(status.description)
 
-            pathToShow.forEach { file -> if(showIgnored || status != IGNORED) Logger.log("\t[${status.symbol}] ${ColorUtil.message(file)}") }
+            pathToShow.forEach { file -> if(showIgnored || status != IGNORED) Logger.info("\t[${status.symbol}] ${ColorUtil.message(file)}") }
         }
 
         if (StagingHandler.getStagedFiles().isEmpty()) {
-            Logger.log("")
-            Logger.log("no changes added to commit (use \"trackit stage\" and/or \"trackit commit -a\")")
+            Logger.info("")
+            Logger.info("no changes added to commit (use \"trackit stage\" and/or \"trackit commit -a\")")
         }
     }
 

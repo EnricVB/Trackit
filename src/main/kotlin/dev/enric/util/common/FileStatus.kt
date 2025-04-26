@@ -69,7 +69,7 @@ enum class FileStatus(val symbol: String, val description: String) {
     IGNORED(
         "I",
         """Ignored files:
-            |   (use "trackit unignore <file>..." to start tracking)""".trimMargin()
+            |   (use "trackit unignore <file>..." to start tracking)""".trimMargin() //TODO: Unignore
     );
 
     companion object {

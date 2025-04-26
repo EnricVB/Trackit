@@ -35,13 +35,13 @@ class StageCommandTest : CommandTest() {
 
     @Before
     fun setUpInput() {
-        SystemConsoleInput.setInput("$USERNAME\n$MAIL\n$PHONE\n$PASSWORD\n$PASSWORD\n")
+        SystemConsoleInput.setInput("$USERNAME\n$PASSWORD\n$PASSWORD\n\n$MAIL\n$PHONE")
         InitHandler.init()
     }
 
     @Test
     fun `Stage command adds file to the stage`() {
-        Logger.log("Executing test: Stage command adds file to the stage\n")
+        Logger.info("Executing test: Stage command adds file to the stage\n")
 
         // Given
         val path = RepositoryFolderManager().getInitFolderPath().resolve(FILE_PATH)
@@ -62,7 +62,7 @@ class StageCommandTest : CommandTest() {
 
     @Test
     fun `Stage command adds files from folder to the stage`() {
-        Logger.log("Executing test: Stage command adds files from folder to the stage\n")
+        Logger.info("Executing test: Stage command adds files from folder to the stage\n")
 
         // Given
         val folder = RepositoryFolderManager().getInitFolderPath().resolve(FOLDER)
@@ -96,7 +96,7 @@ class StageCommandTest : CommandTest() {
 
     @Test
     fun `Stage command does not adds file to the stage that does not exists`() {
-        Logger.log("Executing test: Stage command does not adds file to the stage that does not exists\n")
+        Logger.info("Executing test: Stage command does not adds file to the stage that does not exists\n")
 
         // Given
         val path = RepositoryFolderManager().getInitFolderPath().resolve(FILE_PATH)
@@ -113,7 +113,7 @@ class StageCommandTest : CommandTest() {
 
     @Test
     fun `Stage command does not stage ignored files`() {
-        Logger.log("Executing test: Stage command does not stage ignored files\n")
+        Logger.info("Executing test: Stage command does not stage ignored files\n")
 
         // Given
         val path = RepositoryFolderManager().getSecretKeyPath()
@@ -127,7 +127,7 @@ class StageCommandTest : CommandTest() {
 
     @Test
     fun `Stage command does stage ignored files if forced`() {
-        Logger.log("Executing test: Stage command does stage ignored files if forced\n")
+        Logger.info("Executing test: Stage command does stage ignored files if forced\n")
 
         // Given
         val path = RepositoryFolderManager().getSecretKeyPath()
@@ -144,7 +144,7 @@ class StageCommandTest : CommandTest() {
 
     @Test
     fun `Unstage command does only unstage specified file`() {
-        Logger.log("Executing test: Unstage command does only unstage specified file\n")
+        Logger.info("Executing test: Unstage command does only unstage specified file\n")
 
         // Given
         val path = RepositoryFolderManager().getInitFolderPath().resolve(FILE_PATH)
@@ -165,7 +165,7 @@ class StageCommandTest : CommandTest() {
 
     @Test
     fun `Unstage command does unstage everything under folder`() {
-        Logger.log("Executing test: Unstage command does unstage everything under folder\n")
+        Logger.info("Executing test: Unstage command does unstage everything under folder\n")
 
         // Given
         val folder = RepositoryFolderManager().getInitFolderPath().resolve(FOLDER)
@@ -195,7 +195,7 @@ class StageCommandTest : CommandTest() {
 
     @Test
     fun `Unstage command does nothing if file does not exist`() {
-        Logger.log("Executing test: Unstage command does nothing if file does not exist\n")
+        Logger.info("Executing test: Unstage command does nothing if file does not exist\n")
 
         // Given
         val path = RepositoryFolderManager().getInitFolderPath().resolve(FILE_PATH)

@@ -4,6 +4,9 @@ import dev.enric.command.TrackitCommand
 import dev.enric.core.handler.administration.LogHandler
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 
 /**
  * Displays the commit history of the current repository in a structured and readable format.
@@ -22,7 +25,7 @@ import picocli.CommandLine.Option
  */
 @Command(
     name = "log",
-    description = ["Show the commit history with filtering options by author, date, and message."],
+    description = ["Show the commit history with filtering options by author, date, and message, and/or formatting the output message."],
     footer = [
         "",
         "Examples:",
@@ -38,8 +41,34 @@ import picocli.CommandLine.Option
         "  trackit log --since 2024-01-01 --until 2024-03-01",
         "    Show commits between January and March 2024.",
         "",
-        "  trackit log --message 'bugfix'",
+        "  trackit log --message \"bugfix\"",
         "    Show commits containing 'bugfix' in their message.",
+        "",
+        "  trackit log --format \"{chS} - {an} <{ahS}> : {title} - {message}\"",
+        "    Show commits with a custom format.",
+        "",
+        "Format parameters:",
+        "  {ch}    Full commit hash",
+        "  {chS}   Short commit hash (first 5 characters + '^')",
+        "  {date}  Commit date",
+        "  {title} Commit title",
+        "  {message} Commit message",
+        "",
+        "  {ah}    Author hash",
+        "  {ahS}   Short author hash (first 5 characters + '^')",
+        "  {an}    Author name",
+        "  {am}    Author email",
+        "  {ap}    Author phone",
+        "",
+        "  {Ch}    Confirmer hash",
+        "  {ChS}   Short confirmer hash (first 5 characters + '^')",
+        "  {Cn}    Confirmer name",
+        "  {Cm}    Confirmer email",
+        "  {Cp}    Confirmer phone",
+        "",
+        "  {Th}    Full tag names (comma-separated)",
+        "  {ThS}   Short tag names (first 5 characters + '^', comma-separated)",
+        "  {Tn}    Tag titles (comma-separated)",
         "",
         "Notes:",
         "  - Date format: YYYY-MM-DD or YYYY-MM-DDTHH:MM (e.g., 2024-01-01T10:00).",
@@ -61,7 +90,7 @@ class Log : TrackitCommand() {
         description = ["Shows the specified quantity directly without pressing enter"],
         required = false
     )
-    var limit: Int = 3
+    var limit: Int = 10
 
     /**
      * The author of the commits to show in the log.
@@ -105,13 +134,32 @@ class Log : TrackitCommand() {
      * By default, the log shows all commits.
      */
     @Option(
-        names = ["--message", "-m"], description = ["Shows the commits with the specified message"], required = false
+        names = ["--message", "-m"],
+        description = ["Shows the commits with the specified title/message"],
+        required = false
     )
-    var message: String? = null
+    var message: String = ""
+
+    /**
+     * The format in which to show the commits in the log.
+     *
+     * This option is used to specify the format of the commit information displayed in the log.
+     * By default, the log shows the commit information in a standard format.
+     */
+    @Option(
+        names = ["-f", "--format"], description = ["Shows the commits with the specified format"], required = false
+    )
+    var format: String? = null
+
+
+    @Option(
+        names = ["-g", "--graph"], description = ["Prints commit graph as a graph"], required = false
+    )
+    var oneLine: Boolean = false
 
     /**
      * Entry point for the `log` command execution.
-     * Delegates to [LogHandler.showLog] to print commit information.
+     * Delegates to [LogHandler.showInlineLog] to print commit information.
      *
      * @return 0 on success, other codes for error states.
      */
@@ -119,13 +167,34 @@ class Log : TrackitCommand() {
         super.call()
 
         // Show the commit history
-        LogHandler().showLog(
+        val logHandler = LogHandler(
+            format,
             limit,
             author,
-            since?.let { LogHandler.parseDate(it)},
-            until?.let { LogHandler.parseDate(it)},
-            message ?: "")
+            parseDateTime(since),
+            parseDateTime(until),
+            message
+        )
+
+        // Depending if oneline option is introduced, print inline or formatted log
+        if (oneLine) {
+            logHandler.showInlineLog()
+        } else {
+            logHandler.showFormattedLog()
+        }
+
 
         return 0
     }
+}
+
+/**
+ * Parses a date-time string in ISO_LOCAL_DATE_TIME format.
+ *
+ * @param str the input date string.
+ * @return LocalDateTime object or null if input is null or empty.
+ */
+private fun parseDateTime(str: String?): LocalDateTime? {
+    if (str == null || str.isEmpty()) return null
+    return LocalDateTime.parse(str, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 }

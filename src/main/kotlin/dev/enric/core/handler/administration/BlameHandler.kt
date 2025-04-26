@@ -6,6 +6,7 @@ import dev.enric.domain.objects.Content
 import dev.enric.domain.objects.Tree
 import dev.enric.domain.objects.User
 import dev.enric.util.common.SerializablePath
+import dev.enric.util.common.Utility
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.File
 import java.nio.file.Files
@@ -50,14 +51,26 @@ class BlameHandler : CommandHandler() {
      */
     fun compareLines(originalString: List<String>, commitString: List<String>, commit: Commit, blameString: StringBuilder) {
         val author = User.newInstance(commit.author)
+        val lines = blameString.toString().lines().toMutableList()
 
-        for (i in originalString.indices) {
-            if (i < commitString.size && originalString[i] == commitString[i]) {
-                blameString.appendLine(
-                    "^${commit.generateKey().abbreviate()} (${author.name} ${commit.date})  $i) ${commitString[i]}"
-                )
+        // Per each line in the originalString, check if it exists in the commitString
+        // If it exists, it means it was added in this commit
+        // If it doesn't exist, it means it was added in a previous commit
+        for (lineIndex in originalString.indices) {
+            val isAddedOnThisCommit = commitString.contains(originalString[lineIndex])
+            val padStart = lines.size.toString().length - lineIndex.toString().length
+
+            // If the line exists in the commitString, it means it was added in this commit
+            if (isAddedOnThisCommit) {
+                lines[lineIndex] =
+                    "${commit.generateKey().abbreviate()}^ " +
+                    "(${author.name} ${Utility.formatDateTime(commit.date, "yyyy-MM-dd HH:mm:ss")}) ${lineIndex}${")".padEnd(padStart + 1, ' ')}" +
+                    " ${originalString[lineIndex]}"
             }
         }
+
+        blameString.clear()
+        blameString.append(lines.joinToString("\n"))
     }
 
     /**
@@ -69,20 +82,21 @@ class BlameHandler : CommandHandler() {
      */
     fun blame(file: File, commit: Commit): String {
         val originalString = Files.readAllLines(file.toPath()).toList()
-        val blameString = StringBuilder()
+        val blameString = StringBuilder().append(getCommitContent(commit, file)?.joinToString { "\n" })
 
         var currentCommit: Commit? = commit
 
+        // Iterate through the commit history until the initial commit is reached
         while (currentCommit != null) {
-            val commitString = getCommitContent(currentCommit, file)
+            // If the commitString is null, it means the file was not found in this commit
+            // So we can stop searching
+            val commitString = getCommitContent(currentCommit, file) ?: break
 
-            if (commitString.isNullOrEmpty()) {
-                currentCommit = currentCommit.previousCommit?.let { Commit.newInstance(it) }
-                continue
-            }
-
+            // Compare the lines of the current file with the version stored in the commit and assign authorship
             compareLines(originalString, commitString, currentCommit, blameString)
 
+            // If the commitString is not null, it means the file was found in this commit
+            // So we can searching in previous commits
             currentCommit = currentCommit.previousCommit?.let { Commit.newInstance(it) }
         }
 

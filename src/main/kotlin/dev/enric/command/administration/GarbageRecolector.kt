@@ -12,6 +12,24 @@ import picocli.CommandLine.*
     name = "gr",
     description = ["Removes all indexes and objects that are no longer in use."],
     mixinStandardHelpOptions = true,
+    footer = [
+        "",
+        "Examples:",
+        "  trackit gr",
+        "    Removes all indexes and objects that are no longer in use.",
+        "",
+        "  trackit gr --tags",
+        "    Removes all tags that are no longer in use.",
+        "",
+        "  trackit gr --commits",
+        "    Removes all commits that are no longer in use.",
+        "",
+        "  trackit gr --permissions",
+        "    Removes all permissions that are no longer in use.",
+        "",
+        "  trackit gr --roles",
+        "    Removes all roles that are no longer in use."
+    ]
 )
 
 class GarbageRecolector : TrackitCommand() {

@@ -5,6 +5,7 @@ import dev.enric.core.handler.repo.tag.TagHandler
 import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.Hash
 import dev.enric.core.handler.repo.staging.StagingHandler
+import dev.enric.core.security.AuthUtil
 import dev.enric.domain.objects.*
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.exceptions.InvalidPermissionException
@@ -48,7 +49,7 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
      * Checks if the user has the permission to write into the specified branch.
      */
     private fun checkWritePermissionOnBranch(user: User) {
-        if (!hasWritePermissionOnBranch(user)) {
+        if (!hasWritePermissionOnBranch(user, commit.branch)) {
             val branch = BranchIndex.getCurrentBranch()
             throw InvalidPermissionException("User does not have permission to write on branch ${branch.name} (${branch.generateKey()})")
         }
@@ -67,16 +68,6 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
         }
     }
 
-    /**
-     * Checks if the user has write permission on the current branch.
-     * @param user The user to check.
-     * @return True if the user has write permission on the branch, false otherwise.
-     */
-    private fun hasWritePermissionOnBranch(user: User) : Boolean {
-        return user.roles.map { Role.newInstance(it) }.any { role ->
-            role.getBranchPermissions().any { it.branch == commit.branch && it.writePermission }
-        }
-    }
 
     /**
      * Initializes the commit properties.
@@ -89,10 +80,10 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
         commit.previousCommit = CommitIndex.getCurrentCommit()?.encode()?.first
         commit.branch = BranchIndex.getCurrentBranch().generateKey()
 
-        Logger.log("Logging for author...")
+        Logger.debug("Trying to log in for commit author with sudoArgs: ${author?.first()} or Logged User ${AuthUtil.getLoggedUser()?.name}")
         commit.author = isValidSudoUser(author).generateKey()
 
-        Logger.log("Logging for confirmer...")
+        Logger.debug("Trying to log in for commit confirmer with sudoArgs: ${author?.first()} or Logged User ${AuthUtil.getLoggedUser()?.name}")
         commit.confirmer = isValidSudoUser(confirmer).generateKey()
 
         commit.date = Timestamp.from(java.time.Instant.now())
@@ -226,7 +217,7 @@ data class CommitHandler(val commit: Commit) : CommandHandler() {
      * @see Stage
      */
     fun stageAllFiles() {
-        Logger.log("Staging all files before committing")
+        Logger.info("Staging all files before committing")
 
         val stageCommand = Stage()
 

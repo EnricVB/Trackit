@@ -29,6 +29,7 @@ import picocli.CommandLine.Option
         "Configure user credentials and session settings locally or globally.",
         "Supports persistent sessions and scoped configuration."
     ],
+    mixinStandardHelpOptions = true,
     footer = [
         "",
         "Examples:",
@@ -45,7 +46,6 @@ import picocli.CommandLine.Option
         "  - If no credentials are provided via options, you will be prompted.",
         "  - Use --local (default) or --global to control scope of configuration."
     ],
-    mixinStandardHelpOptions = true,
 )
 class Config : TrackitCommand() {
 
@@ -100,6 +100,8 @@ class Config : TrackitCommand() {
     /**
      * Applies configuration changes locally, within the current repository.
      * This is the default behavior unless --global is specified.
+     *
+     * This is never used really.
      */
     @Option(
         names = ["--local"],
@@ -160,13 +162,13 @@ class Config : TrackitCommand() {
         val session = KeepSession(username ?: "", password ?: "", salt)
 
         if (global) {
-            Logger.log("Saving session at system level")
+            Logger.info("Saving session at system level")
             session.globalSave()
         } else {
-            Logger.log("Saving session at repository level")
+            Logger.info("Saving session at repository level")
             session.localSave()
         }
 
-        Logger.log("Session saved")
+        Logger.info("Session saved")
     }
 }

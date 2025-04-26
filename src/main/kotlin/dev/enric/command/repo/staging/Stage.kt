@@ -25,12 +25,13 @@ import kotlin.io.path.*
         "Example:",
         "  trackit stage build/",
         "    Stages all files inside the 'build' directory, making them ready to be committed.",
+        "  trackit stage build/main.kt",
+        "    Stages the 'main.kt' file inside the 'build' directory, making it ready to be committed.",
         "",
         "Notes:",
         "  - This command stages files for the next commit. Files can be added individually or entire directories can be staged.",
         "  - If a file is ignored, it will not be staged unless the '--force' flag is used.",
         "  - Directories are processed recursively. All files inside a directory will be staged.",
-        "  - The '--force' option allows staging of files that are ignored (use with caution).",
         "",
     ]
 )
@@ -90,17 +91,10 @@ class Stage : TrackitCommand() {
             throw IllegalStateException("The file does not exist: $path")
         }
 
-        if (stagedFilesCache.containsKey(path)) {
-            Logger.log("File already staged: $path")
-            return
-        }
-
-        val file = path.toFile()
-
-        when (val status = FileStatus.getStatus(file)) {
+        when (val status = FileStatus.getStatus(path.toFile())) {
             MODIFIED, UNTRACKED, IGNORED -> {
-                if (status == IGNORED && !force) {
-                    Logger.error("The file is being ignored: $path")
+                if (!force && status == IGNORED) {
+                    if(path == stagePath) Logger.error("The file is being ignored: $path")
                     return
                 }
 
@@ -110,7 +104,7 @@ class Stage : TrackitCommand() {
                 // Stage the content, cache the result, and log
                 stagingHandler.stage(content, path)
                 stagedFilesCache[path] = content.generateKey().toString()
-                Logger.log("Staging file: $relativePath")
+                Logger.info("Staging file: $relativePath")
             }
 
             else -> {}

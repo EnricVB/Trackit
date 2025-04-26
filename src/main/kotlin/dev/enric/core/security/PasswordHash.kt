@@ -13,7 +13,7 @@ import java.util.*
  */
 object PasswordHash {
     const val ITERATIONS = 2    // Lower values increase the speed of the hash          // TODO: Allow this to be configurable
-    const val MEMORY = 512000   // Lower values increase the speed of the hash          // TODO: Allow this to be configurable
+    const val MEMORY = 51200   // Lower values increase the speed of the hash          // TODO: Allow this to be configurable
     const val PARALLELISM = 8   // Higher values increase the speed of the hash         // TODO: Allow this to be configurable
     const val SALT_LENGTH = 16  // Bytes of the salt
 

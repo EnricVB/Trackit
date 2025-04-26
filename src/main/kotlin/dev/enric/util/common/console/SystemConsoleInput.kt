@@ -29,7 +29,7 @@ class SystemConsoleInput : ConsoleInput() {
     /**
      * Reads a line of input from the system console or [Scanner].
      * If the console is available, it uses the [Console.readLine] method; otherwise, it falls back to the [Scanner].
-     * The prompt is logged using [Logger.log] before reading the input.
+     * The prompt is logged using [Logger.info] before reading the input.
      *
      * @param prompt The prompt to display to the user.
      * @return The input entered by the user as a string.
@@ -37,7 +37,7 @@ class SystemConsoleInput : ConsoleInput() {
     override fun readLine(prompt: String): String {
         if (console == null || isTesting) {
             val line = scanner.nextLine()
-            Logger.log(prompt)
+            Logger.info(prompt)
 
             if (isTesting) println(line)
             return line
@@ -49,7 +49,7 @@ class SystemConsoleInput : ConsoleInput() {
     /**
      * Reads a password from the system console or [Scanner].
      * If the console is available, it uses the [Console.readPassword] method; otherwise, it falls back to the [Scanner].
-     * The prompt is logged using [Logger.log] before reading the input.
+     * The prompt is logged using [Logger.info] before reading the input.
      *
      * @param prompt The prompt to display to the user.
      * @return A [CharArray] containing the password entered by the user.
@@ -57,7 +57,7 @@ class SystemConsoleInput : ConsoleInput() {
     override fun readPassword(prompt: String): CharArray {
         if (console == null || isTesting) {
             val line = scanner.nextLine()
-            Logger.log(prompt)
+            Logger.info(prompt)
 
             if (isTesting) println(line)
             return line.toCharArray()

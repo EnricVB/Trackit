@@ -89,7 +89,7 @@ data class Hash(val string: String) : Serializable {
         COMPLEX_TAG(parseText("ComplexTag", 1)),            // dd
         USER(parseText("User", 1)),                         // 7b
         BRANCH(parseText("Branch", 1)),                     // 21
-        REMOTE(parseText("Remote", 1)),                     //
+        REMOTE(parseText("Remote", 1)),                     // da
         ROLE(parseText("Role", 1)),                         // d4
         BRANCH_PERMISSION(parseText("BranchPermission", 1)),// 71
         ROLE_PERMISSION(parseText("RolePermission", 1))     // 8d

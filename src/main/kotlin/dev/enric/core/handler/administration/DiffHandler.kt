@@ -82,7 +82,7 @@ data class DiffHandler(
      */
     private fun showDiffs(allPaths: Map<Path, Pair<Hash?, Hash?>>) {
         if (!fileFilter.isNullOrEmpty()) {
-            Logger.log("Showing diffs for files containing '$fileFilter'")
+            Logger.info("Showing diffs for files containing '$fileFilter'")
         }
 
         allPaths.forEach {
@@ -98,10 +98,10 @@ data class DiffHandler(
             // Skip identical content
             if (version1 == version2) return@forEach
 
-            Logger.log("File: $path")
+            Logger.info("File: $path")
             val diff = Utility.fileDiff(version1, version2)
-            Logger.log(diff)
-            Logger.log("--------------------")
+            Logger.info(diff)
+            Logger.info("--------------------")
         }
     }
 

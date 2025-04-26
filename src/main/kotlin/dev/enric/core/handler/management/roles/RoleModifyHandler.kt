@@ -155,7 +155,7 @@ class RoleModifyHandler(
         // If the overwrite flag is true, remove all role permissions
         if (overwrite) {
             role.permissions.clear()
-            Logger.log("Role permissions overwritten")
+            Logger.warning("Role permissions overwritten")
         }
 
         // Assign the new role permissions, branch permissions and remove branch permissions
@@ -164,7 +164,7 @@ class RoleModifyHandler(
         removeBranchPermissions(role)
 
         // Save the role
-        Logger.log("Role modified successfully")
+        Logger.info("Role modified successfully")
         role.encode(true)
     }
 
