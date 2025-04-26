@@ -1,17 +1,17 @@
 package dev.enric.core.handler.administration
 
+import com.github.difflib.text.DiffRow
+import com.github.difflib.text.DiffRow.Tag.*
+import com.github.difflib.text.DiffRowGenerator
 import dev.enric.core.handler.CommandHandler
 import dev.enric.core.handler.repo.staging.StagingHandler
 import dev.enric.domain.Hash
-import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
 import dev.enric.domain.objects.Content
 import dev.enric.domain.objects.Tree
-import dev.enric.exceptions.CommitNotFoundException
 import dev.enric.logger.Logger
+import dev.enric.util.common.ColorUtil
 import dev.enric.util.common.SerializablePath
-import dev.enric.util.common.Utility
-import dev.enric.util.index.BranchIndex
 import dev.enric.util.repository.RepositoryFolderManager
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
@@ -60,21 +60,6 @@ data class DiffHandler(
     }
 
     /**
-     * Shows differences between two Branches based on their respective HEAD Commits.
-     *
-     * @param branch1 The first branch.
-     * @param branch2 The second branch.
-     * @throws CommitNotFoundException If the HEAD of either branch is not found.
-     */
-    fun executeDiffBetweenBranches(branch1: Branch, branch2: Branch) {
-        val commit1 = BranchIndex.getBranchHead(branch1.generateKey())
-        val commit2 = BranchIndex.getBranchHead(branch2.generateKey())
-
-        val allPaths = getAllFilesInTrees(commit1.tree, commit2.tree, onlyCommonFiles = false)
-        showDiffs(allPaths)
-    }
-
-    /**
      * Displays diffs for all given file paths. Filters by [fileFilter] if provided.
      * Skips files with identical content.
      *
@@ -99,8 +84,7 @@ data class DiffHandler(
             if (version1 == version2) return@forEach
 
             Logger.info("File: $path")
-            val diff = Utility.fileDiff(version1, version2)
-            Logger.info(diff)
+            Logger.info(fileDiff(version1, version2))
             Logger.info("--------------------")
         }
     }
@@ -190,4 +174,51 @@ data class DiffHandler(
             tree.encode(true).first
         }
     }
+
+    /**
+     * Generates a diff between two text strings.
+     * This method uses the DiffRowGenerator to create a diff representation.
+     *
+     * The diff is formatted with:
+     *
+     * - Lines starting with "+" indicate additions.
+     * - Lines starting with "-" indicate deletions.
+     * - Lines starting with " " indicate unchanged lines.
+     *
+     * @param text1 The first text string.
+     * @param text2 The second text string.
+     *
+     * @return A string representing the diff between the two texts.
+     */
+    fun fileDiff(text1: String, text2: String): String {
+        val generator = DiffRowGenerator.create()
+            .showInlineDiffs(false)
+            .ignoreWhiteSpaces(true)
+            .reportLinesUnchanged(true)
+            .mergeOriginalRevised(false)
+            .inlineDiffByWord(false)
+            .replaceOriginalLinefeedInChangesWithSpaces(true)
+            .build()
+
+        val rows: List<DiffRow> = generator.generateDiffRows(text1.split("\n"), text2.split("\n"))
+        val diff = StringBuilder()
+
+        rows.forEach {
+            when (it.tag ?: EQUAL) {
+                INSERT -> diff.appendLine("+ ${ColorUtil.insertLine(it.newLine)}")
+                DELETE -> diff.appendLine("- ${ColorUtil.deleteLine(it.oldLine)}")
+                CHANGE -> diff.appendLine(
+                    """
+                    - ${if (it.oldLine.isNotBlank()) ColorUtil.deleteLine(it.oldLine) else ""}
+                    + ${if (it.newLine.isNotBlank()) ColorUtil.deleteLine(it.oldLine) else ""}"""
+                        .trimIndent()
+                )
+
+                else -> diff.appendLine("  ${it.oldLine}")
+            }
+        }
+
+        return diff.toString()
+    }
+
 }

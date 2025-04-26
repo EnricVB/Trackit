@@ -177,10 +177,10 @@ class LogHandler(
             // Verify if this commit has special connection lines
             val commitKey = commit.generateKey()
             if (lineStructure.containsKey(commitKey)) {
-                val connections = lineStructure[commitKey]!!
+                val connections = lineStructure[commitKey]
 
                 // Add additional lines for each connection
-                connections.forEach { (fromIndex, toIndex) ->
+                connections?.forEach { (fromIndex, toIndex) ->
                     // Check if direction is diagonal
                     val isRightToLeft = fromIndex < toIndex
                     val startIndex = minOf(fromIndex, toIndex)
