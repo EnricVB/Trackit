@@ -1,7 +1,7 @@
 package dev.enric.util.common
 
-import com.github.difflib.text.DiffRow
-import com.github.difflib.text.DiffRow.Tag.*
+import com.github.difflib.text.DiffRow.Tag.CHANGE
+import com.github.difflib.text.DiffRow.Tag.EQUAL
 import com.github.difflib.text.DiffRowGenerator
 import java.sql.Timestamp
 import java.time.LocalDateTime
@@ -13,32 +13,69 @@ object Utility {
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern(format))
     }
 
-    fun fileDiff(text1: String, text2: String): String {
+    fun fileConflicts(text1: String, text2: String): String {
+        val result = StringBuilder()
         val generator = DiffRowGenerator.create()
             .showInlineDiffs(false)
-            .ignoreWhiteSpaces(true)
             .reportLinesUnchanged(true)
             .mergeOriginalRevised(false)
             .inlineDiffByWord(false)
             .replaceOriginalLinefeedInChangesWithSpaces(true)
             .build()
 
-        val rows: List<DiffRow> = generator.generateDiffRows(text1.split("\n"), text2.split("\n"))
-        val diff = StringBuilder()
+        val rows = generator.generateDiffRows(text1.split("\n"), text2.split("\n"))
 
-        rows.forEach {
-            when (it.tag ?: EQUAL) {
-                INSERT -> diff.appendLine("+ ${ColorUtil.insertLine(it.newLine)}")
-                DELETE -> diff.appendLine("- ${ColorUtil.deleteLine(it.oldLine)}")
-                CHANGE -> diff.appendLine("""
-                    - ${if(it.oldLine.isNotBlank()) ColorUtil.deleteLine(it.oldLine) else ""}
-                    + ${if(it.newLine.isNotBlank()) ColorUtil.deleteLine(it.oldLine) else ""}"""
-                    .trimIndent())
-                else -> diff.appendLine("  ${it.oldLine}")
+        val rowTypes = rows
+            .associate { row ->
+                val rowIndex = rows.indexOf(row)
+                val lineType = if(row.tag != EQUAL) CHANGE else EQUAL
+
+                val data = Triple(lineType, row.oldLine, row.newLine)
+                rowIndex to data
+            }.toSortedMap()
+
+        // Create a new StringBuilder to store the result
+        var insideConflict = false
+        val oldBlock = mutableListOf<String>()
+        val newBlock = mutableListOf<String>()
+
+        // Iterate through the sorted map and build the result
+        // If we encounter a conflict, we store the lines in oldBlock and newBlock
+        // If we encounter an equal line, we append the blocks to the result and reset the blocks
+        rowTypes.forEach { (_, data) ->
+            val (lineType, oldLine, newLine) = data
+
+            if (lineType == EQUAL) {
+                if (insideConflict) {
+                    result.appendLine("<<<<<< OLD")
+                    oldBlock.forEach { result.appendLine(it) }
+                    result.appendLine("======")
+                    newBlock.forEach { result.appendLine(it) }
+                    result.appendLine(">>>>>> NEW")
+
+                    oldBlock.clear()
+                    newBlock.clear()
+                }
+
+                result.appendLine(newLine)
+                insideConflict = false
+            } else {
+                oldBlock.add(oldLine)
+                newBlock.add(newLine)
+                insideConflict = true
             }
         }
 
-        return diff.toString()
+        // If we finish with a conflict, we need to append the remaining blocks
+        if (insideConflict) {
+            result.appendLine("<<<<<< OLD")
+            oldBlock.forEach { result.appendLine(it) }
+            result.appendLine("======")
+            newBlock.forEach { result.appendLine(it) }
+            result.appendLine(">>>>>> NEW")
+        }
+
+        return result.toString()
     }
 
     fun formatDateTime(dateTime: LocalDateTime, format: String): String {
