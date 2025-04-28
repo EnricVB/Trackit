@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Esta línea permite la ejecución manual
+  workflow_dispatch:
 
 jobs:
   build:
@@ -11,16 +11,16 @@ jobs:
     steps:
       # Paso 1: Revisa el código fuente del repositorio
       - name: Check out the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         
-      # Paso 2: Configurar JDK 22 (usando la acción oficial más reciente)
+      # Paso 2: Configurar JDK 22
       - name: Set up JDK 22
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v2
         with:
-          distribution: 'temurin'  # Eclipse Temurin distribution
-          java-version: '22'       # Usando JDK 22 como solicitado
+          distribution: 'temurin'
+          java-version: '22'
       
-      # Paso 3: Configurar Gradle (usando la acción oficial)
+      # Paso 3: Configurar Gradle
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
       
@@ -38,7 +38,7 @@ jobs:
       # Paso 6: Mover el archivo .jar y crear el ejecutable
       - name: Copy .jar file and create executable
         run: |
-          cp build/libs/trackit.jar trackit-deb/usr/share/trackit/trackit.jar
+          cp build/libs/trackit-1.0-all.jar trackit-deb/usr/share/trackit/trackit.jar
           echo '#!/bin/bash
           exec java -jar /usr/share/trackit/trackit.jar "$@"' > trackit-deb/usr/local/bin/trackit
           chmod +x trackit-deb/usr/local/bin/trackit
@@ -67,34 +67,7 @@ jobs:
         run: |
           dpkg-deb --build trackit-deb
           mv trackit-deb.deb trackit-1.0.deb
-      
-      # Paso 10: Subir el archivo .deb como artefacto
-      - name: Upload .deb file as an artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: trackit-1.0.deb
-          path: ./trackit-1.0.deb
-      
-      # Paso 11: Crear Release en GitHub
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v1.0
-          release_name: v1.0
-          body: 'New release with .deb package'
-          draft: false
-          prerelease: false
-      
-      # Paso 12: Subir .deb a Releases
-      - name: Upload .deb to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./trackit-1.0.deb
-          asset_name: trackit-1.0.deb
-          asset_content_type: application/vnd.debian.binary-package
+          
+      # Paso 10: Listar el archivo para verificar que se ha creado
+      - name: List generated files
+        run: ls -la *.deb
