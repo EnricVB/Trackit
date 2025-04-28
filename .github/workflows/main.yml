@@ -70,7 +70,7 @@ jobs:
       
       # Paso 10: Subir el archivo .deb como artefacto
       - name: Upload .deb file as an artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: trackit-1.0.deb
           path: ./trackit-1.0.deb
