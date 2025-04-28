@@ -60,21 +60,6 @@ data class DiffHandler(
     }
 
     /**
-     * Shows differences between two Branches based on their respective HEAD Commits.
-     *
-     * @param branch1 The first branch.
-     * @param branch2 The second branch.
-     * @throws CommitNotFoundException If the HEAD of either branch is not found.
-     */
-    fun executeDiffBetweenBranches(branch1: Branch, branch2: Branch) {
-        val commit1 = BranchIndex.getBranchHead(branch1.generateKey())
-        val commit2 = BranchIndex.getBranchHead(branch2.generateKey())
-
-        val allPaths = getAllFilesInTrees(commit1.tree, commit2.tree, onlyCommonFiles = false)
-        showDiffs(allPaths)
-    }
-
-    /**
      * Displays diffs for all given file paths. Filters by [fileFilter] if provided.
      * Skips files with identical content.
      *
