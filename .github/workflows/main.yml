@@ -76,15 +76,18 @@ jobs:
           chmod +x /usr/local/bin/trackit' > trackit-deb/DEBIAN/postinst
           chmod +x trackit-deb/DEBIAN/postinst
       
-      # Paso 11: Construir el paquete .deb
-      - name: Build .deb package
+      # Paso 11: Construir el paquete .deb y dpkg
+      - name: Build .deb and dpkg package
         run: |
           dpkg-deb --build trackit-deb
           mv trackit-deb.deb trackit-${{ env.VERSION }}.deb
+
+          dpkg-scanpackages -m . > Packages-${{ env.VERSION }}
+          gzip -k Packages
           
       # Paso 12: Listar el archivo para verificar que se ha creado
       - name: List generated files
-        run: ls -la *.deb
+        run: ls -la *.deb Packages-${{ env.VERSION }}
       
       # Paso 13: Crear un release usando una acción más confiable
       - name: Create Release
@@ -97,12 +100,10 @@ jobs:
             # Trackit v${{ env.VERSION }}
             
             Automatic build from GitHub Actions workflow run #${{ github.run_number }}
-            
-            ## Changes
-            - Version autoincremental
-            - Improved packaging
           draft: false
           prerelease: false
-          files: ./trackit-${{ env.VERSION }}.deb
+          files: |
+            ./trackit-${{ env.VERSION }}.deb
+            ./Packages-${{ env.VERSION }}.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
