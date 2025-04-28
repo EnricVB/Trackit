@@ -40,6 +40,7 @@ java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(22))
 }
 
+
 tasks {
     withType<Jar> {
         manifest {
