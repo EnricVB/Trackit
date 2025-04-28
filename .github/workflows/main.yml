@@ -83,7 +83,7 @@ jobs:
           mv trackit-deb.deb trackit-${{ env.VERSION }}.deb
 
           dpkg-scanpackages -m . > Packages-${{ env.VERSION }}
-          gzip -k Packages
+          gzip -k Packages-${{ env.VERSION }}
           
       # Paso 12: Listar el archivo para verificar que se ha creado
       - name: List generated files
