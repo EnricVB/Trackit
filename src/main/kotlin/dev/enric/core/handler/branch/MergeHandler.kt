@@ -4,9 +4,12 @@ import com.github.difflib.text.DiffRow.Tag.CHANGE
 import com.github.difflib.text.DiffRow.Tag.EQUAL
 import com.github.difflib.text.DiffRowGenerator
 import dev.enric.core.handler.CommandHandler
+import dev.enric.core.handler.repo.staging.StagingHandler
+import dev.enric.core.handler.repo.staging.StatusHandler
 import dev.enric.domain.objects.*
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.exceptions.InvalidPermissionException
+import dev.enric.util.common.FileStatus
 import dev.enric.util.index.*
 import java.nio.file.Files
 import java.nio.file.Path
@@ -15,7 +18,8 @@ import java.nio.file.StandardOpenOption
 class MergeHandler(
     private val workingBranch: Branch?,
     private val mergeBranch: Branch?,
-    private val sudoArgs: Array<String>?
+    private val sudoArgs: Array<String>?,
+    private val force: Boolean = false,
 ) : CommandHandler() {
 
     /**
@@ -38,7 +42,15 @@ class MergeHandler(
             throw InvalidPermissionException("You don't have permission to merge branches.")
         }
 
-        // TODO: Check if staging area is empty and everything is up to date
+        // If the user has not used the --force option, check if the working area is clean
+        if (!force) {
+            val stagingIsEmpty = StagingHandler.getStagedFiles().isEmpty()
+            val workingAreaUpToDate = !StatusHandler.getFilesStatus().containsKey(FileStatus.MODIFIED)
+
+            if (!stagingIsEmpty || !workingAreaUpToDate) {
+                throw IllegalStateException("Working area is not clean. Please commit or stash your changes before merging or use '--force'.")
+            }
+        }
 
         return true
     }

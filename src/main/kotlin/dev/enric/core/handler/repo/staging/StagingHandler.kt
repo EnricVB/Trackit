@@ -163,14 +163,6 @@ data class StagingHandler(val force: Boolean = false) {
     }
 
     /**
-     * Shows the differences between the working directory and the staging area.
-     * @return A string with the differences between the working directory and the staging area
-     */
-    fun showDifferences(): String {
-        return "Showing differences"
-    }
-
-    /**
      * Checks if a file is staged to be committed.
      * @param hash The hash of the file to be checked
      * @param path The path of the file to be checked
