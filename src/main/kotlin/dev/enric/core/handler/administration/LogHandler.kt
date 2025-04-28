@@ -94,7 +94,7 @@ class LogHandler(
      * Displays the commit log starting from one or more branch heads.
      * Commits are displayed in topological order and rendered with a simple graph structure.
      */
-    fun showInlineLog() {
+    fun showGraphLog() {
         val branches = BranchIndex.getAllBranches()
         val commits = mutableListOf<Commit>()
 
