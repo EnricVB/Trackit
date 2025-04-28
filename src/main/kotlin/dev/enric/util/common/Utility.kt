@@ -41,6 +41,34 @@ object Utility {
         return diff.toString()
     }
 
+    fun fileConflict(text1: String, text2: String): String {
+        val generator = DiffRowGenerator.create()
+            .showInlineDiffs(false)
+            .reportLinesUnchanged(true)
+            .mergeOriginalRevised(false)
+            .inlineDiffByWord(false)
+            .build()
+
+        val rows: List<DiffRow> = generator.generateDiffRows(text1.split("\n"), text2.split("\n"))
+        val diff = StringBuilder()
+
+        rows.forEach {
+            if(it.tag == CHANGE) {
+                diff.appendLine("<<<<<<<< ORIGINAL")
+                diff.appendLine(it.oldLine)
+
+                diff.appendLine("========")
+
+                diff.appendLine(it.newLine)
+                diff.appendLine(">>>>>>>> REVISED")
+            } else {
+                diff.appendLine(it.oldLine)
+            }
+        }
+
+        return diff.toString()
+    }
+
     fun formatDateTime(dateTime: LocalDateTime, format: String): String {
         return dateTime.format(DateTimeFormatter.ofPattern(format))
     }
