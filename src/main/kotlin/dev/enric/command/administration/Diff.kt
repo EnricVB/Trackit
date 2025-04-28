@@ -5,6 +5,7 @@ import dev.enric.core.handler.administration.DiffHandler
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
+import dev.enric.exceptions.BranchNotFoundException
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.logger.Logger
 import dev.enric.util.index.BranchIndex
@@ -136,19 +137,29 @@ class Diff : TrackitCommand() {
                 val isFirstHashBranch = hashes[0].startsWith(Hash.HashType.BRANCH.hash.string)
                 val isSecondHashBranch = hashes[1].startsWith(Hash.HashType.BRANCH.hash.string)
 
-                if (isFirstHashBranch && isSecondHashBranch) {
-                    diffHandler.executeDiffBetweenBranches(
-                        Branch.newInstance(Hash(hashes[0])),
-                        Branch.newInstance(Hash(hashes[1]))
-                    )
-                } else if (isFirstHashBranch || isSecondHashBranch) {
-                    throw IllegalStateException("Cannot compare a branch with a commit.")
+                val isFirstHashCommit = hashes[0].startsWith(Hash.HashType.COMMIT.hash.string)
+                val isSecondHashCommit = hashes[1].startsWith(Hash.HashType.COMMIT.hash.string)
+
+
+                val firstHashCommit = if(isFirstHashCommit) {
+                    Commit.newInstance(Hash(hashes[0]))
+                } else if(isFirstHashBranch) {
+                    BranchIndex.getBranchHead(Branch.newInstance(Hash(hashes[0])).generateKey())
                 } else {
-                    diffHandler.executeDiffBetweenCommits(
-                        Commit.newInstance(Hash(hashes[0])),
-                        Commit.newInstance(Hash(hashes[1]))
-                    )
+                    BranchIndex.getBranch(hashes[0])?.generateKey()?.let { BranchIndex.getBranchHead(it) }
+                        ?: throw BranchNotFoundException("Branch ${hashes[0]} not found. Or illegal commit hash")
                 }
+
+                val secondHashCommit = if(isSecondHashCommit) {
+                    Commit.newInstance(Hash(hashes[1]))
+                } else if(isSecondHashBranch) {
+                    BranchIndex.getBranchHead(Branch.newInstance(Hash(hashes[1])).generateKey())
+                } else {
+                    BranchIndex.getBranch(hashes[1])?.generateKey()?.let { BranchIndex.getBranchHead(it) }
+                        ?: throw BranchNotFoundException("Branch ${hashes[1]} not found. Or illegal commit hash")
+                }
+
+                diffHandler.executeDiffBetweenCommits(firstHashCommit, secondHashCommit)
             }
         }
 
