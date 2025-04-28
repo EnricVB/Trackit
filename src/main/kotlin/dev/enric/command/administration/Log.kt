@@ -151,11 +151,15 @@ class Log : TrackitCommand() {
     )
     var format: String? = null
 
-
     @Option(
-        names = ["-g", "--graph"], description = ["Prints commit graph as a graph"], required = false
+        names = ["-g", "--graph"], description = ["Prints commit as a graph"], required = false
     )
     var graph: Boolean = false
+
+    @Option(
+        names = ["-i", "--inline"], description = ["Prints commits in a single line"], required = false
+    )
+    var inline: Boolean = false
 
     /**
      * Entry point for the `log` command execution.
@@ -175,6 +179,11 @@ class Log : TrackitCommand() {
             parseDateTime(until),
             message
         )
+
+        // If inline option is set, print inline log replacing the default format
+        if (inline) {
+            format = "{chS} - {an} <{ahS}> : {title} - {message}"
+        }
 
         // Depending if oneline option is introduced, print inline or formatted log
         if (graph) {
