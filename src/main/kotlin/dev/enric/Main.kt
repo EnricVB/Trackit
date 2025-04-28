@@ -16,6 +16,7 @@ import dev.enric.command.management.users.UserCreation
 import dev.enric.command.management.users.UserList
 import dev.enric.command.management.users.UserModify
 import dev.enric.command.repo.commit.Checkout
+import dev.enric.command.repo.commit.Reset
 import dev.enric.command.repo.commit.Restore
 import dev.enric.command.repo.staging.Status
 import dev.enric.command.repo.tag.TagAssign
@@ -32,6 +33,17 @@ import picocli.CommandLine.Help.Ansi
 import kotlin.system.exitProcess
 import picocli.CommandLine.Help.ColorScheme
 
+/*
+TODO:
+    Comandos que debería agregar y no son muy dificiles:
+    - BranchDelete          -> Elimina una rama
+    - BranchList            -> Lista las ramas
+    - PermissionGrant       -> Agrega permisos a un usuario
+    - PermissionRevoke      -> Revoca permisos a un usuario
+    - RolePermissionAssign  -> Agrega permisos a un rol
+    - RolePermissionRemove  -> Revoca permisos a un rol
+    - CheckIntegrity        -> Verifica la integridad de la base de datos
+*/
 
 @Command(
     name = "trackit",
@@ -41,7 +53,7 @@ import picocli.CommandLine.Help.ColorScheme
     subcommands = [
         Init::class, Stage::class, Unstage::class, Status::class,
         Ignore::class, Config::class, Log::class, Diff::class, Blame::class, GarbageRecolector::class,
-        Commit::class, Checkout::class, Restore::class,
+        Commit::class, Checkout::class, Restore::class, Reset::class,
         UserCreation::class, UserModify::class, UserList::class,
         RoleCreation::class, RoleModify::class, RoleList::class,
         TagAssign::class, TagCreation::class, TagList::class, TagRemove::class,
