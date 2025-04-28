@@ -16,6 +16,7 @@ import java.io.Console
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalUnit
 import java.util.*
 
 /**
@@ -194,7 +195,12 @@ class LogHandler(
 
                         branchOrder.forEachIndexed { colIndex, branchKey ->
                             val branch = Branch.newInstance(branchKey)
+                            val isNewCreatedBranch =
+                                branch.creationDate.toLocalDateTime().truncatedTo(ChronoUnit.SECONDS) ==
+                                        commit.date.toLocalDateTime().truncatedTo(ChronoUnit.SECONDS)
                             val isBranchOldEnough = branch.creationDate < commit.date
+
+                            if (isNewCreatedBranch) return@forEachIndexed
 
                             if (colIndex == startIndex + currentStep - 1) {
                                 if (isRightToLeft) line.append("\\ ") else line.append("/ ")
