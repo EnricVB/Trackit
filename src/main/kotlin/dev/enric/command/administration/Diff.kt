@@ -3,9 +3,9 @@ package dev.enric.command.administration
 import dev.enric.command.TrackitCommand
 import dev.enric.core.handler.administration.DiffHandler
 import dev.enric.domain.Hash
-import dev.enric.domain.objects.Branch
+import dev.enric.domain.Hash.HashType.BRANCH
+import dev.enric.domain.Hash.HashType.COMMIT
 import dev.enric.domain.objects.Commit
-import dev.enric.exceptions.BranchNotFoundException
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.logger.Logger
 import dev.enric.util.index.BranchIndex
@@ -134,32 +134,33 @@ class Diff : TrackitCommand() {
 
             hashes.size == 2 -> {
                 Logger.info("Diff ${hashes[0]} vs ${hashes[1]}\n")
-                val isFirstHashBranch = hashes[0].startsWith(Hash.HashType.BRANCH.hash.string)
-                val isSecondHashBranch = hashes[1].startsWith(Hash.HashType.BRANCH.hash.string)
+                val isFirstHashBranch = hashes[0].startsWith(BRANCH.hash.string)
+                val isSecondHashBranch = hashes[1].startsWith(BRANCH.hash.string)
 
-                val isFirstHashCommit = hashes[0].startsWith(Hash.HashType.COMMIT.hash.string)
-                val isSecondHashCommit = hashes[1].startsWith(Hash.HashType.COMMIT.hash.string)
+                val isFirstHashCommit = hashes[0].startsWith(COMMIT.hash.string)
+                val isSecondHashCommit = hashes[1].startsWith(COMMIT.hash.string)
+
+                val firstHashType = if (isFirstHashBranch) BRANCH else if (isFirstHashCommit) COMMIT else null
+                val secondHashType = if (isSecondHashBranch) BRANCH else if (isSecondHashCommit) COMMIT else null
 
 
-                val firstHashCommit = if(isFirstHashCommit) {
-                    Commit.newInstance(Hash(hashes[0]))
-                } else if(isFirstHashBranch) {
-                    BranchIndex.getBranchHead(Branch.newInstance(Hash(hashes[0])).generateKey())
-                } else {
-                    BranchIndex.getBranch(hashes[0])?.generateKey()?.let { BranchIndex.getBranchHead(it) }
-                        ?: throw BranchNotFoundException("Branch ${hashes[0]} not found. Or illegal commit hash")
+                val firstHash = when (firstHashType) {
+                    BRANCH -> BranchIndex.getBranchHead(Hash(hashes[0]))
+                    COMMIT -> Commit.newInstance(Hash(hashes[0]))
+                    else -> hashes[0].let { BranchIndex.getBranch(it)?.generateKey() }
+                        ?.let { BranchIndex.getBranchHead(it) }
+                        ?: throw IllegalStateException("Invalid hash type for ${hashes[0]}")
                 }
 
-                val secondHashCommit = if(isSecondHashCommit) {
-                    Commit.newInstance(Hash(hashes[1]))
-                } else if(isSecondHashBranch) {
-                    BranchIndex.getBranchHead(Branch.newInstance(Hash(hashes[1])).generateKey())
-                } else {
-                    BranchIndex.getBranch(hashes[1])?.generateKey()?.let { BranchIndex.getBranchHead(it) }
-                        ?: throw BranchNotFoundException("Branch ${hashes[1]} not found. Or illegal commit hash")
+                val secondHash = when (secondHashType) {
+                    BRANCH -> BranchIndex.getBranchHead(Hash(hashes[1]))
+                    COMMIT -> Commit.newInstance(Hash(hashes[1]))
+                    else -> hashes[1].let { BranchIndex.getBranch(it)?.generateKey() }
+                        ?.let { BranchIndex.getBranchHead(it) }
+                        ?: throw IllegalStateException("Invalid hash type for ${hashes[0]}")
                 }
 
-                diffHandler.executeDiffBetweenCommits(firstHashCommit, secondHashCommit)
+                diffHandler.executeDiffBetweenCommits(firstHash, secondHash)
             }
         }
 

@@ -16,7 +16,6 @@ import java.io.Console
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalUnit
 import java.util.*
 
 /**
@@ -123,103 +122,108 @@ class LogHandler(
      * Displays the commit graph in ASCII format, simulating a tree structure.
      */
     private fun drawGraph(commits: MutableList<Commit>) {
-        val branches = BranchIndex.getAllBranches().map { Branch.newInstance(it) }.sortedByDescending { it.name }
+        val branches = prepareBranches()
         val branchOrder = branches.map { it.generateKey() }
+        val lineStructure = buildLineStructure(commits, branchOrder)
 
-        // Map to store the structure of lines
-        val lineStructure = mutableMapOf<Hash, MutableList<Pair<Int, Int>>>()
-
-        // Pre-process branches to determine their order
         commits.forEach { commit ->
-            val currentBranch = commit.branch
-            val previousCommit = commit.previousCommit?.let { Commit().decode(it) }
-            val parentBranch = previousCommit?.branch
-
-            if (previousCommit != null && parentBranch != currentBranch) {
-                val currentIndex = branchOrder.indexOf(currentBranch)
-                val parentIndex = branchOrder.indexOf(parentBranch)
-
-                // Store the connection between branches
-                val key = commit.generateKey()
-                lineStructure[key] = mutableListOf(Pair(currentIndex, parentIndex))
-            }
-        }
-
-        // Draw the graph
-        commits.forEach { commit ->
-            val lines = mutableListOf<StringBuilder>()
-            val mainLine = StringBuilder()
-            lines.add(mainLine)
-
-            val currentBranch = commit.branch
-            val currentIndex = branchOrder.indexOf(currentBranch)
-
-            // Add commit date
-            mainLine.append(daysBetween(commit.date.toLocalDateTime(), LocalDateTime.now()).toString().plus(" days ago").padEnd(14, ' '))
-
-            // Draw the primary line for the commit
-            branchOrder.forEachIndexed { colIndex, branchKey ->
-                val branch = Branch.newInstance(branchKey)
-                val isBranchOldEnough = branch.creationDate < commit.date
-
-                if (colIndex == currentIndex) {
-                    mainLine.append("* ")
-                } else if (isBranchOldEnough) {
-                    mainLine.append("| ")
-                } else {
-                    mainLine.append("  ")
-                }
-            }
-
-            // Draw the commit hash
-            mainLine.append(commit.generateKey().abbreviate() + "^")
-            mainLine.append("\t${commit.title}")
-
-            // Verify if this commit has special connection lines
-            val commitKey = commit.generateKey()
-            if (lineStructure.containsKey(commitKey)) {
-                val connections = lineStructure[commitKey]!!
-
-                // Add additional lines for each connection
-                connections.forEach { (fromIndex, toIndex) ->
-                    // Check if direction is diagonal
-                    val isRightToLeft = fromIndex < toIndex
-                    val startIndex = minOf(fromIndex, toIndex)
-                    val endIndex = maxOf(fromIndex, toIndex)
-
-                    // Create the correct number of lines for the diagonal connection
-                    val distance = endIndex - startIndex
-                    for (step in 1..distance) {
-                        val line = StringBuilder().append(" ".repeat(14))
-                        val currentStep = if (isRightToLeft) step else distance - step + 1
-
-                        branchOrder.forEachIndexed { colIndex, branchKey ->
-                            val branch = Branch.newInstance(branchKey)
-                            val isNewCreatedBranch =
-                                branch.creationDate.toLocalDateTime().truncatedTo(ChronoUnit.SECONDS) ==
-                                        commit.date.toLocalDateTime().truncatedTo(ChronoUnit.SECONDS)
-                            val isBranchOldEnough = branch.creationDate < commit.date
-
-                            if (isNewCreatedBranch) return@forEachIndexed
-
-                            if (colIndex == startIndex + currentStep - 1) {
-                                if (isRightToLeft) line.append("\\ ") else line.append("/ ")
-                            } else if (!isBranchOldEnough) {
-                                line.append("  ")
-                            } else if (colIndex in startIndex..endIndex) {
-                                line.append("| ")
-                            } else {
-                                line.append("| ")
-                            }
-                        }
-                        lines.add(line)
-                    }
-                }
-            }
-
-            // Imprimir todas las líneas
+            val lines = buildCommitLines(commit, branchOrder, lineStructure)
             lines.forEach { println(it) }
         }
+    }
+
+    private fun prepareBranches(): List<Branch> {
+        return BranchIndex.getAllBranches()
+            .map { Branch.newInstance(it) }
+            .sortedByDescending { it.name }
+    }
+
+    private fun buildLineStructure(commits: List<Commit>, branchOrder: List<Hash>): Map<Hash, List<Pair<Int, Int>>> {
+        val lineStructure = mutableMapOf<Hash, MutableList<Pair<Int, Int>>>()
+
+        commits.forEach { commit ->
+            val previousCommit = commit.previousCommit?.let { Commit().decode(it) }
+            if (previousCommit != null && previousCommit.branch != commit.branch) {
+                val currentIndex = branchOrder.indexOf(commit.branch)
+                val parentIndex = branchOrder.indexOf(previousCommit.branch)
+                lineStructure.getOrPut(commit.generateKey()) { mutableListOf() }.add(Pair(currentIndex, parentIndex))
+            }
+        }
+
+        return lineStructure
+    }
+
+    private fun buildCommitLines(
+        commit: Commit,
+        branchOrder: List<Hash>,
+        lineStructure: Map<Hash, List<Pair<Int, Int>>>
+    ): List<StringBuilder> {
+        val lines = mutableListOf<StringBuilder>()
+        val mainLine = buildMainCommitLine(commit, branchOrder)
+        lines.add(mainLine)
+
+        lineStructure[commit.generateKey()]?.forEach { (fromIndex, toIndex) ->
+            lines.addAll(buildConnectionLines(fromIndex, toIndex, branchOrder, commit.date))
+        }
+
+        return lines
+    }
+
+    private fun buildMainCommitLine(commit: Commit, branchOrder: List<Hash>): StringBuilder {
+        val line = StringBuilder()
+
+        line.append("${daysBetween(commit.date.toLocalDateTime(), LocalDateTime.now())} days ago".padEnd(14, ' '))
+
+        val currentBranch = commit.branch
+        val currentIndex = branchOrder.indexOf(currentBranch)
+
+        branchOrder.forEachIndexed { index, branchKey ->
+            val branch = Branch.newInstance(branchKey)
+            if (index == currentIndex) {
+                line.append("* ")
+            } else if (branch.creationDate < commit.date) {
+                line.append("| ")
+            } else {
+                line.append("  ")
+            }
+        }
+
+        line.append(commit.generateKey().abbreviate() + "^")
+        line.append("\t${commit.title}")
+
+        return line
+    }
+
+    private fun buildConnectionLines(
+        fromIndex: Int,
+        toIndex: Int,
+        branchOrder: List<Hash>,
+        commitDate: Timestamp
+    ): List<StringBuilder> {
+        val lines = mutableListOf<StringBuilder>()
+        val distance = kotlin.math.abs(toIndex - fromIndex)
+        val isRightToLeft = fromIndex < toIndex
+        val startIndex = minOf(fromIndex, toIndex)
+
+        for (step in 1..distance) {
+            val line = StringBuilder().append(" ".repeat(14))
+            val currentStep = if (isRightToLeft) step else distance - step + 1
+
+            branchOrder.forEachIndexed { index, branchKey ->
+                val branch = Branch.newInstance(branchKey)
+                val isOldEnough = branch.creationDate < commitDate
+
+                when {
+                    index == startIndex + currentStep - 1 -> line.append(if (isRightToLeft) "\\ " else "/ ")
+                    !isOldEnough -> line.append("  ")
+                    index in startIndex..startIndex + distance -> line.append("| ")
+                    else -> line.append("| ")
+                }
+            }
+            lines.add(line)
+        }
+
+        return lines
     }
 
     /**
