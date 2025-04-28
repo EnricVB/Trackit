@@ -195,6 +195,6 @@ class Log : TrackitCommand() {
  * @return LocalDateTime object or null if input is null or empty.
  */
 private fun parseDateTime(str: String?): LocalDateTime? {
-    if (str == null || str.isEmpty()) return null
+    if (str.isNullOrEmpty()) return null
     return LocalDateTime.parse(str, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 }

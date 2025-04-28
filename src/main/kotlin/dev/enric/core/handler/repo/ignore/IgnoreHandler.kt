@@ -40,6 +40,10 @@ class IgnoreHandler : CommandHandler() {
                 throw IllegalStateException("File or directory does not exist")
             }
 
+            if (Files.notExists(path)) {
+                throw IllegalStateException("File or directory does not exist")
+            }
+
             Files.writeString(ignoreFile, "$relativePath\n", StandardOpenOption.CREATE, StandardOpenOption.APPEND)
         } catch (e: IOException) {
             e.printStackTrace()
