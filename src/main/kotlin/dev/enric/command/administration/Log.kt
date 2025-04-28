@@ -155,11 +155,11 @@ class Log : TrackitCommand() {
     @Option(
         names = ["-g", "--graph"], description = ["Prints commit graph as a graph"], required = false
     )
-    var oneLine: Boolean = false
+    var graph: Boolean = false
 
     /**
      * Entry point for the `log` command execution.
-     * Delegates to [LogHandler.showInlineLog] to print commit information.
+     * Delegates to [LogHandler.showGraphLog] to print commit information.
      *
      * @return 0 on success, other codes for error states.
      */
@@ -177,8 +177,8 @@ class Log : TrackitCommand() {
         )
 
         // Depending if oneline option is introduced, print inline or formatted log
-        if (oneLine) {
-            logHandler.showInlineLog()
+        if (graph) {
+            logHandler.showGraphLog()
         } else {
             logHandler.showFormattedLog()
         }

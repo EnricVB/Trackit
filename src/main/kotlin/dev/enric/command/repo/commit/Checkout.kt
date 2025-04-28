@@ -33,6 +33,9 @@ import picocli.CommandLine.*
         "Notes:",
         "  - The commit hash can be abbreviated or full.",
         "  - If the hash is ambiguous, an error will be thrown.",
+        "  - If checkout to a previous commit, the history will remain.",
+        "    F.e. Checkout from v1.0.1 to v1.0.0, History will look like: ",
+        "    'v1.0.0 -> v1.0.1 -> v1.0.0 -> ...",
         ""
     ]
 )
@@ -57,7 +60,7 @@ class Checkout : TrackitCommand() {
     override fun call(): Int {
         super.call()
 
-        val commitToCheckout = getCommitByBranchName() ?: getCommitByHash()!!
+        val commitToCheckout = getCommitByBranchName() ?: getCommitByHash()
         val checkoutHandler = CheckoutHandler(commitToCheckout, sudoArgs)
 
         // Will never return 1 because the checkCanCreateRole method will throw an exception if the role can't be created
@@ -80,7 +83,7 @@ class Checkout : TrackitCommand() {
      * @throws IllegalArgumentValueException if no matching commit is found or if multiple matches exist.
      * @return The resolved Commit instance.
      */
-    private fun getCommitByHash(): Commit? {
+    private fun getCommitByHash(): Commit {
         val hashes = if (Hash.isAbbreviatedHash(checkoutDirection)) {
             CommitIndex.getAbbreviatedCommit(checkoutDirection)
         } else {
