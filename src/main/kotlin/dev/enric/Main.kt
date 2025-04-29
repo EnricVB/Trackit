@@ -48,7 +48,7 @@ TODO:
 @Command(
     name = "trackit",
     mixinStandardHelpOptions = true,
-    version = ["Trackit 1.0"],
+    version = ["Trackit 1.0.0-BETA"],
     description = ["Track your files"],
     subcommands = [
         Init::class, Stage::class, Unstage::class, Status::class,

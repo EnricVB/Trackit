@@ -19,11 +19,11 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
       
-      # Paso 3: Configurar versión autoincremental
+      # Paso 3: Configurar versión segun gradle.properties
       - name: Set version number
         id: version
         run: |
-          VERSION="1.0.${{ github.run_number }}"
+          VERSION=$(grep "^version=" gradle.properties | cut -d'=' -f2)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
         
@@ -101,7 +101,7 @@ jobs:
           body: |
             # Trackit v${{ env.VERSION }}
             
-            Automatic build from GitHub Actions workflow run #${{ github.run_number }}
+            Automatic build of .deb and Packages.gz for Linux APT
           draft: false
           prerelease: false
           files: |
