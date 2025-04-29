@@ -79,13 +79,13 @@ jobs:
       # Paso 11: Construir el paquete .deb y dpkg
       - name: Build .deb and dpkg package
         run: |
-          rm -f Packages.gz
-          
           dpkg-deb --build trackit-deb
           mv trackit-deb.deb trackit-${{ env.VERSION }}.deb
 
           dpkg-scanpackages -m . > Packages
-          gzip -k Packages.gz
+          
+          rm -f Packages.gz
+          gzip -9c Packages > Packages.gz
           
       # Paso 12: Listar el archivo para verificar que se ha creado
       - name: List generated files
