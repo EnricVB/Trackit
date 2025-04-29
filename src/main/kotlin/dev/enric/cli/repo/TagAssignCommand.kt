@@ -11,6 +11,7 @@ import picocli.CommandLine.Option
     name = "assign-tag",
     description = ["Assigns a tag to one or multiple commits."],
     mixinStandardHelpOptions = true,
+    usageHelpWidth = 500,
     footer = [
         "",
         "Examples:",

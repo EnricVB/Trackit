@@ -42,7 +42,7 @@ data class Commit(
         val decompressedData = decompressContent(Files.readAllBytes(objectFile)) ?: return Commit() // If the file is empty, return an empty commit
 
         val byteArrayInputStream = decompressedData.inputStream()
-        val objectIStream = java.io.ObjectInputStream(byteArrayInputStream)
+        val objectIStream = ObjectInputStream(byteArrayInputStream)
 
         return objectIStream.readObject() as Commit
     }

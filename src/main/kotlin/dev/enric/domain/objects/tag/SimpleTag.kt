@@ -30,7 +30,7 @@ data class SimpleTag(
             ?: return SimpleTag() // If the file is empty, return an empty SimpleTag
 
         val byteArrayInputStream = decompressedData.inputStream()
-        val objectIStream = java.io.ObjectInputStream(byteArrayInputStream)
+        val objectIStream = ObjectInputStream(byteArrayInputStream)
 
         return objectIStream.readObject() as SimpleTag
     }

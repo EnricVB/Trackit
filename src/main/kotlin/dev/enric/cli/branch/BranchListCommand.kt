@@ -16,6 +16,7 @@ import picocli.CommandLine.Command
     name = "list-branch",
     mixinStandardHelpOptions = true,
     description = ["Lists all available branches in the repository."],
+    usageHelpWidth = 500,
     footer = [
         "",
         "Examples:",

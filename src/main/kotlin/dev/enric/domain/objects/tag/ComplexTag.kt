@@ -35,7 +35,7 @@ data class ComplexTag(
             ?: return ComplexTag() // If the file is empty, return an empty ComplexTag
 
         val byteArrayInputStream = decompressedData.inputStream()
-        val objectIStream = java.io.ObjectInputStream(byteArrayInputStream)
+        val objectIStream = ObjectInputStream(byteArrayInputStream)
 
         return objectIStream.readObject() as ComplexTag
     }

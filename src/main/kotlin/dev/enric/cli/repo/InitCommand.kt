@@ -19,6 +19,7 @@ import picocli.CommandLine.Command
     name = "init",
     description = ["Initialize a new repository"],
     mixinStandardHelpOptions = true,
+    usageHelpWidth = 500,
     footer = [
         "",
         "Example:",

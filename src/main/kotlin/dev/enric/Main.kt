@@ -41,6 +41,7 @@ import picocli.CommandLine.Help.ColorScheme
         BranchPermissionGrantCommand::class, BranchPermissionRevokeCommand::class,
         TagAssignCommand::class, TagCreationCommand::class, TagListCommand::class, TagRemoveCommand::class,
         BranchCommand::class, BranchListCommand::class, MergeCommand::class,
+        CheckIntegrityCommand::class
     ]
 )
 class Main : TrackitCommand() {

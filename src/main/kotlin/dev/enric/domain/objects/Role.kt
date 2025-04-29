@@ -35,7 +35,7 @@ data class Role(
             ?: return Role() // If the file is empty, return an empty role
 
         val byteArrayInputStream = decompressedData.inputStream()
-        val objectIStream = java.io.ObjectInputStream(byteArrayInputStream)
+        val objectIStream = ObjectInputStream(byteArrayInputStream)
 
         return objectIStream.readObject() as Role
     }

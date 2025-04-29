@@ -22,6 +22,7 @@ import java.nio.file.Path
     name = "ignore",
     description = ["Ignores a file from the repository from being tracked"],
     mixinStandardHelpOptions = true,
+    usageHelpWidth = 500,
     footer = [
         "",
         "Examples:",

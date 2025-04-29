@@ -15,9 +15,28 @@ import dev.enric.util.repository.RepositoryFolderManager
 import kotlin.io.path.exists
 import kotlin.io.path.pathString
 
+/**
+ * Handler responsible for performing integrity checks over all Trackit objects.
+ *
+ * This class provides utilities to:
+ * - Check the integrity of a single object by hash.
+ * - Check the integrity of all objects of a specific type.
+ * - Check the integrity of all objects across all types.
+ *
+ * It delegates to the static `checkIntegrity` method defined in each object class.
+ */
 class CheckIntegrityHandler : CommandHandler() {
 
-    fun checkObjectIntegrity(objectHash : Hash) : Boolean {
+    /**
+     * Verifies the integrity of a single object by using its hash.
+     *
+     * The method infers the object type from the hash, then delegates to the
+     * corresponding object's `checkIntegrity` static method.
+     *
+     * @param objectHash the hash of the object to check.
+     * @return true if the object's integrity is valid; false otherwise.
+     */
+    fun checkObjectIntegrity(objectHash: Hash): Boolean {
         val hashType = HashType.fromHash(objectHash)
 
         return when (hashType) {
@@ -35,24 +54,32 @@ class CheckIntegrityHandler : CommandHandler() {
         }
     }
 
-    fun checkObjectTypeIntegrity(objectType : HashType) : Boolean {
+    /**
+     * Verifies the integrity of all objects within a given type folder.
+     *
+     * For each object file found under the folder corresponding to the given type,
+     * it checks its integrity using [checkObjectIntegrity]. Logs detailed results.
+     *
+     * @param objectType the type of object to check.
+     * @return true if all objects of this type pass the check; false if at least one fails.
+     */
+    fun checkObjectTypeIntegrity(objectType: HashType): Boolean {
         val repositoryFolderManager = RepositoryFolderManager()
         val objectsFolder = repositoryFolderManager.getObjectsFolderPath()
 
-        // Check if the objects folder exists and is a directory
         val objectTypeFolder = objectsFolder.resolve(objectType.hash.string)
         if (!objectTypeFolder.exists()) {
             Logger.error("Object type folder does not exist: ${objectTypeFolder.pathString}")
             return false
         }
 
-        // Check all objects in the folder
         var result = true
 
         objectTypeFolder.toFile().listFiles()?.forEach {
-            result = checkObjectIntegrity(Hash(it.name))
+            val currentResult = checkObjectIntegrity(Hash(it.name))
+            result = result && currentResult
 
-            if (!result) {
+            if (!currentResult) {
                 Logger.error("Integrity check failed for object: ${it.name}")
             } else {
                 Logger.debug("Integrity check passed for object: ${it.name}")
@@ -62,16 +89,25 @@ class CheckIntegrityHandler : CommandHandler() {
         return result
     }
 
-    fun checkAllIntegrity() : Boolean {
+    /**
+     * Performs a full integrity check of the entire repository.
+     *
+     * Iterates through all known object types ([HashType.entries]) and
+     * validates the integrity of each object found for each type.
+     *
+     * @return true if all object types and all their objects pass; false otherwise.
+     */
+    fun checkAllIntegrity(): Boolean {
         var result = true
 
         HashType.entries.forEach { hashType ->
-            result = checkObjectTypeIntegrity(hashType)
+            val currentResult = checkObjectTypeIntegrity(hashType)
+            result = result && currentResult
 
-            if (!result) {
-                Logger.error("Integrity check failed for type: ${hashType.name}")
+            if (!currentResult) {
+                Logger.error("Integrity check failed for type: ${hashType.name}\n")
             } else {
-                Logger.debug("Integrity check passed for type: ${hashType.name}")
+                Logger.debug("Integrity check passed for type: ${hashType.name}\n")
             }
         }
 

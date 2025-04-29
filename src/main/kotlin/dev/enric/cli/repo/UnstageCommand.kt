@@ -15,6 +15,7 @@ import kotlin.io.path.*
     name = "unstage",
     description = ["Remove a file from the staging area"],
     mixinStandardHelpOptions = true,
+    usageHelpWidth = 500,
     footer = [
         "",
         "Example:",

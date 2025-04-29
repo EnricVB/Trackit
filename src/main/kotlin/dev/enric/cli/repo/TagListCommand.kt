@@ -9,6 +9,7 @@ import picocli.CommandLine.Option
     name = "list-tags",
     description = ["Lists a tag. Can be filtered by tag name."],
     mixinStandardHelpOptions = true,
+    usageHelpWidth = 500,
     footer = [
         "Examples:",
         "  trackit repo tag list-tags",

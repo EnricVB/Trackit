@@ -22,7 +22,8 @@ import picocli.CommandLine.*
  */
 @Command(
     name = "checkout",
-    description = ["Changes repository state to a specified commit or branch. Allows switching to a commit identified by hash."],
+    description = ["Changes repository state to a specified commit or branch."],
+    usageHelpWidth = 500,
     mixinStandardHelpOptions = true,
     footer = [
         "Examples:",

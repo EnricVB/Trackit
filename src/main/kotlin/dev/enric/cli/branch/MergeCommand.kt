@@ -22,6 +22,7 @@ import picocli.CommandLine.*
     name = "merge",
     mixinStandardHelpOptions = true,
     description = ["Merges the specified branch into the current branch."],
+    usageHelpWidth = 500,
     footer = [
         "",
         "Examples:",

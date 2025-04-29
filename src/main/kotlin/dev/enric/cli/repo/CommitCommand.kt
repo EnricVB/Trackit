@@ -21,6 +21,7 @@ import picocli.CommandLine.*
     name = "commit",
     description = ["Commits the staged files"],
     mixinStandardHelpOptions = true,
+    usageHelpWidth = 500,
     footer = [
         "",
         "Examples:",
