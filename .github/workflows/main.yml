@@ -82,12 +82,12 @@ jobs:
           dpkg-deb --build trackit-deb
           mv trackit-deb.deb trackit-${{ env.VERSION }}.deb
 
-          dpkg-scanpackages -m . > Packages-${{ env.VERSION }}
-          gzip -k Packages-${{ env.VERSION }}
+          dpkg-scanpackages -m . > Packages
+          gzip -k Packages
           
       # Paso 12: Listar el archivo para verificar que se ha creado
       - name: List generated files
-        run: ls -la *.deb Packages-${{ env.VERSION }}
+        run: ls -la *.deb Packages.gz
       
       # Paso 13: Crear un release usando una acción más confiable
       - name: Create Release
@@ -104,6 +104,6 @@ jobs:
           prerelease: false
           files: |
             ./trackit-${{ env.VERSION }}.deb
-            ./Packages-${{ env.VERSION }}.gz
+            ./Packages.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
