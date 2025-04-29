@@ -1,6 +1,6 @@
 package dev.enric.util.repository
 
-import dev.enric.core.handler.repo.staging.StagingHandler
+import dev.enric.core.handler.repo.StagingHandler
 import dev.enric.core.security.SecretKey
 import dev.enric.logger.Logger
 import dev.enric.util.common.Utility

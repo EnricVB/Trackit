@@ -1,8 +1,8 @@
 package dev.enric.core.handler.branch
 
 import dev.enric.core.handler.CommandHandler
-import dev.enric.core.handler.repo.staging.StagingHandler
-import dev.enric.core.handler.repo.staging.StatusHandler
+import dev.enric.core.handler.repo.StagingHandler
+import dev.enric.core.handler.repo.StatusHandler
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
 import dev.enric.domain.objects.Content
@@ -45,7 +45,7 @@ class MergeHandler(
         // If the user has not used the --force option, check if the working area is clean
         if (!force) {
             val stagingIsEmpty = StagingHandler.getStagedFiles().isEmpty()
-            val workingAreaUpToDate = !StatusHandler.getFilesStatus().containsKey(FileStatus.MODIFIED)
+            val workingAreaUpToDate = !StatusHandler().getFilesStatus().containsKey(FileStatus.MODIFIED)
 
             if (!stagingIsEmpty || !workingAreaUpToDate) {
                 throw IllegalStateException("Working area is not clean. Please commit or stash your changes before merging or use '--force'.")
