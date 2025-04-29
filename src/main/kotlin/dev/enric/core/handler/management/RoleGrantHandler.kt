@@ -13,12 +13,12 @@ import dev.enric.util.index.UserIndex
 /**
  * GrantRoleHandler is responsible for modifying an existing user's information in the system.
  *
- * @property name The name of the user to be modified.
+ * @property username The name of the user to be modified.
  * @property roleNames The new role names to be assigned to the user (optional).
  * @property sudoArgs The credentials of the sudo user (optional).
  */
 class RoleGrantHandler(
-    val name: String,
+    val username: String,
     val roleNames: Array<String>,
     val sudoArgs: Array<String>? = null
 ) : CommandHandler() {
@@ -33,45 +33,10 @@ class RoleGrantHandler(
      */
     fun checkCanModifyUser(): Boolean {
         val sudo = isValidSudoUser(sudoArgs)
-        userExists()
+        userExists(username)
         checkHasModifyUserPermission(sudo)
 
         return true
-    }
-
-    /**
-     * Verifies if the user already exists.
-     *
-     * @throws UserNotFoundException If the user does not exist.
-     */
-    fun userExists() {
-        if (!UserIndex.userAlreadyExists(name)) {
-            throw UserNotFoundException("User does not exist. Please create the user first.")
-        }
-    }
-
-    /**
-     * Checks if the user has the permission to modify users looking at the role permissions.
-     *
-     * @param sudo The sudo user to check the permissions.
-     * @throws InvalidPermissionException If the user does not have permission to modify users.
-     */
-    private fun checkHasModifyUserPermission(sudo: User) {
-        if (!hasModifyUserPermission(sudo)) {
-            throw InvalidPermissionException("User does not have permission to modify users")
-        }
-    }
-
-    /**
-     * Checks if the user has the permission to modify users looking at the role permissions.
-     *
-     * @param user The user to check the permissions.
-     * @return True if the user has the permission to modify users, false otherwise.
-     */
-    private fun hasModifyUserPermission(user: User): Boolean {
-        return user.roles.map { Role.newInstance(it) }.any { role ->
-            role.getRolePermissions().any { it.userOperationPermission }
-        }
     }
 
     /**
@@ -79,7 +44,7 @@ class RoleGrantHandler(
      */
     fun addRoles() {
         val sudo = isValidSudoUser(sudoArgs)
-        val user = UserIndex.getUser(name)!!
+        val user = UserIndex.getUser(username)!!
 
         // Assign new roles if new role names are provided
         if (roleNames.isNotEmpty()) {
@@ -100,7 +65,7 @@ class RoleGrantHandler(
      */
     fun removeRoles() {
         val sudo = isValidSudoUser(sudoArgs)
-        val user = UserIndex.getUser(name)!!
+        val user = UserIndex.getUser(username)!!
 
         // Remove roles if new role names are provided
         if (roleNames.isNotEmpty()) {

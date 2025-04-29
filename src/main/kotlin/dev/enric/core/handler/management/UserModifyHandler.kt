@@ -45,45 +45,10 @@ class UserModifyHandler(
      */
     fun checkCanModifyUser(): Boolean {
         val sudo = isValidSudoUser(sudoArgs)
-        userExists()
+        userExists(name)
         checkHasModifyUserPermission(sudo)
 
         return true
-    }
-
-    /**
-     * Verifies if the user already exists.
-     *
-     * @throws UserNotFoundException If the user does not exist.
-     */
-    fun userExists() {
-        if (!UserIndex.userAlreadyExists(name)) {
-            throw UserNotFoundException("User does not exist. Please create the user first.")
-        }
-    }
-
-    /**
-     * Checks if the user has the permission to modify users looking at the role permissions.
-     *
-     * @param sudo The sudo user to check the permissions.
-     * @throws InvalidPermissionException If the user does not have permission to modify users.
-     */
-    private fun checkHasModifyUserPermission(sudo: User) {
-        if (!hasModifyUserPermission(sudo)) {
-            throw InvalidPermissionException("User does not have permission to modify users")
-        }
-    }
-
-    /**
-     * Checks if the user has the permission to modify users looking at the role permissions.
-     *
-     * @param user The user to check the permissions.
-     * @return True if the user has the permission to modify users, false otherwise.
-     */
-    private fun hasModifyUserPermission(user: User): Boolean {
-        return user.roles.map { Role.newInstance(it) }.any { role ->
-            role.getRolePermissions().any { it.userOperationPermission }
-        }
     }
 
     /**
