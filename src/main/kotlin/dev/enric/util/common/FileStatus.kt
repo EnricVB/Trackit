@@ -1,7 +1,7 @@
 package dev.enric.util.common
 
-import dev.enric.core.handler.repo.ignore.IgnoreHandler
-import dev.enric.core.handler.repo.staging.StagingHandler
+import dev.enric.core.handler.repo.IgnoreHandler
+import dev.enric.core.handler.repo.StagingHandler
 import dev.enric.domain.objects.Content
 import dev.enric.domain.objects.Tree
 import dev.enric.util.index.CommitIndex

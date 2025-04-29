@@ -1,31 +1,19 @@
 package dev.enric
 
-import dev.enric.command.TrackitCommand
-import dev.enric.command.administration.*
-import dev.enric.command.branch.Branch
-import dev.enric.command.branch.BranchList
-import dev.enric.command.branch.Merge
-import dev.enric.command.management.roles.RoleCreation
-import dev.enric.command.management.roles.RoleList
-import dev.enric.command.management.roles.RoleModify
-import dev.enric.command.repo.commit.Commit
-import dev.enric.command.repo.repository.Ignore
-import dev.enric.command.repo.repository.Init
-import dev.enric.command.repo.staging.Stage
-import dev.enric.command.repo.staging.Unstage
-import dev.enric.command.management.users.UserCreation
-import dev.enric.command.management.users.UserList
-import dev.enric.command.management.users.UserModify
-import dev.enric.command.management.users.permissionUtility.GrantRole
-import dev.enric.command.management.users.permissionUtility.RevokeRole
-import dev.enric.command.repo.commit.Checkout
-import dev.enric.command.repo.commit.Reset
-import dev.enric.command.repo.commit.Restore
-import dev.enric.command.repo.staging.Status
-import dev.enric.command.repo.tag.TagAssign
-import dev.enric.command.repo.tag.TagCreation
-import dev.enric.command.repo.tag.TagList
-import dev.enric.command.repo.tag.TagRemove
+import dev.enric.cli.TrackitCommand
+import dev.enric.cli.admin.*
+import dev.enric.cli.branch.BranchCommand
+import dev.enric.cli.branch.BranchListCommand
+import dev.enric.cli.branch.MergeCommand
+import dev.enric.cli.management.RoleCreationCommand
+import dev.enric.cli.management.RoleListCommand
+import dev.enric.cli.management.RoleModifyCommand
+import dev.enric.cli.management.UserCreationCommand
+import dev.enric.cli.management.UserListCommand
+import dev.enric.cli.management.UserModifyCommand
+import dev.enric.cli.management.RoleGrantCommand
+import dev.enric.cli.management.RoleRevokeCommand
+import dev.enric.cli.repo.*
 import dev.enric.exceptions.TrackitException
 import dev.enric.logger.Logger
 import dev.enric.util.repository.RepositoryFolderManager
@@ -50,14 +38,14 @@ TODO:
     version = ["Trackit 1.0.0-BETA"],
     description = ["Track your files"],
     subcommands = [
-        Init::class, Stage::class, Unstage::class, Status::class,
-        Ignore::class, Config::class, Log::class, Diff::class, Blame::class, GarbageRecolector::class,
-        Commit::class, Checkout::class, Restore::class, Reset::class,
-        UserCreation::class, UserModify::class, UserList::class,
-        RoleCreation::class, RoleModify::class, RoleList::class,
-        GrantRole::class, RevokeRole::class,
-        TagAssign::class, TagCreation::class, TagList::class, TagRemove::class,
-        Branch::class, BranchList::class, Merge::class,
+        InitCommand::class, StageCommand::class, UnstageCommand::class, StatusCommand::class,
+        IgnoreCommand::class, ConfigCommand::class, LogCommand::class, DiffCommand::class, BlameCommand::class, GarbageRecolectorCommand::class,
+        CommitCommand::class, CheckoutCommand::class, RestoreCommand::class, ResetCommand::class,
+        UserCreationCommand::class, UserModifyCommand::class, UserListCommand::class,
+        RoleCreationCommand::class, RoleModifyCommand::class, RoleListCommand::class,
+        RoleGrantCommand::class, RoleRevokeCommand::class,
+        TagAssignCommand::class, TagCreationCommand::class, TagListCommand::class, TagRemoveCommand::class,
+        BranchCommand::class, BranchListCommand::class, MergeCommand::class,
     ]
 )
 class Main : TrackitCommand() {
