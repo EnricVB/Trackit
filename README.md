@@ -31,8 +31,8 @@ For more detailed information about Trackit, please refer to the README in your 
 ## Getting Started
 
 To get started with Trackit, follow these steps:
-1. **Install Trackit**: [Link to installation instructions].
-2. **Create a Repository**: [Instructions to create a new repository].
+1. **Install Trackit**: [Link to installation instructions](https://github.com/EnricVB/Trackit/blob/master/docs/README_en.md).
+2. **Create a Repository**: [Instructions to create a new repository](https://trackit-vsc.vercel.app/).
 3. **Commit Your Changes**: Learn how to use Trackit's powerful commit and version tracking features.
 4. **Collaborate with Others**: Share your repository and start working on your project collaboratively with others.
 
