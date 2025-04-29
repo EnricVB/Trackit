@@ -3,6 +3,7 @@ package dev.enric
 import dev.enric.command.TrackitCommand
 import dev.enric.command.administration.*
 import dev.enric.command.branch.Branch
+import dev.enric.command.branch.BranchList
 import dev.enric.command.branch.Merge
 import dev.enric.command.management.roles.RoleCreation
 import dev.enric.command.management.roles.RoleList
@@ -15,6 +16,8 @@ import dev.enric.command.repo.staging.Unstage
 import dev.enric.command.management.users.UserCreation
 import dev.enric.command.management.users.UserList
 import dev.enric.command.management.users.UserModify
+import dev.enric.command.management.users.permissionUtility.GrantRole
+import dev.enric.command.management.users.permissionUtility.RevokeRole
 import dev.enric.command.repo.commit.Checkout
 import dev.enric.command.repo.commit.Reset
 import dev.enric.command.repo.commit.Restore
@@ -36,9 +39,6 @@ import picocli.CommandLine.Help.ColorScheme
 /*
 TODO:
     Comandos que debería agregar y no son muy dificiles:
-    - BranchDelete          -> Elimina una rama
-    - PermissionGrant       -> Agrega permisos a un usuario
-    - PermissionRevoke      -> Revoca permisos a un usuario
     - RolePermissionAssign  -> Agrega permisos a un rol
     - RolePermissionRemove  -> Revoca permisos a un rol
     - CheckIntegrity        -> Verifica la integridad de la base de datos
@@ -55,8 +55,9 @@ TODO:
         Commit::class, Checkout::class, Restore::class, Reset::class,
         UserCreation::class, UserModify::class, UserList::class,
         RoleCreation::class, RoleModify::class, RoleList::class,
+        GrantRole::class, RevokeRole::class,
         TagAssign::class, TagCreation::class, TagList::class, TagRemove::class,
-        Branch::class, Merge::class,
+        Branch::class, BranchList::class, Merge::class,
     ]
 )
 class Main : TrackitCommand() {

@@ -1,0 +1,154 @@
+package dev.enric.core.handler.management.users.permissionUtility
+
+import dev.enric.core.handler.CommandHandler
+import dev.enric.domain.objects.Role
+import dev.enric.domain.objects.User
+import dev.enric.exceptions.IllegalArgumentValueException
+import dev.enric.exceptions.InvalidPermissionException
+import dev.enric.exceptions.UserNotFoundException
+import dev.enric.logger.Logger
+import dev.enric.util.index.RoleIndex
+import dev.enric.util.index.UserIndex
+
+/**
+ * GrantRoleHandler is responsible for modifying an existing user's information in the system.
+ *
+ * @property name The name of the user to be modified.
+ * @property roleNames The new role names to be assigned to the user (optional).
+ * @property sudoArgs The credentials of the sudo user (optional).
+ */
+class GrantRoleHandler(
+    val name: String,
+    val roleNames: Array<String>,
+    val sudoArgs: Array<String>? = null
+) : CommandHandler() {
+
+    /**
+     * Checks if the user has the permission to modify other user's roles.
+     *
+     * @return True if the user has the permission to modify other users, false otherwise.
+     * @throws UserNotFoundException If the user does not exist.
+     * @throws InvalidPermissionException If the user does not have permission to modify users.
+     *
+     */
+    fun checkCanModifyUser(): Boolean {
+        val sudo = isValidSudoUser(sudoArgs)
+        userExists()
+        checkHasModifyUserPermission(sudo)
+
+        return true
+    }
+
+    /**
+     * Verifies if the user already exists.
+     *
+     * @throws UserNotFoundException If the user does not exist.
+     */
+    fun userExists() {
+        if (!UserIndex.userAlreadyExists(name)) {
+            throw UserNotFoundException("User does not exist. Please create the user first.")
+        }
+    }
+
+    /**
+     * Checks if the user has the permission to modify users looking at the role permissions.
+     *
+     * @param sudo The sudo user to check the permissions.
+     * @throws InvalidPermissionException If the user does not have permission to modify users.
+     */
+    private fun checkHasModifyUserPermission(sudo: User) {
+        if (!hasModifyUserPermission(sudo)) {
+            throw InvalidPermissionException("User does not have permission to modify users")
+        }
+    }
+
+    /**
+     * Checks if the user has the permission to modify users looking at the role permissions.
+     *
+     * @param user The user to check the permissions.
+     * @return True if the user has the permission to modify users, false otherwise.
+     */
+    private fun hasModifyUserPermission(user: User): Boolean {
+        return user.roles.map { Role.newInstance(it) }.any { role ->
+            role.getRolePermissions().any { it.userOperationPermission }
+        }
+    }
+
+    /**
+     * Modifies the user's roles based on the provided arguments.
+     */
+    fun addRoles() {
+        val sudo = isValidSudoUser(sudoArgs)
+        val user = UserIndex.getUser(name)!!
+
+        // Assign new roles if new role names are provided
+        if (roleNames.isNotEmpty()) {
+            val rolesToAdd = getRolesToAssign(sudo)
+
+            if (rolesToAdd.isEmpty() && user.roles.isEmpty()) {
+                throw IllegalArgumentValueException("No roles found to assign to the user. Please provide at least one valid role.")
+            }
+
+            user.roles.addAll(rolesToAdd.map { it.generateKey() })
+        }
+
+        user.encode(true)
+    }
+
+    /**
+     * Removes the user's roles based on the provided arguments.
+     */
+    fun removeRoles() {
+        val sudo = isValidSudoUser(sudoArgs)
+        val user = UserIndex.getUser(name)!!
+
+        // Remove roles if new role names are provided
+        if (roleNames.isNotEmpty()) {
+            val rolesToRemove = getRolesToRemove(sudo)
+
+            if (rolesToRemove.isEmpty() && user.roles.isEmpty()) {
+                throw IllegalArgumentValueException("No roles found to remove from the user. Please provide at least one valid role.")
+            }
+
+            user.roles.removeAll(rolesToRemove.map { it.generateKey() })
+        }
+    }
+
+    /**
+     * Assigns roles to the user based on the provided role names.
+     *
+     * @return A list of roles that can be assigned to the user.
+     */
+    private fun getRolesToAssign(sudo: User): MutableList<Role> {
+        return roleNames.mapNotNull { RoleIndex.getRoleByName(it) }.filter {
+            val canAddRole = it.permissionLevel > sudo.roles.map { sudoRoles -> Role.newInstance(sudoRoles) }
+                .maxOf { sudoRole -> sudoRole.permissionLevel }
+
+            if (!canAddRole) {
+                Logger.error("User does not have permission to add role ${it.name}. The role has a higher permission level than the user")
+                Logger.error("Skipping role ${it.name}")
+            }
+
+            return@filter canAddRole
+        }.toMutableList()
+    }
+
+    /**
+     * Remove roles to the user based on the provided role names.
+     *
+     * @return A list of roles that can be removed from the user.
+     */
+    private fun getRolesToRemove(sudo: User): MutableList<Role> {
+        return roleNames.mapNotNull { RoleIndex.getRoleByName(it) }.filter {
+            val canRemoveRole = it.permissionLevel > sudo.roles.map { sudoRoles -> Role.newInstance(sudoRoles) }
+                .maxOf { sudoRole -> sudoRole.permissionLevel }
+
+            if (!canRemoveRole) {
+                Logger.error("User does not have permission to remove role ${it.name}. The role has a lower permission level than the user")
+                Logger.error("Skipping role ${it.name}")
+            }
+
+            return@filter canRemoveRole
+        }.toMutableList()
+    }
+}

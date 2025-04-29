@@ -104,8 +104,8 @@ class BranchHandler(
 
                         Logger.debug(
                             "Copied permission from ${oldBranch.name} to ${newBranch.name} " +
-                            "for user ${user.name}, role ${role.name}: " +
-                            "Read=${permission.readPermission}, Write=${permission.writePermission}"
+                                    "for user ${user.name}, role ${role.name}: " +
+                                    "Read=${permission.readPermission}, Write=${permission.writePermission}"
                         )
                     }
 
@@ -231,7 +231,10 @@ class BranchHandler(
      * It is useful for users to see the available branches in the repository.
      */
     fun listBranches() {
-        val branches = BranchIndex.getAllBranches().map { Branch.newInstance(it) }
+        val branches = BranchIndex.getAllBranches()
+            .map { Branch.newInstance(it) }
+            .filter { hasReadPermissionOnBranch(isValidSudoUser(sudoArgs), it.generateKey()) }
+
         if (branches.isEmpty()) {
             Logger.info("No branches found.")
             return
