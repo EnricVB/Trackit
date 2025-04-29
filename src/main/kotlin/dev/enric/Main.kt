@@ -37,7 +37,6 @@ import picocli.CommandLine.Help.ColorScheme
 TODO:
     Comandos que debería agregar y no son muy dificiles:
     - BranchDelete          -> Elimina una rama
-    - BranchList            -> Lista las ramas
     - PermissionGrant       -> Agrega permisos a un usuario
     - PermissionRevoke      -> Revoca permisos a un usuario
     - RolePermissionAssign  -> Agrega permisos a un rol
