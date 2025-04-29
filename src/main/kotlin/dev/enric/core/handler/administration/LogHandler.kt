@@ -9,6 +9,7 @@ import dev.enric.domain.objects.Commit
 import dev.enric.domain.objects.User
 import dev.enric.domain.objects.tag.ComplexTag
 import dev.enric.domain.objects.tag.SimpleTag
+import dev.enric.exceptions.IllegalStateException
 import dev.enric.logger.Logger
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.TagIndex
@@ -121,7 +122,7 @@ class LogHandler(
     /**
      * Displays the commit graph in ASCII format, simulating a tree structure.
      */
-    private fun drawGraph(commits: MutableList<Commit>) {
+    private fun drawGraph(commits: List<Commit>) {
         val branches = prepareBranches()
         val branchOrder = branches.map { it.generateKey() }
         val lineStructure = buildLineStructure(commits, branchOrder)

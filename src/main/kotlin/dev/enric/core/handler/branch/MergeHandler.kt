@@ -1,16 +1,16 @@
 package dev.enric.core.handler.branch
 
-import com.github.difflib.text.DiffRow.Tag.CHANGE
-import com.github.difflib.text.DiffRow.Tag.EQUAL
-import com.github.difflib.text.DiffRowGenerator
 import dev.enric.core.handler.CommandHandler
 import dev.enric.core.handler.repo.staging.StagingHandler
 import dev.enric.core.handler.repo.staging.StatusHandler
-import dev.enric.domain.objects.*
+import dev.enric.domain.objects.Branch
+import dev.enric.domain.objects.Commit
+import dev.enric.domain.objects.Content
+import dev.enric.domain.objects.Tree
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.util.common.FileStatus
-import dev.enric.util.index.*
+import dev.enric.util.index.BranchIndex
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
@@ -82,7 +82,7 @@ class MergeHandler(
      *
      * @return a map of file paths to their merged content
      */
-    fun prepareFileContent(filesToMerge: Map<Path, Triple<String?, String?, String?>>): MutableMap<Path, String> {
+    fun prepareFileContent(filesToMerge: Map<Path, Triple<String?, String?, String?>>): Map<Path, String> {
         val workingBranchName = workingBranch?.name ?: "CURRENT"
         val mergeBranchName = mergeBranch?.name ?: "THEIRS"
         val mergedFiles = mutableMapOf<Path, String>()
@@ -169,20 +169,11 @@ class MergeHandler(
             val conflict = baseLine != ourLine && baseLine != theirLine
 
             when {
-                emptyLine -> { // skip empty lines, add to result
-                    flushConflictIfNeeded()
-                    if (baseRaw.isNotEmpty()) result.appendLine(baseRaw)
-                }
-                noChanges -> { // no changes, add to result
+                emptyLine || noChanges -> { // skip empty lines, add to result
                     flushConflictIfNeeded()
                     if (baseRaw.isNotEmpty()) result.appendLine(baseRaw)
                 }
                 conflict -> { // conflict found, add to conflict blocks
-                    oldBlock.add(ourRaw)
-                    newBlock.add(theirRaw)
-                    insideConflict = true
-                }
-                else -> { // no expected scenario, add to conflict blocks
                     oldBlock.add(ourRaw)
                     newBlock.add(theirRaw)
                     insideConflict = true

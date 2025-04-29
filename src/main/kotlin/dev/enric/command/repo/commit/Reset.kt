@@ -56,12 +56,11 @@ class Reset : TrackitCommand() {
         }
 
         // Reset the current branch to the specified commit depending on the options
-        if (soft) {
-            softReset(commitHash)
-        } else if (mixed) {
-            mixedReset(commitHash)
-        } else if (hard) {
-            hardReset(commitHash)
+        when {
+            soft -> softReset(commitHash)
+            mixed -> mixedReset(commitHash)
+            hard -> hardReset(commitHash)
+            else -> throw IllegalArgumentValueException("You must specify one of --soft, --mixed or --hard.")
         }
 
         return 0
