@@ -100,6 +100,19 @@ open class CommandHandler {
     }
 
     /**
+     * Checks if the user has the permission to modify roles looking at the role permissions.
+     *
+     * @param sudo The sudo user to check the permissions.
+     * @throws InvalidPermissionException If the user does not have permission to modify roles.
+     */
+    fun checkHasModifyRolePermission(sudo: User) {
+        if (!hasModifyRolePermission(sudo)) {
+            throw InvalidPermissionException("User does not have permission to modify users")
+        }
+    }
+
+
+    /**
      * Checks if the user has the permission to modify users looking at the role permissions.
      *
      * @param sudo The sudo user to check the permissions.
@@ -120,6 +133,18 @@ open class CommandHandler {
     private fun hasModifyUserPermission(user: User): Boolean {
         return user.roles.map { Role.newInstance(it) }.any { role ->
             role.getRolePermissions().any { it.userOperationPermission }
+        }
+    }
+
+    /**
+     * Checks if the user has the permission to modify roles looking at the role permissions.
+     *
+     * @param user The user to check the permissions.
+     * @return True if the user has the permission to modify roles, false otherwise.
+     */
+    private fun hasModifyRolePermission(user: User): Boolean {
+        return user.roles.map { Role.newInstance(it) }.any { role ->
+            role.getRolePermissions().any { it.modifyRolePermission }
         }
     }
 }
