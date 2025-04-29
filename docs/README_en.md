@@ -17,55 +17,6 @@
 
 Trackit is an enhanced version control system designed to improve upon existing solutions like Git. This document provides instructions on how to generate and install the `.deb` package for Trackit using `apt`.
 
-## Creating a `.deb` Package for Trackit
-
-Follow these steps to create a `.deb` package for Trackit:
-
-### 1. Create the Package Structure
-```bash
-    mkdir -p trackit-deb/DEBIAN
-    mkdir -p trackit-deb/usr/local/bin
-    mkdir -p trackit-deb/usr/share/trackit
-```
-
-### 2. Move the `.jar` File and Create an Executable
-```bash
-    cp path/to/trackit.jar trackit-deb/usr/share/trackit/
-    echo '#!/bin/bash
-    exec java -jar /usr/share/trackit/trackit.jar "$@"' > trackit-deb/usr/local/bin/trackit
-    chmod +x trackit-deb/usr/local/bin/trackit
-```
-
-### 3. Create the Control File
-Create `trackit-deb/DEBIAN/control` with the following content:
-```
-Package: trackit
-Version: 1.0
-Section: utils
-Priority: optional
-Architecture: all
-Depends: default-jre
-Maintainer: Enric Velasco <enricvbufi@gmail.com>
-Description: Trackit - Enhanced Version Control System
-```
-
-### 4. Create the `postinst` Script
-```bash
-    echo '#!/bin/bash
-    chmod +x /usr/local/bin/trackit' > trackit-deb/DEBIAN/postinst
-    chmod +x trackit-deb/DEBIAN/postinst
-```
-
-### 5. Build the `.deb` Package
-```bash
-    dpkg-deb --build trackit-deb
-```
-
-### 6. Generate `dpkg` Packages Index
-```bash
-    dpkg-scanpackages -m . > Packages
-    gzip -k Packages
-```
 
 ## Installing Trackit on Ubuntu
 
