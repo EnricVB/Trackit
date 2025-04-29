@@ -3,6 +3,7 @@
 package dev.enric.domain
 
 import io.github.rctcwyvrn.blake3.Blake3
+import picocli.CommandLine.ITypeConverter
 import java.io.Serializable
 
 /**
@@ -75,6 +76,12 @@ data class Hash(val string: String) : Serializable {
         }
     }
 
+    class HashTypeConverter : ITypeConverter<HashType> {
+        override fun convert(value: String): HashType {
+            return HashType.valueOf(value.uppercase())
+        }
+    }
+
     /**
      * Enum class that represents the different types of Hash objects.
      * The HashType is used to identify the type of the object that is going to be stored in the repository.
@@ -93,5 +100,15 @@ data class Hash(val string: String) : Serializable {
         ROLE(parseText("Role", 1)),                         // d4
         BRANCH_PERMISSION(parseText("BranchPermission", 1)),// 71
         ROLE_PERMISSION(parseText("RolePermission", 1))     // 8d
+        ;
+
+        companion object {
+            fun fromHash(hash: Hash): HashType {
+                return hash.string.substring(0, 2).let { prefix ->
+                    entries.firstOrNull { it.hash.string == prefix }
+                        ?: throw IllegalArgumentException("Invalid hash type: $prefix")
+                }
+            }
+        }
     }
 }

@@ -5,10 +5,16 @@ import dev.enric.domain.Hash.HashType.BRANCH_PERMISSION
 import dev.enric.domain.TrackitObject
 import dev.enric.domain.objects.Branch
 import dev.enric.exceptions.IllegalHashException
+import dev.enric.logger.Logger
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
+import java.io.ObjectInputStream
 import java.io.Serializable
 import java.nio.file.Files
+import kotlin.io.path.exists
+import kotlin.io.path.name
+import kotlin.io.path.pathString
+import kotlin.io.path.readBytes
 
 data class BranchPermission(
     val readPermission: Boolean = false,
@@ -82,6 +88,35 @@ data class BranchPermission(
         @JvmStatic
         fun newInstance(hash: Hash): BranchPermission {
             return BranchPermission().decode(hash)
+        }
+
+        @JvmStatic
+        fun checkIntegrity(objectHash: Hash): Boolean {
+            val repositoryFolderManager = RepositoryFolderManager()
+            val objectsFolder = repositoryFolderManager.getObjectsFolderPath()
+            val objectFolder = objectsFolder.resolve(BRANCH_PERMISSION.hash.string)
+            val objectFile = objectFolder.resolve(objectHash.string)
+
+            return if (objectFile.exists()) {
+                val decompressedData = BranchPermission().decompressContent(objectFile.readBytes())
+                    ?: return false // If the file is empty, return false
+                val byteArrayInputStream = decompressedData.inputStream()
+                val objectIStream = ObjectInputStream(byteArrayInputStream)
+
+                val supposedContentHash = (objectIStream.readObject() as BranchPermission).generateKey()
+
+                // Check if the hash of the content matches the hash of the file
+                if (Hash(objectFile.name) == supposedContentHash) {
+                    Logger.debug("Integrity check passed for BranchPermission: ${objectHash.string}")
+                    true
+                } else {
+                    Logger.error("Integrity check failed for BranchPermission: ${objectHash.string}")
+                    false
+                }
+            } else {
+                Logger.error("Content file does not exist: ${objectFile.pathString}")
+                false
+            }
         }
     }
 }

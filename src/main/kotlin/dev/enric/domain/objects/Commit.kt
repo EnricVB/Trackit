@@ -6,14 +6,20 @@ import dev.enric.domain.TrackitObject
 import dev.enric.domain.objects.tag.ComplexTag
 import dev.enric.domain.objects.tag.SimpleTag
 import dev.enric.exceptions.IllegalHashException
+import dev.enric.logger.Logger
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.index.TagIndex
 import dev.enric.util.repository.RepositoryFolderManager
+import java.io.ObjectInputStream
 import java.io.Serializable
 import java.nio.file.Files
 import java.nio.file.Path
 import java.sql.Timestamp
 import java.time.Instant
+import kotlin.io.path.exists
+import kotlin.io.path.name
+import kotlin.io.path.pathString
+import kotlin.io.path.readBytes
 
 data class Commit(
     var previousCommit: Hash? = null,
@@ -103,6 +109,35 @@ data class Commit(
         @JvmStatic
         fun newInstance(hash : Hash) : Commit {
             return Commit().decode(hash)
+        }
+
+        @JvmStatic
+        fun checkIntegrity(objectHash: Hash): Boolean {
+            val repositoryFolderManager = RepositoryFolderManager()
+            val objectsFolder = repositoryFolderManager.getObjectsFolderPath()
+            val objectFolder = objectsFolder.resolve(COMMIT.hash.string)
+            val objectFile = objectFolder.resolve(objectHash.string)
+
+            return if (objectFile.exists()) {
+                val decompressedData = Commit().decompressContent(objectFile.readBytes())
+                    ?: return false // If the file is empty, return false
+                val byteArrayInputStream = decompressedData.inputStream()
+                val objectIStream = ObjectInputStream(byteArrayInputStream)
+
+                val supposedContentHash = (objectIStream.readObject() as Commit).generateKey()
+
+                // Check if the hash of the content matches the hash of the file
+                if (Hash(objectFile.name) == supposedContentHash) {
+                    Logger.debug("Integrity check passed for Commit: ${objectHash.string}")
+                    true
+                } else {
+                    Logger.error("Integrity check failed for Commit: ${objectHash.string}")
+                    false
+                }
+            } else {
+                Logger.error("Content file does not exist: ${objectFile.pathString}")
+                false
+            }
         }
     }
 }
