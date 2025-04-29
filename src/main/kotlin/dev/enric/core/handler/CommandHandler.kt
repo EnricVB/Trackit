@@ -87,6 +87,41 @@ open class CommandHandler {
             role.getBranchPermissions().any { it.branch == branch && it.readPermission }
         }
     }
+
+    /**
+     * Verifies if the user already exists.
+     *
+     * @throws UserNotFoundException If the user does not exist.
+     */
+    fun userExists(username: String) {
+        if (!UserIndex.userAlreadyExists(username)) {
+            throw UserNotFoundException("User does not exist. Please create the user first.")
+        }
+    }
+
+    /**
+     * Checks if the user has the permission to modify users looking at the role permissions.
+     *
+     * @param sudo The sudo user to check the permissions.
+     * @throws InvalidPermissionException If the user does not have permission to modify users.
+     */
+    fun checkHasModifyUserPermission(sudo: User) {
+        if (!hasModifyUserPermission(sudo)) {
+            throw InvalidPermissionException("User does not have permission to modify users")
+        }
+    }
+
+    /**
+     * Checks if the user has the permission to modify users looking at the role permissions.
+     *
+     * @param user The user to check the permissions.
+     * @return True if the user has the permission to modify users, false otherwise.
+     */
+    private fun hasModifyUserPermission(user: User): Boolean {
+        return user.roles.map { Role.newInstance(it) }.any { role ->
+            role.getRolePermissions().any { it.userOperationPermission }
+        }
+    }
 }
 
 /**

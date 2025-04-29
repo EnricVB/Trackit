@@ -66,14 +66,14 @@ class RoleGrantCommand : TrackitCommand() {
 
         // Create an instance of RoleGrantHandler with the necessary arguments
         val handler = RoleGrantHandler(
-            name = username,
+            username = username,
             roleNames = roles,
             sudoArgs = sudoArgs,
         )
 
         // Check if the user has permission to modify user roles
         if (!handler.checkCanModifyUser()) {
-            return 1 // Permission denied
+            return 1
         }
 
         // Assign the roles to the user
