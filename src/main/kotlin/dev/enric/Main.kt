@@ -11,10 +11,7 @@ import dev.enric.cli.management.RoleModifyCommand
 import dev.enric.cli.management.UserCreationCommand
 import dev.enric.cli.management.UserListCommand
 import dev.enric.cli.management.UserModifyCommand
-import dev.enric.cli.management.grantPermission.BranchPermissionGrantCommand
-import dev.enric.cli.management.grantPermission.BranchPermissionRevokeCommand
-import dev.enric.cli.management.grantPermission.RoleGrantCommand
-import dev.enric.cli.management.grantPermission.RoleRevokeCommand
+import dev.enric.cli.management.grantPermission.*
 import dev.enric.cli.repo.*
 import dev.enric.exceptions.TrackitException
 import dev.enric.logger.Logger
@@ -32,16 +29,25 @@ import picocli.CommandLine.Help.ColorScheme
     version = ["Trackit 1.0.0-BETA"],
     description = ["Track your files"],
     subcommands = [
-        InitCommand::class, StageCommand::class, UnstageCommand::class, StatusCommand::class,
-        IgnoreCommand::class, ConfigCommand::class, LogCommand::class, DiffCommand::class, BlameCommand::class, GarbageRecolectorCommand::class,
-        CommitCommand::class, CheckoutCommand::class, RestoreCommand::class, ResetCommand::class,
+        InitCommand::class, ConfigCommand::class, IgnoreCommand::class,
+
+        StageCommand::class, UnstageCommand::class, StatusCommand::class,
+        CommitCommand::class, LogCommand::class, DiffCommand::class, BlameCommand::class,
+        CheckoutCommand::class, RestoreCommand::class, ResetCommand::class,
+        MergeCommand::class,
+
+        BranchCommand::class, BranchListCommand::class,
+        BranchPermissionGrantCommand::class, BranchPermissionRevokeCommand::class,
+
+        TagAssignCommand::class, TagCreationCommand::class, TagListCommand::class, TagRemoveCommand::class,
+
         UserCreationCommand::class, UserModifyCommand::class, UserListCommand::class,
+
         RoleCreationCommand::class, RoleModifyCommand::class, RoleListCommand::class,
         RoleGrantCommand::class, RoleRevokeCommand::class,
-        BranchPermissionGrantCommand::class, BranchPermissionRevokeCommand::class,
-        TagAssignCommand::class, TagCreationCommand::class, TagListCommand::class, TagRemoveCommand::class,
-        BranchCommand::class, BranchListCommand::class, MergeCommand::class,
-        CheckIntegrityCommand::class
+        RolePermissionGrantCommand::class, RolePermissionRevokeCommand::class,
+
+        GarbageRecolectorCommand::class, CheckIntegrityCommand::class
     ]
 )
 class Main : TrackitCommand() {
