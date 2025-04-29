@@ -1,35 +1,35 @@
 package dev.enric.cli.management.grantPermission
 
 import dev.enric.cli.TrackitCommand
-import dev.enric.core.handler.management.grantPermission.BranchPermissionGrantHandler
+import dev.enric.core.handler.management.grantPermission.RolePermissionGrantHandler
 import picocli.CommandLine.*
 
 /**
- * The BranchPermissionGrantCommand class is responsible for granting permissions over a Branch for a specific role.
+ * The RolePermissionGrantCommand class is responsible for granting permissions over a role for a specific role.
  *
  * Usage examples:
  * - Grant roles to a user:
- *   trackit grant-branchPermission <role> <permission> <branches...>
+ *   trackit grant-rolePermission <role> <permission>
  * 
  * - Display help for the command:
- *   trackit grant-role --help
+ *   trackit grant-rolePermission --help
  */
 @Command(
-    name = "grant-branchPermission",
-    description = ["Grant branch permissions to a specific role"],
+    name = "grant-rolePermission",
+    description = ["Grant role permissions to a specific role"],
     usageHelpWidth = 500,
     footer = [
         "",
         "Examples:",
-        "  trackit grant-branchPermission <role> <permission> <branches...>",
-        "    Grants the specified permission to the given role over the specified branches.",
+        "  trackit grant-rolePermission <role> <permission>",
+        "    Grants the specified permission to the given role over the specified roles.",
         "",
         "  trackit grant-role --help",
         "    Displays help information for this command."
     ],
     mixinStandardHelpOptions = true,
 )
-class BranchPermissionGrantCommand : TrackitCommand() {
+class RolePermissionGrantCommand : TrackitCommand() {
 
     /**
      * The name of the role to whose permission(s) will be granted.
@@ -43,27 +43,15 @@ class BranchPermissionGrantCommand : TrackitCommand() {
     var role: String = ""
 
     /**
-     * The branches to assign the permissions.
-     * This parameter accepts one or more branch names.
+     * The roles to assign the permissions.
+     * This parameter accepts one or more roles names.
      */
     @Parameters(
         index = "1",
-        description = ["Branch permissions"],
+        description = ["Role permissions"],
         arity = "1",
     )
     var permission: String = "--"
-
-    /**
-     * The branches to assign the permissions.
-     * This parameter accepts one or more branch names.
-     */
-    @Parameters(
-        index = "2",
-        description = ["Branch names to assign permissions", "Use '--' (in quotes) to denote no permissions"],
-        split = " ",
-        arity = "1..*",
-    )
-    var branchNames: Array<String> = emptyArray()
 
     /**
      * Executes the command to grant permissions to the specified role.
@@ -75,9 +63,8 @@ class BranchPermissionGrantCommand : TrackitCommand() {
         super.call()
 
         // Create an instance of RoleGrantHandler with the necessary arguments
-        val handler = BranchPermissionGrantHandler(
+        val handler = RolePermissionGrantHandler(
             role = role,
-            branchNames = branchNames,
             newPermission = permission.replace("'", ""),
             sudoArgs = sudoArgs,
         )
