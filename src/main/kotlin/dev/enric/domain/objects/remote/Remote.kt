@@ -4,10 +4,16 @@ import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.REMOTE
 import dev.enric.domain.TrackitObject
 import dev.enric.exceptions.IllegalHashException
+import dev.enric.logger.Logger
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.repository.RepositoryFolderManager
+import java.io.ObjectInputStream
 import java.io.Serializable
 import java.nio.file.Files
+import kotlin.io.path.exists
+import kotlin.io.path.name
+import kotlin.io.path.pathString
+import kotlin.io.path.readBytes
 
 data class Remote(
     val protocol: DataProtocol? = null,
@@ -56,6 +62,35 @@ data class Remote(
         @JvmStatic
         fun newInstance(hash : Hash) : Remote {
             return Remote().decode(hash)
+        }
+
+        @JvmStatic
+        fun checkIntegrity(objectHash: Hash): Boolean {
+            val repositoryFolderManager = RepositoryFolderManager()
+            val objectsFolder = repositoryFolderManager.getObjectsFolderPath()
+            val objectFolder = objectsFolder.resolve(REMOTE.hash.string)
+            val objectFile = objectFolder.resolve(objectHash.string)
+
+            return if (objectFile.exists()) {
+                val decompressedData = Remote().decompressContent(objectFile.readBytes())
+                    ?: return false // If the file is empty, return false
+                val byteArrayInputStream = decompressedData.inputStream()
+                val objectIStream = ObjectInputStream(byteArrayInputStream)
+
+                val supposedContentHash = (objectIStream.readObject() as Remote).generateKey()
+
+                // Check if the hash of the content matches the hash of the file
+                if (Hash(objectFile.name) == supposedContentHash) {
+                    Logger.debug("Integrity check passed for Remote: ${objectHash.string}")
+                    true
+                } else {
+                    Logger.error("Integrity check failed for Remote: ${objectHash.string}")
+                    false
+                }
+            } else {
+                Logger.error("Content file does not exist: ${objectFile.pathString}")
+                false
+            }
         }
     }
 }

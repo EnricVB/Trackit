@@ -5,11 +5,17 @@ import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.USER
 import dev.enric.domain.TrackitObject
 import dev.enric.exceptions.IllegalHashException
+import dev.enric.logger.Logger
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.common.console.SystemConsoleInput
 import dev.enric.util.repository.RepositoryFolderManager
+import java.io.ObjectInputStream
 import java.io.Serializable
 import java.nio.file.Files
+import kotlin.io.path.exists
+import kotlin.io.path.name
+import kotlin.io.path.pathString
+import kotlin.io.path.readBytes
 
 data class User(
     val name: String = "",
@@ -135,6 +141,35 @@ data class User(
             val salt = PasswordHash.generateSalt()
 
             return User(username, PasswordHash.hash(password, salt), salt, mail, phone, rolesHash)
+        }
+
+        @JvmStatic
+        fun checkIntegrity(objectHash: Hash): Boolean {
+            val repositoryFolderManager = RepositoryFolderManager()
+            val objectsFolder = repositoryFolderManager.getObjectsFolderPath()
+            val objectFolder = objectsFolder.resolve(USER.hash.string)
+            val objectFile = objectFolder.resolve(objectHash.string)
+
+            return if (objectFile.exists()) {
+                val decompressedData = User().decompressContent(objectFile.readBytes())
+                    ?: return false // If the file is empty, return false
+                val byteArrayInputStream = decompressedData.inputStream()
+                val objectIStream = ObjectInputStream(byteArrayInputStream)
+
+                val supposedContentHash = (objectIStream.readObject() as User).generateKey()
+
+                // Check if the hash of the content matches the hash of the file
+                if (Hash(objectFile.name) == supposedContentHash) {
+                    Logger.debug("Integrity check passed for User: ${objectHash.string}")
+                    true
+                } else {
+                    Logger.error("Integrity check failed for User: ${objectHash.string}")
+                    false
+                }
+            } else {
+                Logger.error("Content file does not exist: ${objectFile.pathString}")
+                false
+            }
         }
     }
 }
