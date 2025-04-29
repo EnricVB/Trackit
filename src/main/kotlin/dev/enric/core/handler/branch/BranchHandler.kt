@@ -18,8 +18,8 @@ import dev.enric.util.repository.RepositoryFolderManager
 import kotlin.io.path.deleteIfExists
 
 class BranchHandler(
-    private val workingBranch: Branch?,
-    private val sudoArgs: Array<String>?
+    private val workingBranch: Branch? = null,
+    private val sudoArgs: Array<String>? = null
 ) : CommandHandler() {
 
     /**
@@ -223,4 +223,25 @@ class BranchHandler(
         .getObjectsFolderPath()
         .resolve(BRANCH_PERMISSION.hash.string)
         .resolve(workingBranch!!.generateKey().toString())
+
+    /**
+     * Lists all branches in the repository.
+     *
+     * This operation retrieves all branches and displays their names and hashes.
+     * It is useful for users to see the available branches in the repository.
+     */
+    fun listBranches() {
+        val branches = BranchIndex.getAllBranches().map { Branch.newInstance(it) }
+        if (branches.isEmpty()) {
+            Logger.info("No branches found.")
+            return
+        }
+
+        Logger.info("Branches:")
+        branches.forEach { branch ->
+
+
+            Logger.info("- ${branch.name} (${branch.generateKey().abbreviate()}^)")
+        }
+    }
 }
