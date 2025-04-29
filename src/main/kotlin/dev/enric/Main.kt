@@ -11,8 +11,10 @@ import dev.enric.cli.management.RoleModifyCommand
 import dev.enric.cli.management.UserCreationCommand
 import dev.enric.cli.management.UserListCommand
 import dev.enric.cli.management.UserModifyCommand
-import dev.enric.cli.management.RoleGrantCommand
-import dev.enric.cli.management.RoleRevokeCommand
+import dev.enric.cli.management.grantPermission.BranchPermissionGrantCommand
+import dev.enric.cli.management.grantPermission.BranchPermissionRevokeCommand
+import dev.enric.cli.management.grantPermission.RoleGrantCommand
+import dev.enric.cli.management.grantPermission.RoleRevokeCommand
 import dev.enric.cli.repo.*
 import dev.enric.exceptions.TrackitException
 import dev.enric.logger.Logger
@@ -23,14 +25,6 @@ import picocli.CommandLine.Command
 import picocli.CommandLine.Help.Ansi
 import kotlin.system.exitProcess
 import picocli.CommandLine.Help.ColorScheme
-
-/*
-TODO:
-    Comandos que debería agregar y no son muy dificiles:
-    - RolePermissionAssign  -> Agrega permisos a un rol
-    - RolePermissionRemove  -> Revoca permisos a un rol
-    - CheckIntegrity        -> Verifica la integridad de la base de datos
-*/
 
 @Command(
     name = "trackit",
@@ -44,6 +38,7 @@ TODO:
         UserCreationCommand::class, UserModifyCommand::class, UserListCommand::class,
         RoleCreationCommand::class, RoleModifyCommand::class, RoleListCommand::class,
         RoleGrantCommand::class, RoleRevokeCommand::class,
+        BranchPermissionGrantCommand::class, BranchPermissionRevokeCommand::class,
         TagAssignCommand::class, TagCreationCommand::class, TagListCommand::class, TagRemoveCommand::class,
         BranchCommand::class, BranchListCommand::class, MergeCommand::class,
     ]

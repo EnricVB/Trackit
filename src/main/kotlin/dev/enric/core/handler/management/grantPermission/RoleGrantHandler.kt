@@ -1,4 +1,4 @@
-package dev.enric.core.handler.management
+package dev.enric.core.handler.management.grantPermission
 
 import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.objects.Role
