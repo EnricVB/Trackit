@@ -30,6 +30,7 @@ import picocli.CommandLine.Option
         "Supports persistent sessions and scoped configuration."
     ],
     mixinStandardHelpOptions = true,
+    usageHelpWidth = 500,
     footer = [
         "",
         "Examples:",

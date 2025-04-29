@@ -32,7 +32,7 @@ class Branch(val name: String = "", val creationDate: Timestamp = Timestamp.from
             ?: return Branch() // If the file is empty, return an empty Branch
 
         val byteArrayInputStream = decompressedData.inputStream()
-        val objectIStream = java.io.ObjectInputStream(byteArrayInputStream)
+        val objectIStream = ObjectInputStream(byteArrayInputStream)
 
         return objectIStream.readObject() as Branch
     }

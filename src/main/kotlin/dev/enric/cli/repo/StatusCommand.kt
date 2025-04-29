@@ -22,6 +22,7 @@ import picocli.CommandLine.Option
     name = "status",
     description = ["Show the status of the working directory"],
     mixinStandardHelpOptions = true,
+    usageHelpWidth = 500,
     footer = [
         "",
         "Example:",

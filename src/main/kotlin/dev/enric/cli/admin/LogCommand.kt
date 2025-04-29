@@ -25,7 +25,8 @@ import java.time.format.DateTimeFormatter
  */
 @Command(
     name = "log",
-    description = ["Show the commit history with filtering options by author, date, and message, and/or formatting the output message."],
+    description = ["Show the commit history."],
+    usageHelpWidth = 500,
     footer = [
         "",
         "Examples:",

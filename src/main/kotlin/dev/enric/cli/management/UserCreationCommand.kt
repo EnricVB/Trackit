@@ -25,6 +25,7 @@ import picocli.CommandLine.Option
 @Command(
     name = "create-user",
     description = ["Create a new user account with optional contact info and role assignment."],
+    usageHelpWidth = 500,
     footer = [
         "",
         "Description:",

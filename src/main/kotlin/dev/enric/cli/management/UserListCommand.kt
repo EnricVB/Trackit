@@ -16,6 +16,7 @@ import picocli.CommandLine.Command
 @Command(
     name = "list-user",
     description = ["Displays all users registered in the system with their assigned roles and contact info."],
+    usageHelpWidth = 500,
     footer = [
         "",
         "Description:",

@@ -35,6 +35,8 @@ import picocli.CommandLine.Option
 @Command(
     name = "branch",
     mixinStandardHelpOptions = true,
+    description = ["Manages branches in the Trackit version control system."],
+    usageHelpWidth = 500,
     footer = [
         "",
         "Examples:",

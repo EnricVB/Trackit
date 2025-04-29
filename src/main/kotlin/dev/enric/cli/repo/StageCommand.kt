@@ -20,6 +20,7 @@ import kotlin.io.path.*
     name = "stage",
     description = ["Stage files to be committed"],
     mixinStandardHelpOptions = true,
+    usageHelpWidth = 500,
     footer = [
         "",
         "Example:",

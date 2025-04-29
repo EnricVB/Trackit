@@ -16,6 +16,7 @@ import picocli.CommandLine.Option
     name = "create-tag",
     description = ["Create a new simple or complex tag."],
     mixinStandardHelpOptions = true,
+    usageHelpWidth = 500,
     footer = [
         "",
         "Examples:",

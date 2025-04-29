@@ -18,6 +18,7 @@ import picocli.CommandLine.*
 @Command(
     name = "grant-role",
     description = ["Grant role to a user"],
+    usageHelpWidth = 500,
     footer = [
         "",
         "Examples:",

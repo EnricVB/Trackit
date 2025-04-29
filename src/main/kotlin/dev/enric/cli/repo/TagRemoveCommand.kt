@@ -11,6 +11,7 @@ import picocli.CommandLine.Option
     name = "remove-tag",
     description = ["Removes a tag from one or multiple ."],
     mixinStandardHelpOptions = true,
+    usageHelpWidth = 500,
     footer = [
         "",
         "Examples:",

@@ -30,7 +30,7 @@ data class Remote(
         val decompressedData = decompressContent(Files.readAllBytes(objectFile)) ?: return Remote() // If the file is empty, return an empty Remote
 
         val byteArrayInputStream = decompressedData.inputStream()
-        val objectIStream = java.io.ObjectInputStream(byteArrayInputStream)
+        val objectIStream = ObjectInputStream(byteArrayInputStream)
 
         return objectIStream.readObject() as Remote
     }

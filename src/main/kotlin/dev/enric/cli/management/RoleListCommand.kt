@@ -25,6 +25,7 @@ import picocli.CommandLine.Command
 @Command(
     name = "list-role",
     description = ["List all roles in the repository or system."],
+    usageHelpWidth = 500,
     footer = [
         "",
         "Description:",

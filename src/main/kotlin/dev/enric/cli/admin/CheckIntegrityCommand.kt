@@ -3,12 +3,14 @@ package dev.enric.cli.admin
 import dev.enric.cli.TrackitCommand
 import dev.enric.core.handler.admin.CheckIntegrityHandler
 import dev.enric.domain.Hash
+import dev.enric.logger.Logger
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 
 @Command(
     name = "check-integrity",
     description = ["Checks the integrity of the repository objects"],
+    usageHelpWidth = 500,
     footer = [
         "",
         "This command checks the integrity of the repository objects.",
@@ -56,6 +58,22 @@ class CheckIntegrityCommand : TrackitCommand() {
         super.call()
 
         val handler = CheckIntegrityHandler()
+
+        // Validate the object hash if provided
+        val result = if (objectHash != null) {
+            handler.checkObjectIntegrity(Hash(objectHash!!))
+        } else if (objectType != null) {
+            handler.checkObjectTypeIntegrity(objectType!!)
+        } else {
+            handler.checkAllIntegrity()
+        }
+
+        // Log the result
+        if (result) {
+            Logger.info("Integrity check passed.")
+        } else {
+            Logger.error("Integrity check failed.")
+        }
 
         return 0
     }

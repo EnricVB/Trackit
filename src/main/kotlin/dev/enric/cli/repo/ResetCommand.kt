@@ -22,8 +22,9 @@ import picocli.CommandLine.*
  */
 @Command(
     name = "reset",
-    description = ["Reset the current branch to a specific commit. Depending on the option, it can be a hard, mix or soft reset."],
+    description = ["Reset the current branch to a specific commit."],
     mixinStandardHelpOptions = true,
+    usageHelpWidth = 500,
     footer = [
         "Hard reset: Discards all changes in the working directory and index. The branch is moved to the specified commit.",
         "Mixed reset: Discards all changes in the index but keeps the working directory intact. The branch is moved to the specified commit.",

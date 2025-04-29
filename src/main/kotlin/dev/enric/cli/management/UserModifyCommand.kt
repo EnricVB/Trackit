@@ -19,6 +19,7 @@ import picocli.CommandLine.Option
 @Command(
     name = "modify-user",
     description = ["Modifies an existing user in the Trackit system by updating their details."],
+    usageHelpWidth = 500,
     mixinStandardHelpOptions = true,
     footer = [
         "Examples:",

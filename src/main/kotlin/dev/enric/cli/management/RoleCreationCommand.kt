@@ -31,6 +31,7 @@ import picocli.CommandLine.Option
 @Command(
     name = "create-role",
     description = ["Create a new role with specific permission and access levels."],
+    usageHelpWidth = 500,
     footer = [
         "",
         "Examples:",

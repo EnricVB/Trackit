@@ -22,6 +22,7 @@ import java.nio.file.Path
     name = "restore",
     description = ["Restores files from a specified commit into the working directory"],
     mixinStandardHelpOptions = true,
+    usageHelpWidth = 500,
     footer = [
         "",
         "Examples:",

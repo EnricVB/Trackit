@@ -18,6 +18,7 @@ import picocli.CommandLine.*
 @Command(
     name = "revoke-role",
     description = ["Revoke role to a user"],
+    usageHelpWidth = 500,
     footer = [
         "",
         "Examples:",

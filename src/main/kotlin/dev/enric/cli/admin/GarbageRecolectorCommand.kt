@@ -34,8 +34,9 @@ import picocli.CommandLine.*
  */
 @Command(
     name = "gr",
-    description = ["Removes all indexes and objects that are no longer in use."],
+    description = ["Removes objects that are no longer used."],
     mixinStandardHelpOptions = true,
+    usageHelpWidth = 500,
     footer = [
         "",
         "Examples:",

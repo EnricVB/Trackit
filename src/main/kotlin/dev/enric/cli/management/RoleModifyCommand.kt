@@ -31,6 +31,7 @@ import picocli.CommandLine.Option
 @Command(
     name = "modify-role",
     description = ["Modify an existing role’s permissions and configuration."],
+    usageHelpWidth = 500,
     footer = [
         "",
         "Description:",

@@ -17,6 +17,7 @@ import picocli.CommandLine.*
 @Command(
     name = "grant-branchPermission",
     description = ["Grant branch permissions to a specific role"],
+    usageHelpWidth = 500,
     footer = [
         "",
         "Examples:",
