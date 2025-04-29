@@ -79,6 +79,8 @@ jobs:
       # Paso 11: Construir el paquete .deb y dpkg
       - name: Build .deb and dpkg package
         run: |
+          rm -f Packages.gz
+          
           dpkg-deb --build trackit-deb
           mv trackit-deb.deb trackit-${{ env.VERSION }}.deb
 
