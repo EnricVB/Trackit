@@ -16,7 +16,7 @@
 
 # Trackit - Versionskontrollsystem
 
-Trackit ist ein erweitertes Versionskontrollsystem, das bestehende Lösungen wie Git verbessern soll. Dieses Dokument enthält Anweisungen zur Erstellung und Installation des `.deb`-Pakets für Trackit mit `apt`.
+Trackit ist ein erweitertes Versionskontrollsystem, das bestehende Lösungen wie Git verbessern soll. 
 
 ## Installation von Trackit unter Ubuntu
 
