@@ -12,7 +12,7 @@ import dev.enric.cli.management.UserCreationCommand
 import dev.enric.cli.management.UserListCommand
 import dev.enric.cli.management.UserModifyCommand
 import dev.enric.cli.management.grantPermission.*
-import dev.enric.cli.remote.SSHServe
+import dev.enric.cli.remote.TCPServe
 import dev.enric.cli.repo.*
 import dev.enric.exceptions.TrackitException
 import dev.enric.logger.Logger
@@ -50,7 +50,7 @@ import picocli.CommandLine.Help.ColorScheme
 
         GarbageRecolectorCommand::class, CheckIntegrityCommand::class,
 
-        SSHServe::class
+        TCPServe::class
     ]
 )
 class Main : TrackitCommand() {
