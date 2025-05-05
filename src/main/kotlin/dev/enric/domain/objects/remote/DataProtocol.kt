@@ -4,18 +4,17 @@ import java.io.Serializable
 
 enum class DataProtocol(
     var user: String? = null,
+    var password: String? = null,
     var host: String? = null,
     var port: Int? = null,
     var path: String? = null
 ) : Serializable {
 
-    SSH,
-    LOCAL;
+    TRACKIT;
 
     override fun toString(): String {
         return when (this) {
-            SSH -> "SSH://$user@$host:$port/$path"
-            LOCAL -> "LOCAL://$user:/$path"
+            TRACKIT -> "trackit://$user:$password@$host:$port/$path"
         }
     }
 
@@ -23,9 +22,10 @@ enum class DataProtocol(
         private const val serialVersionUID: Long = 1L
 
         @JvmStatic
-        fun newSSHInstance(user: String, host: String, port: Int, path: String): DataProtocol {
-            return SSH.apply {
+        fun newTrackitInstance(user: String, password: String, host: String, port: Int, path: String): DataProtocol {
+            return TRACKIT.apply {
                 this.user = user
+                this.password = password
                 this.host = host
                 this.port = port
                 this.path = path
@@ -33,11 +33,9 @@ enum class DataProtocol(
         }
 
         @JvmStatic
-        fun newLocalInstance(user: String, path: String): DataProtocol {
-            return LOCAL.apply {
-                this.user = user
-                this.path = path
-            }
+        fun validateRequest(request: String): MatchResult?  {
+            val regex = """(.+)://(.+):(.+)@(.+):(.+)/(.*)""".toRegex()
+            return regex.matchEntire(request)
         }
     }
 }
