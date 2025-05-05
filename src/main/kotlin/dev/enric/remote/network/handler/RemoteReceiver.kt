@@ -1,8 +1,8 @@
-package dev.enric.remote.tcp
-
 import dev.enric.logger.Logger
-import dev.enric.remote.tcp.message.ITrackitMessage
-import dev.enric.remote.tcp.remoteObject.MessageFactory
+import dev.enric.remote.ITrackitMessage
+import dev.enric.remote.network.handler.RemoteChannel
+import dev.enric.remote.network.handler.RemoteConnection
+import dev.enric.remote.network.serialize.MessageFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,11 +24,7 @@ class RemoteReceiver(
 
             while (true) {
                 val socket = serverSocket.accept()
-                val connection = RemoteConnection(
-                    socket,
-                    socket.getInputStream(),
-                    socket.getOutputStream()
-                )
+                val connection = RemoteConnection(socket)
 
                 this.startConnection(connection)
             }
@@ -48,10 +44,12 @@ class RemoteReceiver(
      */
     private fun startConnection(connection: RemoteConnection) {
         // Start the SSH server and listen for incoming connections
+        val remoteChannel = RemoteChannel(connection.socket)
+
         launch {
             try {
                 if (!connection.isAuthenticated()) {
-                    connection.sendError("Authentication failed")
+                    remoteChannel.sendError("Authentication failed")
                     return@launch
                 }
 
@@ -70,16 +68,20 @@ class RemoteReceiver(
      * Continuously receives messages from the SSH connection and puts them into the queue.
      */
     private suspend fun startReceivingMessages(connection: RemoteConnection) {
+        val remoteChannel = RemoteChannel(connection.socket)
+
         while (connection.isOpen()) {
             try {
                 val rawMessage: ByteArray? = connection.receiveMessage()
                 if (rawMessage != null) {
                     val message = MessageFactory.decode(rawMessage)
+                    RemoteChannel.handleIncomingMessage(message)
+
                     messageQueue.offer(message)
                 }
             } catch (e: Exception) {
                 Logger.error("Error receiving or decoding message: ${e.message}")
-                connection.sendError("Failed to receive message: ${e.message}")
+                remoteChannel.sendError("Failed to receive message: ${e.message}")
             }
         }
     }
@@ -88,18 +90,15 @@ class RemoteReceiver(
      * Continuously processes messages from the queue to execute if valid.
      */
     private suspend fun startProcessingMessages(connection: RemoteConnection) {
+        val remoteChannel = RemoteChannel(connection.socket)
+
         while (connection.isOpen()) {
             try {
                 val message = messageQueue.poll()
-                if (message.validateMessage()) {
-                    message.execute()
-                } else {
-                    Logger.error("Invalid message received: ${message.id}")
-                    connection.sendError("Invalid message format")
-                }
+                message.execute(connection.socket)
             } catch (e: Exception) {
                 Logger.error("Error processing message: ${e.message}")
-                connection.sendError("Error processing message: ${e.message}")
+                remoteChannel.sendError("Error processing message: ${e.message}")
             }
         }
     }

@@ -1,6 +1,7 @@
-package dev.enric.remote.tcp.message
+package dev.enric.remote
 
-import dev.enric.remote.tcp.remoteObject.MessageFactory
+import dev.enric.remote.network.serialize.MessageFactory
+import java.net.Socket
 
 
 /*TODO:
@@ -52,10 +53,5 @@ interface ITrackitMessage<T> {
      *
      * This method is used to execute the message and perform the action that is going to be done with the data.
      */
-    fun execute()
-
-    /**
-     * Validates the message checking if it has the correct format.
-     */
-    fun validateMessage(): Boolean
+    suspend fun execute(socket: Socket)
 }
