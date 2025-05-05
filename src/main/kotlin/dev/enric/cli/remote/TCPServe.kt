@@ -20,7 +20,7 @@ class TCPServe : TrackitCommand() {
 
     override fun call(): Int {
         super.call()
-        RemoteReceiver(port = port).start()
+        RemoteReceiver(port = port).startServerConnection()
 
         return 0
     }

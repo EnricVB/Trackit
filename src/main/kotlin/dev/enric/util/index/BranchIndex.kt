@@ -4,6 +4,7 @@ import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.BRANCH
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
+import dev.enric.exceptions.CommitNotFoundException
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.File
 import java.nio.file.Files
@@ -79,12 +80,15 @@ object BranchIndex {
      *
      * @param branchHash The hash of the branch.
      * @return A [Commit] representing the head of the branch, or null if not found.
+     *
+     * @throws IllegalStateException if the commit head is not found for the branch.
+     * @throws CommitNotFoundException if the commit head is not found for the branch.
      */
     fun getBranchHead(branchHash: Hash): Commit {
         val branchHeadPath = RepositoryFolderManager().getBranchHeadPath()
         val lines = Files.readAllLines(branchHeadPath).toMutableList()
 
-        val targetLine = lines.find { it.startsWith(branchHash.string) } ?: throw throw IllegalStateException("Commit HEAD not found for branch $branchHash. Try commiting a change first.")
+        val targetLine = lines.find { it.startsWith(branchHash.string) } ?: throw throw CommitNotFoundException("Commit HEAD not found for branch $branchHash. Try commiting a change first.")
         val split = targetLine.trim().split(":").takeIf { it.size == 2 } ?: throw IllegalStateException("Branch head file is corrupted: expected ':' separator.")
 
         return Commit.newInstance(Hash(split[1]))

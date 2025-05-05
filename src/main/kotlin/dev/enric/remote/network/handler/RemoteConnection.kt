@@ -15,7 +15,6 @@ class RemoteConnection(val socket: Socket) {
     suspend fun receiveMessage(): ByteArray? {
         return withContext(Dispatchers.IO) {
             val inputStream = socket.getInputStream()
-
             val input = DataInputStream(inputStream)
 
             try {
@@ -25,7 +24,6 @@ class RemoteConnection(val socket: Socket) {
 
                 return@withContext data
             } catch (e: IOException) {
-                Logger.error("Error receiving message: ${e.message}")
                 return@withContext null
             }
         }

@@ -1,5 +1,3 @@
-@file:Suppress("UNCHECKED_CAST")
-
 package dev.enric.remote.network.handler
 
 import dev.enric.logger.Logger
@@ -16,8 +14,8 @@ import java.net.Socket
 class RemoteChannel(private val socket: Socket) {
 
     companion object {
-        private val pendingResponse = mutableMapOf<Int, CompletableDeferred<ITrackitMessage<*>>>()
-        private val lock = Any()
+        val pendingResponse = mutableMapOf<Int, CompletableDeferred<ITrackitMessage<*>>>()
+        val lock = Any()
 
         fun handleIncomingMessage(message: ITrackitMessage<*>) {
             synchronized(lock) {
@@ -43,16 +41,19 @@ class RemoteChannel(private val socket: Socket) {
             output.writeInt(data.size)
             output.write(data)
             output.flush()
+
+            Logger.debug("Sent message: ${data.decodeToString()}")
         }
     }
 
-    suspend fun <T : ITrackitMessage<*>> request(message: ITrackitMessage<*>): T {
+    suspend inline fun <reified T : ITrackitMessage<*>> request(message: ITrackitMessage<*>): T {
+        val expectedID = T::class.java.getDeclaredConstructor().newInstance().id
+
         val deferred = CompletableDeferred<ITrackitMessage<*>>()
         synchronized(lock) {
-            pendingResponse[message.id.ordinal] = deferred
+            pendingResponse[expectedID.ordinal] = deferred
         }
 
-        println("Sending message: ${message.id}")
         send(message)
         return deferred.await() as T
     }

@@ -11,7 +11,7 @@ import java.io.ObjectOutputStream
 import java.net.Socket
 
 class TrackitObjectSender(
-    override val payload: List<Pair<HashType, ByteArray>> = emptyList()
+    override var payload: List<Pair<HashType, ByteArray>> = emptyList()
 ) : ITrackitMessage<List<Pair<HashType, ByteArray>>> {
 
     override val id: MessageFactory.MessageType
@@ -52,7 +52,7 @@ class TrackitObjectSender(
             result.add(Pair(hashType, byteArray))
         }
 
-        return result
+        return result.also { payload = it }
     }
 
     override suspend fun execute(socket: Socket) {

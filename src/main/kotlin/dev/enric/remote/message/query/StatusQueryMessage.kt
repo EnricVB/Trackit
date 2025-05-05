@@ -3,13 +3,11 @@ package dev.enric.remote.message.query
 import dev.enric.logger.Logger
 import dev.enric.remote.ITrackitMessage
 import dev.enric.remote.message.response.StatusResponseMessage
-import dev.enric.remote.network.serialize.MessageFactory.MessageType
 import dev.enric.remote.network.handler.RemoteChannel
+import dev.enric.remote.network.serialize.MessageFactory.MessageType
 import dev.enric.util.index.BranchIndex
-import java.io.ByteArrayOutputStream
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
 import java.net.Socket
+import java.nio.charset.Charset
 
 /**
  * A query message that requests the status of a remote repository.
@@ -18,33 +16,23 @@ import java.net.Socket
  * @param payload The payload of the message, which is the branch name of the commit to be queried.
  */
 class StatusQueryMessage(
-    override val payload: String = ""
+    override var payload: String = ""
 ) : ITrackitMessage<String> {
 
     override val id: MessageType
         get() = MessageType.STATUS_QUERY
 
     override fun encode(): ByteArray {
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        val objectOutputStream = ObjectOutputStream(byteArrayOutputStream)
-
-        // Write the payload to the output stream
-        objectOutputStream.writeUTF(payload)
-
-        // Flush and close the output stream
-        objectOutputStream.flush()
-        return byteArrayOutputStream.toByteArray()
+        return payload.toByteArray(Charset.defaultCharset())
     }
 
     override fun decode(data: ByteArray): String {
-        val byteArrayInputStream = data.inputStream()
-        val objectInputStream = ObjectInputStream(byteArrayInputStream)
-
-        // Read the payload from the input stream
-        return objectInputStream.readUTF()
+        return data.toString(Charset.defaultCharset()).also { payload = it }
     }
 
     override suspend fun execute(socket: Socket) {
+        Logger.debug("Executing StatusQueryMessage with payload: $payload")
+
         val branch = BranchIndex.getBranch(payload)
         if (branch == null) {
             Logger.error("Branch not found: $payload")
@@ -52,8 +40,16 @@ class StatusQueryMessage(
             return
         }
 
-        val branchHead = BranchIndex.getBranchHead(branch.generateKey())
+        RemoteChannel(socket).send(StatusResponseMessage("null"))
 
-        RemoteChannel(socket).send(StatusResponseMessage(branchHead.generateKey().string))
+        /*
+        try {
+            val branchHead = BranchIndex.getBranchHead(branch.generateKey())
+
+            RemoteChannel(socket).send(StatusResponseMessage(branchHead.generateKey().string))
+        } catch (ex: CommitNotFoundException) {
+            RemoteChannel(socket).send(StatusResponseMessage("null"))
+            Logger.error("Branch head not found: ${ex.message}")
+        }*/
     }
 }
