@@ -1,11 +1,11 @@
-package dev.enric.remote.remoteObject
+package dev.enric.remote.tcp.remoteObject
 
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.exceptions.MalformedDataException
 import dev.enric.exceptions.RemoteConnectionException
-import dev.enric.remote.remoteObject.MessageFactory.MessageType.*
-import dev.enric.remote.message.ITrackitMessage
-import dev.enric.remote.message.TrackitObjectSender
+import dev.enric.remote.tcp.remoteObject.MessageFactory.MessageType.*
+import dev.enric.remote.tcp.message.ITrackitMessage
+import dev.enric.remote.tcp.message.TrackitObjectSender
 
 class MessageFactory {
 

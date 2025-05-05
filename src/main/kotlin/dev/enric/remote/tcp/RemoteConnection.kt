@@ -1,14 +1,14 @@
-package dev.enric.remote
+package dev.enric.remote.tcp
 
 import dev.enric.logger.Logger
-import dev.enric.remote.message.ITrackitMessage
-import dev.enric.remote.remoteObject.MessageFactory.MessageType.ERROR
+import dev.enric.remote.tcp.message.ITrackitMessage
+import dev.enric.remote.tcp.remoteObject.MessageFactory.MessageType.ERROR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.*
 import java.net.Socket
 
-class SSHConnection(
+class RemoteConnection(
     private val socket: Socket,
     private val inputStream: InputStream,
     private val outputStream: OutputStream,

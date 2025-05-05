@@ -1,19 +1,46 @@
-package dev.enric.remote
+package dev.enric.remote.tcp
 
 import dev.enric.logger.Logger
-import dev.enric.remote.message.ITrackitMessage
-import dev.enric.remote.remoteObject.MessageFactory
+import dev.enric.remote.tcp.message.ITrackitMessage
+import dev.enric.remote.tcp.remoteObject.MessageFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.net.ServerSocket
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 
-class SSHReceiver(
+class RemoteReceiver(
     private val port: Int,
     private val authorizedKeys: List<String>
 ) : CoroutineScope by CoroutineScope(Dispatchers.IO) {
     private val messageQueue: BlockingQueue<ITrackitMessage<*>> = LinkedBlockingQueue()
+
+    fun start() {
+        var serverSocket: ServerSocket? = null
+
+        try {
+            serverSocket = ServerSocket(port)
+            serverSocket.soTimeout = 5000
+
+            while (true) {
+                val socket = serverSocket.accept()
+                val connection = RemoteConnection(
+                    socket,
+                    socket.getInputStream(),
+                    socket.getOutputStream(),
+                    socket.inetAddress.hostName
+                )
+
+                this.startConnection(connection)
+            }
+
+        } catch (e: Exception) {
+            Logger.error("Could not start SSHReceiver: ${e.message}")
+        } finally {
+            serverSocket?.close()
+        }
+    }
 
     /**
      * Starts the SSH server and listens for incoming connections.
@@ -21,7 +48,7 @@ class SSHReceiver(
      * This method is called to initiate the SSH server and start accepting connections.
      * It runs in a separate thread to avoid blocking the main thread.
      */
-    fun startConnection(connection: SSHConnection) {
+    private fun startConnection(connection: RemoteConnection) {
         // Start the SSH server and listen for incoming connections
         launch {
             try {
@@ -33,9 +60,11 @@ class SSHReceiver(
 
                 Logger.debug("Connection authenticated: ${connection.getPublicKey()}")
 
-                startReceivingMessages(connection)
-                startProcessingMessages(connection)
+                val receivingJob = launch { startReceivingMessages(connection) }
+                val processingJob = launch { startProcessingMessages(connection) }
 
+                receivingJob.join()
+                processingJob.join()
             } catch (e: Exception) {
                 Logger.error("Unexpected error in SSHReceiver: ${e.message}")
             }
@@ -45,7 +74,7 @@ class SSHReceiver(
     /**
      * Continuously receives messages from the SSH connection and puts them into the queue.
      */
-    private suspend fun startReceivingMessages(connection: SSHConnection) {
+    private suspend fun startReceivingMessages(connection: RemoteConnection) {
         while (connection.isOpen()) {
             try {
                 val rawMessage: ByteArray? = connection.receiveMessage()
@@ -63,7 +92,7 @@ class SSHReceiver(
     /**
      * Continuously processes messages from the queue to execute if valid.
      */
-    private suspend fun startProcessingMessages(connection: SSHConnection) {
+    private suspend fun startProcessingMessages(connection: RemoteConnection) {
         while (connection.isOpen()) {
             try {
                 val message = messageQueue.poll()
