@@ -11,12 +11,15 @@ import picocli.CommandLine.*
 )
 class TCPServe : TrackitCommand() {
 
+    @Option(
+        names = ["--port"],
+        required = true
+    )
+    var port: Int = 8088
+
     override fun call(): Int {
         super.call()
-
-        RemoteReceiver(
-            port = 8088
-        ).start()
+        RemoteReceiver(port = port).start()
 
         return 0
     }
