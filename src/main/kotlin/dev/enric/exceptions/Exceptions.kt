@@ -58,6 +58,10 @@ class CommitNotFoundException(message: String) : TrackitException(message, 1003)
 class IllegalArgumentValueException(message: String) : TrackitException(message, 2000)
 class IllegalHashException(message: String) : TrackitException(message, 2001)
 class IllegalStateException(message: String) : TrackitException(message, 2002)
+class MalformedDataException(message: String) : TrackitException(message, 2003)
 
 // Permission exceptions
 class InvalidPermissionException(message: String) : TrackitException(message, 3001)
+
+// Remote exceptions
+class RemoteConnectionException(message: String) : TrackitException(message, 4000)
