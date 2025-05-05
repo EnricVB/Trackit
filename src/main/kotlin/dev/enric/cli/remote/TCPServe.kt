@@ -1,8 +1,9 @@
 package dev.enric.cli.remote
 
+import RemoteReceiver
 import dev.enric.cli.TrackitCommand
-import dev.enric.remote.tcp.RemoteReceiver
-import picocli.CommandLine.*
+import picocli.CommandLine.Command
+import picocli.CommandLine.Option
 
 @Command(
     name = "tcp-serve",

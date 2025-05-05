@@ -1,12 +1,14 @@
-package dev.enric.remote.tcp.message
+package dev.enric.remote.message
 
 import dev.enric.domain.Hash.HashType
 import dev.enric.logger.Logger
-import dev.enric.remote.tcp.DeserializerHandler
-import dev.enric.remote.tcp.remoteObject.MessageFactory
+import dev.enric.remote.network.serialize.DeserializerHandler
+import dev.enric.remote.ITrackitMessage
+import dev.enric.remote.network.serialize.MessageFactory
 import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
+import java.net.Socket
 
 class TrackitObjectSender(
     override val payload: List<Pair<HashType, ByteArray>> = emptyList()
@@ -53,22 +55,12 @@ class TrackitObjectSender(
         return result
     }
 
-    override fun execute() {
+    override suspend fun execute(socket: Socket) {
         payload.forEach { (type, compressedBytes) ->
             val obj = DeserializerHandler.deserialize(type, compressedBytes)
             val (hash, _) = obj.encode(writeOnDisk = true)
 
             Logger.debug("Object with hash $hash and type $type has been sent to the repository.")
         }
-    }
-
-    override fun validateMessage(): Boolean {
-        // Validate the payload
-        if (payload.isEmpty()) {
-            Logger.error("Payload is empty.")
-            return false
-        }
-
-        return true
     }
 }

@@ -1,11 +1,13 @@
-package dev.enric.remote.tcp.remoteObject
+package dev.enric.remote.network.serialize
 
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.exceptions.MalformedDataException
 import dev.enric.exceptions.RemoteConnectionException
-import dev.enric.remote.tcp.remoteObject.MessageFactory.MessageType.*
-import dev.enric.remote.tcp.message.ITrackitMessage
-import dev.enric.remote.tcp.message.TrackitObjectSender
+import dev.enric.remote.network.serialize.MessageFactory.MessageType.*
+import dev.enric.remote.message.TrackitObjectSender
+import dev.enric.remote.ITrackitMessage
+import dev.enric.remote.message.query.StatusQueryMessage
+import dev.enric.remote.message.response.StatusResponseMessage
 
 class MessageFactory {
 
@@ -23,6 +25,8 @@ class MessageFactory {
 
             return when (type) {
                 TRACKIT_OBJECT_SENDER -> TrackitObjectSender().apply { decode(payload) }
+                STATUS_QUERY -> StatusQueryMessage().apply { decode(payload) }
+                STATUS_RESPONSE -> StatusResponseMessage().apply { decode(payload) }
                 ERROR -> throw RemoteConnectionException("Error message received: ${payload.decodeToString()}")
                 else -> throw IllegalStateException("Unknown message type: $type")
             }
@@ -31,6 +35,7 @@ class MessageFactory {
 
     enum class MessageType {
         TRACKIT_OBJECT_SENDER,
+        STATUS_QUERY, STATUS_RESPONSE,
         ERROR,
         UKNOWN;
 
