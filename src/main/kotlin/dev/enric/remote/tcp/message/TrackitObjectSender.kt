@@ -1,9 +1,9 @@
-package dev.enric.remote.message
+package dev.enric.remote.tcp.message
 
 import dev.enric.domain.Hash.HashType
 import dev.enric.logger.Logger
-import dev.enric.remote.DeserializerHandler
-import dev.enric.remote.remoteObject.MessageFactory
+import dev.enric.remote.tcp.DeserializerHandler
+import dev.enric.remote.tcp.remoteObject.MessageFactory
 import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream

@@ -1,6 +1,6 @@
-package dev.enric.remote.message
+package dev.enric.remote.tcp.message
 
-import dev.enric.remote.remoteObject.MessageFactory
+import dev.enric.remote.tcp.remoteObject.MessageFactory
 
 
 /*TODO:

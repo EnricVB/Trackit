@@ -1,4 +1,4 @@
-package dev.enric.remote
+package dev.enric.remote.tcp
 
 import dev.enric.domain.Hash.HashType
 import dev.enric.domain.Hash.HashType.*
