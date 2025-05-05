@@ -1,9 +1,6 @@
 package dev.enric.remote.message
 
-import dev.enric.domain.Hash.HashType
-import java.io.ByteArrayOutputStream
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
+import dev.enric.remote.remoteObject.MessageFactory
 
 
 /*TODO:
@@ -24,9 +21,9 @@ import java.io.ObjectOutputStream
         El servidor ejecutará trackit-serve y obtendrá el ByteArray en el payload.bin
         Así que el servidor no tiene que hacer nada, solo ejecutar el comando y obtener el payload.bin
  */
-interface ITrackitMessage {
-    val id: Int
-    fun getData(): List<Pair<HashType, ByteArray>>
+interface ITrackitMessage<T> {
+    val id: MessageFactory.MessageType
+    val payload: T
 
     /**
      * Encodes the object into a pair of a Hash and a ByteArray.
@@ -37,20 +34,7 @@ interface ITrackitMessage {
      *
      * @return ByteArray with the serialized data.
      */
-    fun encode(): ByteArray {
-        val data = getData()
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        val objectOutputStream = ObjectOutputStream(byteArrayOutputStream)
-
-        objectOutputStream.writeInt(data.size)
-        for (pair in data) {
-            objectOutputStream.writeObject(pair.first)
-            objectOutputStream.write(pair.second)
-        }
-
-        objectOutputStream.flush()
-        return byteArrayOutputStream.toByteArray()
-    }
+    fun encode(): ByteArray
 
     /**
      * Decodes the object from a ByteArray.
@@ -61,29 +45,17 @@ interface ITrackitMessage {
      *
      * @param data ByteArray that is going to be deserialized.
      */
-    fun decode(data: ByteArray): List<Pair<HashType, ByteArray>> {
-        val byteArrayInputStream = data.inputStream()
-        val objectInputStream = ObjectInputStream(byteArrayInputStream)
-
-        val size = objectInputStream.readInt()
-        val result = mutableListOf<Pair<HashType, ByteArray>>()
-
-        for (i in 0 until size) {
-            val hashType = objectInputStream.readObject() as HashType
-            val byteArray = ByteArray(objectInputStream.available())
-            objectInputStream.read(byteArray)
-
-            result.add(Pair(hashType, byteArray))
-        }
-
-        return result
-    }
+    fun decode(data: ByteArray): T
 
     /**
      * Executes the message.
+     *
      * This method is used to execute the message and perform the action that is going to be done with the data.
      */
-    fun execute(receivedData : ByteArray) {
-        // Implementation of the execute method
-    }
+    fun execute()
+
+    /**
+     * Validates the message checking if it has the correct format.
+     */
+    fun validateMessage(): Boolean
 }
