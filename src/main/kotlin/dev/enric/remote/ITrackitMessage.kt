@@ -24,7 +24,7 @@ import java.net.Socket
  */
 interface ITrackitMessage<T> {
     val id: MessageFactory.MessageType
-    val payload: T
+    var payload: T
 
     /**
      * Encodes the object into a pair of a Hash and a ByteArray.

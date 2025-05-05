@@ -6,6 +6,7 @@ import dev.enric.remote.network.serialize.MessageFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.ServerSocket
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
@@ -15,7 +16,7 @@ class RemoteReceiver(
 ) : CoroutineScope by CoroutineScope(Dispatchers.IO) {
     private val messageQueue: BlockingQueue<ITrackitMessage<*>> = LinkedBlockingQueue()
 
-    fun start() {
+    fun startServerConnection() {
         var serverSocket: ServerSocket? = null
 
         try {
@@ -42,7 +43,7 @@ class RemoteReceiver(
      * This method is called to initiate the SSH server and start accepting connections.
      * It runs in a separate thread to avoid blocking the main thread.
      */
-    private fun startConnection(connection: RemoteConnection) {
+    fun startConnection(connection: RemoteConnection) {
         // Start the SSH server and listen for incoming connections
         val remoteChannel = RemoteChannel(connection.socket)
 
@@ -71,17 +72,19 @@ class RemoteReceiver(
         val remoteChannel = RemoteChannel(connection.socket)
 
         while (connection.isOpen()) {
-            try {
-                val rawMessage: ByteArray? = connection.receiveMessage()
-                if (rawMessage != null) {
+            val rawMessage: ByteArray? = connection.receiveMessage()
+            if (rawMessage != null) {
+                try {
                     val message = MessageFactory.decode(rawMessage)
                     RemoteChannel.handleIncomingMessage(message)
 
+                    Logger.debug("Received message: ${message.id}")
+
                     messageQueue.offer(message)
+                } catch (e: Exception) {
+                    Logger.error("Error decoding message: ${e.message}")
+                    remoteChannel.sendError("Failed to decode message: ${e.message}")
                 }
-            } catch (e: Exception) {
-                Logger.error("Error receiving or decoding message: ${e.message}")
-                remoteChannel.sendError("Failed to receive message: ${e.message}")
             }
         }
     }
@@ -94,8 +97,7 @@ class RemoteReceiver(
 
         while (connection.isOpen()) {
             try {
-                val message = messageQueue.poll()
-                message.execute(connection.socket)
+                withContext(Dispatchers.IO) { messageQueue.take() }?.execute(connection.socket)
             } catch (e: Exception) {
                 Logger.error("Error processing message: ${e.message}")
                 remoteChannel.sendError("Error processing message: ${e.message}")

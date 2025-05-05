@@ -3,6 +3,7 @@ package dev.enric.remote.network.serialize
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.exceptions.MalformedDataException
 import dev.enric.exceptions.RemoteConnectionException
+import dev.enric.logger.Logger
 import dev.enric.remote.network.serialize.MessageFactory.MessageType.*
 import dev.enric.remote.message.TrackitObjectSender
 import dev.enric.remote.ITrackitMessage
@@ -13,6 +14,8 @@ class MessageFactory {
 
     companion object {
         fun decode(data: ByteArray): ITrackitMessage<*> {
+            Logger.debug("Received raw message: ${data.decodeToString()}")
+
             val input = data.decodeToString()
             val splitIndex = input.indexOf(":")
             if (splitIndex == -1) throw MalformedDataException("Invalid message format: $input")
@@ -22,6 +25,8 @@ class MessageFactory {
 
             val type = MessageType.fromOrdinal(typeOrdinal)
             val payload = input.substring(splitIndex + 1).toByteArray()
+
+            Logger.debug("Decoded message type: $type, payload: ${payload.decodeToString()}")
 
             return when (type) {
                 TRACKIT_OBJECT_SENDER -> TrackitObjectSender().apply { decode(payload) }

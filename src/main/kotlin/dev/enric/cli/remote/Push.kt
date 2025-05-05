@@ -5,6 +5,8 @@ import dev.enric.core.handler.remote.StartSSHRemote
 import dev.enric.remote.message.query.StatusQueryMessage
 import dev.enric.remote.message.response.StatusResponseMessage
 import dev.enric.remote.network.handler.RemoteChannel
+import dev.enric.remote.network.handler.RemoteClientListener
+import dev.enric.remote.network.handler.RemoteConnection
 import dev.enric.util.index.BranchIndex
 import kotlinx.coroutines.runBlocking
 import picocli.CommandLine.Command
@@ -26,12 +28,15 @@ class Push : TrackitCommand() {
             port = 8088,
             path = "C:\\tktFolder"
         )
+        val remoteConnection = RemoteConnection(socket)
+
+        RemoteClientListener(remoteConnection).start()
 
         val response = RemoteChannel(socket).request<StatusResponseMessage>(
             message = StatusQueryMessage(BranchIndex.getCurrentBranch().name)
         )
 
-        println("A ${response.payload}")
+        println("Commit ${response.payload}")
 
         return@runBlocking 0
     }
