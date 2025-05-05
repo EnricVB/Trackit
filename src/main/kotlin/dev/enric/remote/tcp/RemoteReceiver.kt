@@ -12,7 +12,6 @@ import java.util.concurrent.LinkedBlockingQueue
 
 class RemoteReceiver(
     private val port: Int,
-    private val authorizedKeys: List<String>
 ) : CoroutineScope by CoroutineScope(Dispatchers.IO) {
     private val messageQueue: BlockingQueue<ITrackitMessage<*>> = LinkedBlockingQueue()
 
@@ -28,8 +27,7 @@ class RemoteReceiver(
                 val connection = RemoteConnection(
                     socket,
                     socket.getInputStream(),
-                    socket.getOutputStream(),
-                    socket.inetAddress.hostName
+                    socket.getOutputStream()
                 )
 
                 this.startConnection(connection)
@@ -53,12 +51,9 @@ class RemoteReceiver(
         launch {
             try {
                 if (!connection.isAuthenticated()) {
-                    Logger.error("Unauthorized SSH public key: ${connection.getPublicKey()}")
                     connection.sendError("Authentication failed")
                     return@launch
                 }
-
-                Logger.debug("Connection authenticated: ${connection.getPublicKey()}")
 
                 val receivingJob = launch { startReceivingMessages(connection) }
                 val processingJob = launch { startProcessingMessages(connection) }

@@ -12,11 +12,10 @@ class RemoteConnection(
     private val socket: Socket,
     private val inputStream: InputStream,
     private val outputStream: OutputStream,
-    private val clientPublicKey: String?
 ) {
 
     fun isAuthenticated(): Boolean {
-        return clientPublicKey != null // TODO("Implement actual authentication logic")
+        return true
     }
 
     suspend fun receiveMessage(): ByteArray? {
@@ -68,10 +67,6 @@ class RemoteConnection(
 
     fun isOpen(): Boolean {
         return !socket.isClosed && socket.isConnected
-    }
-
-    fun getPublicKey(): String {
-        return clientPublicKey ?: "Unknown"
     }
 
     fun close() {
