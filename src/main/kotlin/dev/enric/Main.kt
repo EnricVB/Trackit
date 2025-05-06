@@ -56,6 +56,8 @@ import picocli.CommandLine.Help.ColorScheme
 )
 class Main : TrackitCommand() {
 
+
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
