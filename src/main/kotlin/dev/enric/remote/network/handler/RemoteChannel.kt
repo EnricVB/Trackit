@@ -4,6 +4,7 @@ import dev.enric.logger.Logger
 import dev.enric.remote.ITrackitMessage
 import dev.enric.remote.network.serialize.MessageFactory.MessageType.ERROR
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.DataOutputStream
@@ -12,6 +13,7 @@ import java.io.OutputStream
 import java.net.Socket
 
 class RemoteChannel(private val socket: Socket) {
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 
     companion object {
         val pendingResponse = mutableMapOf<Int, CompletableDeferred<ITrackitMessage<*>>>()
@@ -25,7 +27,7 @@ class RemoteChannel(private val socket: Socket) {
     }
 
     suspend fun send(message: ITrackitMessage<*>) {
-        withContext(Dispatchers.IO) {
+        withContext(dispatcher) {
             val payload = message.encode()
             val header = "${message.id.ordinal}:".toByteArray()
             val fullMessage = header + payload
@@ -34,7 +36,7 @@ class RemoteChannel(private val socket: Socket) {
     }
 
     suspend fun sendRawMessage(data: ByteArray) {
-        withContext(Dispatchers.IO) {
+        withContext(dispatcher) {
             val outputStream: OutputStream = socket.getOutputStream()
 
             val output = DataOutputStream(outputStream)

@@ -2,14 +2,12 @@ package dev.enric.remote.network.handler
 
 import dev.enric.remote.ITrackitMessage
 import dev.enric.remote.network.serialize.MessageFactory
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.util.concurrent.LinkedBlockingQueue
 
 class RemoteClientListener(private val connection: RemoteConnection) : CoroutineScope by CoroutineScope(Dispatchers.IO) {
     private val messageQueue = LinkedBlockingQueue<ITrackitMessage<*>>()
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 
     fun start() {
         launch {
@@ -37,7 +35,7 @@ class RemoteClientListener(private val connection: RemoteConnection) : Coroutine
 
         while (connection.isOpen()) {
             try {
-                withContext(Dispatchers.IO) {
+                withContext(dispatcher) {
                     messageQueue.take()
                 }?.execute(connection.socket)
             } catch (e: Exception) {
