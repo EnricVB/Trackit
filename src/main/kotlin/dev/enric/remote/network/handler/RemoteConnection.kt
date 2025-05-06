@@ -1,19 +1,21 @@
 package dev.enric.remote.network.handler
 
 import dev.enric.logger.Logger
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.*
 import java.net.Socket
 
 class RemoteConnection(val socket: Socket) {
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 
     fun isAuthenticated(): Boolean {
         return true
     }
 
     suspend fun receiveMessage(): ByteArray? {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             val inputStream = socket.getInputStream()
             val input = DataInputStream(inputStream)
 

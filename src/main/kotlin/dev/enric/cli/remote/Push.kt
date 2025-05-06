@@ -26,7 +26,7 @@ class Push : TrackitCommand() {
             password = "test",
             host = "localhost",
             port = 8088,
-            path = "C:\\tktFolder"
+            path = "/tktFolder"
         )
         val remoteConnection = RemoteConnection(socket)
 

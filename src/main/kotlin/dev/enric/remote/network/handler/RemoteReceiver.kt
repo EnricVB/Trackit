@@ -1,12 +1,9 @@
+package dev.enric.remote.network.handler
+
 import dev.enric.logger.Logger
 import dev.enric.remote.ITrackitMessage
-import dev.enric.remote.network.handler.RemoteChannel
-import dev.enric.remote.network.handler.RemoteConnection
 import dev.enric.remote.network.serialize.MessageFactory
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.net.ServerSocket
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
@@ -15,6 +12,7 @@ class RemoteReceiver(
     private val port: Int,
 ) : CoroutineScope by CoroutineScope(Dispatchers.IO) {
     private val messageQueue: BlockingQueue<ITrackitMessage<*>> = LinkedBlockingQueue()
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 
     fun startServerConnection() {
         var serverSocket: ServerSocket? = null
@@ -97,7 +95,7 @@ class RemoteReceiver(
 
         while (connection.isOpen()) {
             try {
-                withContext(Dispatchers.IO) { messageQueue.take() }?.execute(connection.socket)
+                withContext(dispatcher) { messageQueue.take() }?.execute(connection.socket)
             } catch (e: Exception) {
                 Logger.error("Error processing message: ${e.message}")
                 remoteChannel.sendError("Error processing message: ${e.message}")

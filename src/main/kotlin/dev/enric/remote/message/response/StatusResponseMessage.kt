@@ -27,5 +27,6 @@ class StatusResponseMessage(
     }
 
     override suspend fun execute(socket: Socket) {
+        // No action needed for response message
     }
 }

@@ -1,6 +1,6 @@
 package dev.enric.cli.remote
 
-import RemoteReceiver
+import dev.enric.remote.network.handler.RemoteReceiver
 import dev.enric.cli.TrackitCommand
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
