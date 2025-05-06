@@ -50,7 +50,8 @@ class CheckoutHandler(
         repositoryFolderManager.getInitFolderPath()
             .walk(PathWalkOption.INCLUDE_DIRECTORIES)
             .forEach {
-                val isTrackitFolder = it.toRealPath().startsWith(repositoryFolderManager.getTrackitFolderPath().toRealPath())
+                val isTrackitFolder =
+                    it.toRealPath().startsWith(repositoryFolderManager.getTrackitFolderPath().toRealPath())
                 val isSecretKey = it.toRealPath().startsWith(repositoryFolderManager.getSecretKeyPath().toRealPath())
                 val isRootFolder = it.toRealPath() == repositoryFolderManager.getInitFolderPath().toRealPath()
 
@@ -73,21 +74,20 @@ class CheckoutHandler(
             val tree = Tree.newInstance(it)
             val relativePath = Path.of(tree.serializablePath.pathString)
             val file = repoRoot.resolve(relativePath)
-            val newContent = Content.newInstance(tree.content).content
-            val needsUpdate = !file.exists() || !file.readBytes().contentEquals(newContent)
+            if (!file.parent.exists()) {
+                file.parent.createDirectories()
+            }
 
-            Logger.debug(file.pathString)
-
-            file.parent.toFile().mkdirs()
-
-            if(needsUpdate) {
+            try {
                 Files.writeString(
                     file,
                     String(Content.newInstance(tree.content).content),
-                    StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING,
+                    StandardOpenOption.CREATE,
                     StandardOpenOption.WRITE
                 )
+            } catch (e: Exception) {
+                Logger.error("Error while writing file: ${file.pathString}")
             }
 
             Logger.debug("Created file: ${file.pathString} with content: ${String(Content.newInstance(tree.content).content)}")
