@@ -9,9 +9,7 @@ import dev.enric.util.repository.RepositoryFolderManager
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.PathWalkOption
-import kotlin.io.path.walk
+import kotlin.io.path.*
 
 class CheckoutHandler(
     val commit: Commit,
@@ -69,18 +67,30 @@ class CheckoutHandler(
      * Checks out a specific commit by restoring its tree structure and content.
      */
     fun checkout() {
+        val repoRoot = RepositoryFolderManager().getInitFolderPath()
+
         commit.tree.forEach {
             val tree = Tree.newInstance(it)
-            Path.of(tree.serializablePath.pathString).parent.toFile().mkdirs()
+            val relativePath = Path.of(tree.serializablePath.pathString)
+            val file = repoRoot.resolve(relativePath)
+            val newContent = Content.newInstance(tree.content).content
+            val needsUpdate = !file.exists() || !file.readBytes().contentEquals(newContent)
 
-            if (!tree.serializablePath.toPath().toFile().exists()) {
+            Logger.debug(file.pathString)
+
+            file.parent.toFile().mkdirs()
+
+            if(needsUpdate) {
                 Files.writeString(
-                    tree.serializablePath.toPath(),
+                    file,
                     String(Content.newInstance(tree.content).content),
-                    StandardOpenOption.CREATE_NEW,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING,
                     StandardOpenOption.WRITE
                 )
             }
+
+            Logger.debug("Created file: ${file.pathString} with content: ${String(Content.newInstance(tree.content).content)}")
         }
 
         CommitIndex.setCurrentCommit(commit.generateKey())

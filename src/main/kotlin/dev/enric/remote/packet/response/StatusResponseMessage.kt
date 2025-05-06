@@ -1,4 +1,4 @@
-package dev.enric.remote.message.response
+package dev.enric.remote.packet.response
 
 import dev.enric.remote.ITrackitMessage
 import dev.enric.remote.network.serialize.MessageFactory.MessageType

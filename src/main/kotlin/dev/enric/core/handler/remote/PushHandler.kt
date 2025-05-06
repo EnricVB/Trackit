@@ -7,15 +7,17 @@ import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
 import dev.enric.domain.objects.Content
 import dev.enric.domain.objects.Tree
+import dev.enric.domain.objects.remote.DataProtocol
 import dev.enric.domain.objects.tag.ComplexTag
 import dev.enric.domain.objects.tag.SimpleTag
 import dev.enric.logger.Logger
-import dev.enric.remote.message.SendObjectsMessage
-import dev.enric.remote.message.query.StatusQueryMessage
-import dev.enric.remote.message.response.StatusResponseMessage
+import dev.enric.remote.packet.message.PushMessage
+import dev.enric.remote.packet.query.StatusQueryMessage
+import dev.enric.remote.packet.response.StatusResponseMessage
 import dev.enric.remote.network.handler.RemoteChannel
 import dev.enric.remote.network.handler.RemoteClientListener
 import dev.enric.remote.network.handler.RemoteConnection
+import dev.enric.remote.packet.message.data.PushData
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.TagIndex
 import java.net.Socket
@@ -26,7 +28,9 @@ import java.net.Socket
  * determining which commits are missing on the remote, and collecting the set of objects
  * (commits, trees, contents, tags, and branches) that need to be pushed.
  */
-class PushHandler : CommandHandler() {
+class PushHandler(
+    val pushDirection : DataProtocol,
+) : CommandHandler() {
 
     /**
      * Starts a remote SSH connection to the given host and folder path,
@@ -36,12 +40,21 @@ class PushHandler : CommandHandler() {
      */
     fun startRemoteConnection(): Socket {
         val socket = StartSSHRemote().connection(
+            username = pushDirection.user ?: throw IllegalArgumentException("Username is required. Configure the Push URL in the config file."),
+            password = pushDirection.password ?: throw IllegalArgumentException("Password is required. Configure the Push URL in the config file."),
+            host = pushDirection.host ?: throw IllegalArgumentException("Host is required. Configure the Push URL in the config file."),
+            port = pushDirection.port ?: 8088,
+            path = pushDirection.path ?: throw IllegalArgumentException("Path is required. Configure the Push URL in the config file.")
+        )
+
+        /*
             username = "test",
             password = "test",
             host = "localhost",
             port = 8088,
-            path = "C:\\Users\\enric.velasco\\Desktop\\trackit\\tktFolder"
-        )
+            path = "C:\\Users\\enric.velasco\\Desktop\\trackit\\tktFolderRemote"
+
+         */
         RemoteClientListener(RemoteConnection(socket)).start()
         return socket
     }
@@ -74,8 +87,16 @@ class PushHandler : CommandHandler() {
         val formattedObjects = objectsToPush.map { (hash, bytes) ->
             Pair(Hash.HashType.fromHash(hash), bytes)
         }
+        val branchHead = BranchIndex.getBranchHead(currentBranch.generateKey()).generateKey()
+        val branchHash = currentBranch.generateKey()
 
-        RemoteChannel(socket).send(SendObjectsMessage(formattedObjects))
+        val data = PushData(
+            objects = formattedObjects,
+            branchHeadHash = branchHead.toString(),
+            branchHash = branchHash.toString()
+        )
+
+        RemoteChannel(socket).send(PushMessage(data))
     }
 
     /**
@@ -85,9 +106,11 @@ class PushHandler : CommandHandler() {
      * @return The [Hash] of the latest commit on the remote side.
      */
     private suspend fun askForCommitHash(socket: Socket): Hash {
-        return Hash(RemoteChannel(socket).request<StatusResponseMessage>(
-            message = StatusQueryMessage(BranchIndex.getCurrentBranch().name)
-        ).payload)
+        return Hash(
+            RemoteChannel(socket).request<StatusResponseMessage>(
+                message = StatusQueryMessage(BranchIndex.getCurrentBranch().name)
+            ).payload
+        )
     }
 
     /**

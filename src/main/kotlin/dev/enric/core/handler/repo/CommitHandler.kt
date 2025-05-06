@@ -19,6 +19,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.sql.Timestamp
+import kotlin.io.path.relativeTo
 
 /**
  * Handles the process of committing changes to the repository.
@@ -180,14 +181,16 @@ class CommitHandler(val commit: Commit) : CommandHandler() {
     private fun mapStagedFilesToTree(stagedFiles: List<Pair<Hash, Path>>): List<Tree> {
         return stagedFiles.mapNotNull { stagedFile ->
             val filePath = stagedFile.second
-            val initPath = RepositoryFolderManager().getInitFolderPath()
 
-            val path = initPath.resolve(filePath)
-            val fileContent = safeFileRead(path.toFile())
+            val repoRoot = RepositoryFolderManager().getInitFolderPath()
+            val absolutePath = filePath.toAbsolutePath()
+            val relativePath = absolutePath.relativeTo(repoRoot.toAbsolutePath())
+
+            val fileContent = safeFileRead(relativePath.toFile())
 
             if (fileContent != null) {
                 val content = fileContent.encode(true).first
-                return@mapNotNull Tree(SerializablePath.of(path), content)
+                return@mapNotNull Tree(SerializablePath.of(relativePath.toString()), content)
             }
 
             return@mapNotNull null

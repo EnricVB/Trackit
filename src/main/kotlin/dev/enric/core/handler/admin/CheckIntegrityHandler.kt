@@ -7,7 +7,6 @@ import dev.enric.domain.Hash.HashType.*
 import dev.enric.domain.objects.*
 import dev.enric.domain.objects.permission.BranchPermission
 import dev.enric.domain.objects.permission.RolePermission
-import dev.enric.domain.objects.remote.Remote
 import dev.enric.domain.objects.tag.ComplexTag
 import dev.enric.domain.objects.tag.SimpleTag
 import dev.enric.logger.Logger
@@ -47,7 +46,6 @@ class CheckIntegrityHandler : CommandHandler() {
             COMPLEX_TAG -> ComplexTag.checkIntegrity(objectHash)
             USER -> User.checkIntegrity(objectHash)
             BRANCH -> Branch.checkIntegrity(objectHash)
-            REMOTE -> Remote.checkIntegrity(objectHash)
             ROLE -> Role.checkIntegrity(objectHash)
             BRANCH_PERMISSION -> BranchPermission.checkIntegrity(objectHash)
             ROLE_PERMISSION -> RolePermission.checkIntegrity(objectHash)

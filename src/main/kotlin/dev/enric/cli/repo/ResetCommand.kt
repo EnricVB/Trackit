@@ -70,7 +70,7 @@ class ResetCommand : TrackitCommand() {
         description = ["The commit to reset to."],
         required = true,
     )
-    var commitString: String = ""
+    var commitString: String = CommitIndex.getCurrentCommit()?.generateKey()?.string ?: ""
 
     /**
      * Executes the reset command. Depending on the options selected, it will perform a soft, mixed, or hard reset.

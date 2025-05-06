@@ -37,5 +37,11 @@ enum class DataProtocol(
             val regex = """(.+)://(.+):(.+)@(.+):(.+)/(.*)""".toRegex()
             return regex.matchEntire(request)
         }
+
+        @JvmStatic
+        fun toDataProtocol(matchResult: MatchResult): DataProtocol {
+            val (_, user, password, host, port, path) = matchResult.destructured
+            return newTrackitInstance(user, password, host, port.toInt(), path)
+        }
     }
 }

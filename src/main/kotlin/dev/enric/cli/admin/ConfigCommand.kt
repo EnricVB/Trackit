@@ -2,6 +2,7 @@ package dev.enric.cli.admin
 
 import dev.enric.cli.TrackitCommand
 import dev.enric.core.handler.admin.KeepSession
+import dev.enric.core.handler.admin.RemoteConfig
 import dev.enric.logger.Logger
 import dev.enric.core.security.AuthUtil
 import dev.enric.util.common.console.SystemConsoleInput
@@ -112,6 +113,34 @@ class ConfigCommand : TrackitCommand() {
     var local: Boolean = true
 
     /**
+     * Defines the remote URL or path for push operations.
+     */
+    @Option(
+        names = ["--remote-push"],
+        description = ["Define the remote URL or path for push operations"],
+        required = false
+    )
+    var remotePush: String? = null
+
+    /**
+     * Defines the remote URL or path for fetch operations.
+     */
+    @Option(
+        names = ["--remote-fetch"],
+        description = ["Define the remote URL or path for fetch operations"],
+        required = false
+    )
+    var remoteFetch: String? = null
+
+    @Option(
+        names = ["--remote"],
+        description = ["Shows the remote URL or path for push and fetch operations"],
+        required = false
+    )
+    var remote: Boolean = false
+
+
+    /**
      * Executes the configuration logic.
      * Validates credentials if session persistence is requested,
      * and stores the session data based on scope (local/global).
@@ -127,6 +156,14 @@ class ConfigCommand : TrackitCommand() {
                 return 1
             }
             saveSession()
+        }
+
+        if (!remotePush.isNullOrBlank() || !remoteFetch.isNullOrBlank()) {
+            saveRemoteConfig()
+        }
+
+        if (remote) {
+            showRemoteConfig()
         }
 
         return 0
@@ -171,5 +208,35 @@ class ConfigCommand : TrackitCommand() {
         }
 
         Logger.info("Session saved")
+    }
+
+    /**
+     * Saves the remote configuration (push and fetch URLs) based on scope (global or local).
+     * Logs progress and completion.
+     */
+    private fun saveRemoteConfig() {
+        RemoteConfig(remotePush, remoteFetch).save()
+
+        Logger.info("Remote configuration saved")
+    }
+
+    /**
+     * Displays the current remote configuration for push and fetch operations.
+     */
+    private fun showRemoteConfig() {
+        val remoteConfig = RemoteConfig()
+        val (remotePush, remoteFetch) = remoteConfig.load()
+
+        if (remotePush != null) {
+            Logger.info("Remote Push URL: $remotePush")
+        } else {
+            Logger.info("No Remote Push URL configured.")
+        }
+
+        if (remoteFetch != null) {
+            Logger.info("Remote Fetch URL: $remoteFetch")
+        } else {
+            Logger.info("No Remote Fetch URL configured.")
+        }
     }
 }
