@@ -19,7 +19,7 @@ class RemoteReceiver(
 
         try {
             serverSocket = ServerSocket(port)
-            serverSocket.soTimeout = 5000
+            serverSocket.soTimeout = 10000
 
             while (true) {
                 val socket = serverSocket.accept()
@@ -69,6 +69,8 @@ class RemoteReceiver(
     private suspend fun startReceivingMessages(connection: RemoteConnection) {
         val remoteChannel = RemoteChannel(connection.socket)
 
+        Logger.debug("Starting to receive messages on port $port")
+
         while (connection.isOpen()) {
             val rawMessage: ByteArray? = connection.receiveMessage()
             if (rawMessage != null) {
@@ -78,13 +80,15 @@ class RemoteReceiver(
 
                     Logger.debug("Received message: ${message.id}")
 
-                    messageQueue.offer(message)
+                    val offerResult = messageQueue.offer(message)
                 } catch (e: Exception) {
                     Logger.error("Error decoding message: ${e.message}")
                     remoteChannel.sendError("Failed to decode message: ${e.message}")
                 }
             }
         }
+
+        Logger.debug("Stopped receiving messages on port $port")
     }
 
     /**

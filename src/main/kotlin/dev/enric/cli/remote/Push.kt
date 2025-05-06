@@ -1,12 +1,7 @@
 package dev.enric.cli.remote
 
 import dev.enric.cli.TrackitCommand
-import dev.enric.core.handler.remote.StartSSHRemote
-import dev.enric.remote.message.query.StatusQueryMessage
-import dev.enric.remote.message.response.StatusResponseMessage
-import dev.enric.remote.network.handler.RemoteChannel
-import dev.enric.remote.network.handler.RemoteClientListener
-import dev.enric.remote.network.handler.RemoteConnection
+import dev.enric.core.handler.remote.PushHandler
 import dev.enric.util.index.BranchIndex
 import kotlinx.coroutines.runBlocking
 import picocli.CommandLine.Command
@@ -21,22 +16,13 @@ class Push : TrackitCommand() {
     override fun call(): Int = runBlocking {
         super.call()
 
-        val socket = StartSSHRemote().connection(
-            username = "test",
-            password = "test",
-            host = "localhost",
-            port = 8088,
-            path = "/tktFolder"
-        )
-        val remoteConnection = RemoteConnection(socket)
+        val handler = PushHandler()
+        val socket = handler.startRemoteConnection()
 
-        RemoteClientListener(remoteConnection).start()
+        // Check if Remote has no pull requests
 
-        val response = RemoteChannel(socket).request<StatusResponseMessage>(
-            message = StatusQueryMessage(BranchIndex.getCurrentBranch().name)
-        )
-
-        println("Commit ${response.payload}")
+        // Send all objects to the remote server
+        handler.sendObjectsToRemote(socket, BranchIndex.getCurrentBranch())
 
         return@runBlocking 0
     }

@@ -28,23 +28,31 @@ class RemoteChannel(private val socket: Socket) {
 
     suspend fun send(message: ITrackitMessage<*>) {
         withContext(dispatcher) {
+            val header = message.id.name
             val payload = message.encode()
-            val header = "${message.id.ordinal}:".toByteArray()
-            val fullMessage = header + payload
-            sendRawMessage(fullMessage)
+            sendRawMessage(header, payload)
         }
     }
 
-    suspend fun sendRawMessage(data: ByteArray) {
+    suspend fun sendRawMessage(header: String, payload: ByteArray) {
         withContext(dispatcher) {
             val outputStream: OutputStream = socket.getOutputStream()
-
             val output = DataOutputStream(outputStream)
-            output.writeInt(data.size)
-            output.write(data)
+
+            // Calculate the total size of the message
+            val headerBytes = header.toByteArray(Charsets.UTF_8)
+            val headerLength = 2 + headerBytes.size
+            val totalSize = headerLength + 4 + payload.size
+
+            output.writeInt(totalSize) // Message length for RemoteConnection
+
+            output.writeUTF(header) // Message type
+            output.writeInt(payload.size) // Payload length
+            output.write(payload) // Payload data
+
             output.flush()
 
-            Logger.debug("Sent message: ${data.decodeToString()}")
+            Logger.debug("Sent message: $header, payload size: ${payload.size}")
         }
     }
 

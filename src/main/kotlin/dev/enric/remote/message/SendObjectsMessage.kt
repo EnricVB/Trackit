@@ -5,12 +5,13 @@ import dev.enric.logger.Logger
 import dev.enric.remote.network.serialize.DeserializerHandler
 import dev.enric.remote.ITrackitMessage
 import dev.enric.remote.network.serialize.MessageFactory
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.net.Socket
 
-class TrackitObjectSender(
+class SendObjectsMessage(
     override var payload: List<Pair<HashType, ByteArray>> = emptyList()
 ) : ITrackitMessage<List<Pair<HashType, ByteArray>>> {
 
@@ -25,9 +26,11 @@ class TrackitObjectSender(
         objectOutputStream.writeInt(payload.size)
 
         // Write each pair to the output stream
-        for (pair in payload) {
-            objectOutputStream.writeObject(pair.first)
-            objectOutputStream.write(pair.second)
+        for ((type, bytes) in payload) {
+            // Write object type, size and ByteArray
+            objectOutputStream.writeUTF(type.name)
+            objectOutputStream.writeInt(bytes.size)
+            objectOutputStream.write(bytes)
         }
 
         // Flush and close the output stream
@@ -36,18 +39,19 @@ class TrackitObjectSender(
     }
 
     override fun decode(data: ByteArray): List<Pair<HashType, ByteArray>> {
-        val byteArrayInputStream = data.inputStream()
+        val byteArrayInputStream = ByteArrayInputStream(data)
         val objectInputStream = ObjectInputStream(byteArrayInputStream)
 
         // Read the size of the payload
-        val size = objectInputStream.readInt()
         val result = mutableListOf<Pair<HashType, ByteArray>>()
+        val size = objectInputStream.readInt()
 
         // Read each pair from the input stream
         for (i in 0 until size) {
-            val hashType = objectInputStream.readObject() as HashType
-            val byteArray = ByteArray(objectInputStream.available())
-            objectInputStream.read(byteArray)
+            val hashType = HashType.valueOf(objectInputStream.readUTF())
+            val byteArrayLength = objectInputStream.readInt()
+            val byteArray = ByteArray(byteArrayLength)
+            objectInputStream.readFully(byteArray)
 
             result.add(Pair(hashType, byteArray))
         }
@@ -56,6 +60,8 @@ class TrackitObjectSender(
     }
 
     override suspend fun execute(socket: Socket) {
+        Logger.debug("Received SendObjectsMessage with ${payload.size} objects.")
+
         payload.forEach { (type, compressedBytes) ->
             val obj = DeserializerHandler.deserialize(type, compressedBytes)
             val (hash, _) = obj.encode(writeOnDisk = true)
