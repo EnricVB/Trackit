@@ -12,11 +12,7 @@ class StartSSHRemote {
     // TODO: Dont use the clean password, use TLS
     fun connection(username: String, password: String, host: String, port: Int, path: String): Socket {
         val protocol = DataProtocol.newTrackitInstance(
-            user = username,
-            password = password,
-            host = host,
-            port = port,
-            path = path
+            user = username, password = password, host = host, port = port, path = path
         )
 
         val socket = Socket(host, 8088) // TODO: Make this configurable
@@ -28,8 +24,7 @@ class StartSSHRemote {
     }
 
     private fun sendConnectionPetition(
-        socket: Socket,
-        protocol: DataProtocol
+        socket: Socket, protocol: DataProtocol
     ): String {
         val writer = PrintWriter(socket.getOutputStream(), true)
         val reader = socket.getInputStream().bufferedReader()
@@ -44,7 +39,7 @@ class StartSSHRemote {
                 return Socket(host, port)
             } catch (e: Exception) {
                 Logger.debug("Connection attempt $attempt to $host:$port failed: ${e.message}")
-                if (attempt == retries - 1) throw e
+                if (attempt == retries - 1) throw RemoteConnectionException("Failed to connect to $host:$port after $retries attempts. Check if the host, port and path are correct.")
                 Thread.sleep(delayMillis)
             }
         }

@@ -6,7 +6,6 @@ import dev.enric.domain.TrackitObject
 import dev.enric.domain.objects.*
 import dev.enric.domain.objects.permission.BranchPermission
 import dev.enric.domain.objects.permission.RolePermission
-import dev.enric.domain.objects.remote.Remote
 import dev.enric.domain.objects.tag.ComplexTag
 import dev.enric.domain.objects.tag.SimpleTag
 import java.io.ObjectInputStream
@@ -70,13 +69,6 @@ object DeserializerHandler {
             val objectIStream = ObjectInputStream(decompressedData.inputStream())
 
             return@registerDeserializer objectIStream.readObject() as Branch
-        }
-
-        registerDeserializer(REMOTE) { data ->
-            val decompressedData = Remote().decompressContent(data)?: return@registerDeserializer Remote()
-            val objectIStream = ObjectInputStream(decompressedData.inputStream())
-
-            return@registerDeserializer objectIStream.readObject() as Remote
         }
 
         registerDeserializer(ROLE) { data ->

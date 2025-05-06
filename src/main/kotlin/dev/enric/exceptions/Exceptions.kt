@@ -65,3 +65,4 @@ class InvalidPermissionException(message: String) : TrackitException(message, 30
 
 // Remote exceptions
 class RemoteConnectionException(message: String) : TrackitException(message, 4000)
+class RemoteDirectionNotFoundException(message: String) : TrackitException(message, 4000)
