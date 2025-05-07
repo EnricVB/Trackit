@@ -1,20 +1,22 @@
 package dev.enric.remote.network.serialize
 
 import dev.enric.exceptions.IllegalStateException
-import dev.enric.exceptions.RemoteConnectionException
 import dev.enric.logger.Logger
 import dev.enric.remote.ITrackitMessage
 import dev.enric.remote.packet.message.PushMessage
 import dev.enric.remote.packet.query.StatusQueryMessage
 import dev.enric.remote.packet.response.StatusResponseMessage
 import dev.enric.remote.network.serialize.MessageFactory.MessageType.*
+import dev.enric.remote.packet.message.ErrorMessage
+import dev.enric.remote.packet.query.BranchSyncStatusQueryMessage
+import dev.enric.remote.packet.response.BranchSyncStatusResponseMessage
 import java.io.DataInputStream
 
 class MessageFactory {
 
     companion object {
         fun decode(data: ByteArray): ITrackitMessage<*> {
-            Logger.debug("Received message raw message")
+            Logger.debug("Received message raw message ${data.decodeToString()}")
 
             val input = DataInputStream(data.inputStream())
             val type = MessageType.valueOf(input.readUTF())
@@ -27,7 +29,9 @@ class MessageFactory {
                 PUSH_MESSAGE -> PushMessage().apply { decode(payload) }
                 STATUS_QUERY -> StatusQueryMessage().apply { decode(payload) }
                 STATUS_RESPONSE -> StatusResponseMessage().apply { decode(payload) }
-                ERROR -> throw RemoteConnectionException("Error message received: ${payload.decodeToString()}")
+                BRANCH_SYNC_STATUS_QUERY -> BranchSyncStatusQueryMessage().apply { decode(payload) }
+                BRANCH_SYNC_STATUS_RESPONSE -> BranchSyncStatusResponseMessage().apply { decode(payload) }
+                ERROR -> ErrorMessage().apply { decode(payload) }
                 else -> throw IllegalStateException("Unknown message type: $type")
             }
         }
@@ -36,6 +40,7 @@ class MessageFactory {
     enum class MessageType {
         PUSH_MESSAGE,
         STATUS_QUERY, STATUS_RESPONSE,
+        BRANCH_SYNC_STATUS_QUERY, BRANCH_SYNC_STATUS_RESPONSE,
         ERROR,
         UKNOWN;
 
