@@ -88,7 +88,7 @@ object BranchIndex {
         val branchHeadPath = RepositoryFolderManager().getBranchHeadPath()
         val lines = Files.readAllLines(branchHeadPath).toMutableList()
 
-        val targetLine = lines.find { it.startsWith(branchHash.string) } ?: throw throw CommitNotFoundException("Commit HEAD not found for branch $branchHash. Try commiting a change first.")
+        val targetLine = lines.find { it.startsWith(branchHash.string) } ?: throw CommitNotFoundException("Commit HEAD not found for branch $branchHash. Try commiting a change first.")
         val split = targetLine.trim().split(":").takeIf { it.size == 2 } ?: throw IllegalStateException("Branch head file is corrupted: expected ':' separator.")
 
         return Commit.newInstance(Hash(split[1]))
