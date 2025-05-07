@@ -2,7 +2,8 @@ package dev.enric.cli.admin
 
 import dev.enric.cli.TrackitCommand
 import dev.enric.core.handler.admin.KeepSession
-import dev.enric.core.handler.admin.RemoteConfig
+import dev.enric.core.handler.admin.RemoteDirectivesConfig
+import dev.enric.core.handler.admin.RemotePathConfig
 import dev.enric.logger.Logger
 import dev.enric.core.security.AuthUtil
 import dev.enric.util.common.console.SystemConsoleInput
@@ -112,9 +113,6 @@ class ConfigCommand : TrackitCommand() {
     )
     var local: Boolean = true
 
-    /**
-     * Defines the remote URL or path for push operations.
-     */
     @Option(
         names = ["--remote-push"],
         description = ["Define the remote URL or path for push operations"],
@@ -122,9 +120,6 @@ class ConfigCommand : TrackitCommand() {
     )
     var remotePush: String? = null
 
-    /**
-     * Defines the remote URL or path for fetch operations.
-     */
     @Option(
         names = ["--remote-fetch"],
         description = ["Define the remote URL or path for fetch operations"],
@@ -138,6 +133,13 @@ class ConfigCommand : TrackitCommand() {
         required = false
     )
     var remote: Boolean = false
+
+    @Option(
+        names = ["--autopush"],
+        description = ["Determines if missing data, as Users, Roles, etc, should be sent on push automatically or not"],
+        required = false
+    )
+    var autopush: Boolean? = null
 
 
     /**
@@ -160,6 +162,10 @@ class ConfigCommand : TrackitCommand() {
 
         if (!remotePush.isNullOrBlank() || !remoteFetch.isNullOrBlank()) {
             saveRemoteConfig()
+        }
+
+        if (autopush != null) {
+            saveAutoPushConfig()
         }
 
         if (remote) {
@@ -215,16 +221,26 @@ class ConfigCommand : TrackitCommand() {
      * Logs progress and completion.
      */
     private fun saveRemoteConfig() {
-        RemoteConfig(remotePush, remoteFetch).save()
+        RemotePathConfig(remotePush, remoteFetch).save()
 
         Logger.info("Remote configuration saved")
+    }
+
+    /**
+     * Saves the auto-push directive based on the provided value.
+     * Logs progress and completion.
+     */
+    private fun saveAutoPushConfig() {
+        RemoteDirectivesConfig().saveAutoPushDirective(autopush ?: false)
+
+        Logger.info("Remote directive saved")
     }
 
     /**
      * Displays the current remote configuration for push and fetch operations.
      */
     private fun showRemoteConfig() {
-        val remoteConfig = RemoteConfig()
+        val remoteConfig = RemotePathConfig()
         val (remotePush, remoteFetch) = remoteConfig.load()
 
         if (remotePush != null) {
