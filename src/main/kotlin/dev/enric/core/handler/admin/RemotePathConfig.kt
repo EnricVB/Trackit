@@ -17,7 +17,7 @@ import kotlin.io.path.outputStream
  * @property remotePush The push remote URL or path.
  * @property remoteFetch The fetch remote URL or path.
  */
-class RemoteConfig(
+class RemotePathConfig(
     private val remotePush: String? = null,
     private val remoteFetch: String? = null
 ) : CommandHandler() {
