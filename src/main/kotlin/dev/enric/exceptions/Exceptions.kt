@@ -3,6 +3,7 @@ package dev.enric.exceptions
 import dev.enric.logger.Logger
 import dev.enric.util.common.Utility
 import kotlin.random.Random
+import kotlin.system.exitProcess
 
 /**
  * Custom exceptions for Trackit.
@@ -45,6 +46,7 @@ open class TrackitException(message: String, errorCode: Int) : Exception(message
             """.trimIndent())
 
         Logger.trace(stackTraceToString())
+        exitProcess(errorCode)
     }
 }
 
@@ -65,4 +67,5 @@ class InvalidPermissionException(message: String) : TrackitException(message, 30
 
 // Remote exceptions
 class RemoteConnectionException(message: String) : TrackitException(message, 4000)
-class RemoteDirectionNotFoundException(message: String) : TrackitException(message, 4000)
+class RemoteDirectionNotFoundException(message: String) : TrackitException(message, 4001)
+class RemotePullRequestException(message: String) : TrackitException(message, 4002)
