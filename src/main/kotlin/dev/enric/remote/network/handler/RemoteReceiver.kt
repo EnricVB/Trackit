@@ -59,6 +59,8 @@ class RemoteReceiver(
                 processingJob.join()
             } catch (e: Exception) {
                 Logger.error("Unexpected error in SSHReceiver: ${e.message}")
+            } finally {
+                connection.close()
             }
         }.start()
     }

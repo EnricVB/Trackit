@@ -36,7 +36,10 @@ class StartSSHRemote {
     fun retryConnection(host: String, port: Int, retries: Int = 10, delayMillis: Long = 200): Socket {
         repeat(retries) { attempt ->
             try {
-                return Socket(host, port)
+                val socket = Socket(host, port)
+                socket.soTimeout = 10000
+
+                return socket
             } catch (e: Exception) {
                 Logger.debug("Connection attempt $attempt to $host:$port failed: ${e.message}")
                 if (attempt == retries - 1) throw RemoteConnectionException("Failed to connect to $host:$port after $retries attempts. Check if the host, port and path are correct.")
