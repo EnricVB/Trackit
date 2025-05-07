@@ -2,13 +2,12 @@ package dev.enric.remote.network.handler
 
 import dev.enric.logger.Logger
 import dev.enric.remote.ITrackitMessage
-import dev.enric.remote.network.serialize.MessageFactory.MessageType.ERROR
+import dev.enric.remote.packet.message.ErrorMessage
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.DataOutputStream
-import java.io.IOException
 import java.io.OutputStream
 import java.net.Socket
 
@@ -27,6 +26,11 @@ class RemoteChannel(private val socket: Socket) {
     }
 
     suspend fun send(message: ITrackitMessage<*>) {
+        if (socket.isClosed) {
+            Logger.error("Attempting to send a message on a closed socket")
+            return
+        }
+
         withContext(dispatcher) {
             val header = message.id.name
             val payload = message.encode()
@@ -68,16 +72,7 @@ class RemoteChannel(private val socket: Socket) {
         return deferred.await() as T
     }
 
-    fun sendError(s: String) {
-        try {
-            val outputStream: OutputStream = socket.getOutputStream()
-
-            val output = DataOutputStream(outputStream)
-            output.writeInt(ERROR.ordinal)
-            output.writeUTF(s)
-            output.flush()
-        } catch (e: IOException) {
-            Logger.error("Failed to send error message: ${e.message}")
-        }
+    suspend fun sendError(s: String) {
+        send(ErrorMessage(s))
     }
 }

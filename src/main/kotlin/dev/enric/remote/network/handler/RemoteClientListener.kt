@@ -1,5 +1,6 @@
 package dev.enric.remote.network.handler
 
+import dev.enric.exceptions.RemoteConnectionException
 import dev.enric.remote.ITrackitMessage
 import dev.enric.remote.network.serialize.MessageFactory
 import kotlinx.coroutines.*
@@ -10,17 +11,20 @@ class RemoteClientListener(private val connection: RemoteConnection) : Coroutine
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 
     fun start() {
-        launch {
+        CoroutineScope(Dispatchers.IO).launch {
             val receivingJob = launch { startReceiving() }
             val processingJob = launch { startProcessing() }
 
-            receivingJob.join()
-            processingJob.join()
+            try {
+                joinAll(receivingJob, processingJob)
+            } catch (e: Exception) {
+                throw RemoteConnectionException("Error in Remote: ${e.message}")
+            }
         }
     }
 
     private suspend fun startReceiving() {
-        while (connection.isOpen()) {
+        while (connection.isOpen() && isActive) {
             val raw = connection.receiveMessage()
             if (raw != null) {
                 val message = MessageFactory.decode(raw)
@@ -33,7 +37,7 @@ class RemoteClientListener(private val connection: RemoteConnection) : Coroutine
     private suspend fun startProcessing() {
         val remoteChannel = RemoteChannel(connection.socket)
 
-        while (connection.isOpen()) {
+        while (connection.isOpen() && isActive) {
             try {
                 withContext(dispatcher) {
                     messageQueue.take()
