@@ -12,7 +12,7 @@ import java.nio.charset.Charset
 
 /**
  * A query message that requests the status of a remote repository.
- * Asks for the commit hash of the remote repository for the specified Branch.
+ * Asks for the commit head hash of the remote repository for the specified Branch.
  *
  * @param payload The payload of the message, which is the branch name of the commit to be queried.
  */

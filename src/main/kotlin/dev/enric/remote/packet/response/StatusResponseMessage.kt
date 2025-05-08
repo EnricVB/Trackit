@@ -7,7 +7,7 @@ import java.nio.charset.Charset
 
 /**
  * A response message for the status query.
- * It contains the commit hash of the remote repository for the specified branch.
+ * It contains the commit head hash of the remote repository for the specified branch.
  *
  * @param payload The payload of the message, which is the commit hash of the branch.
  */

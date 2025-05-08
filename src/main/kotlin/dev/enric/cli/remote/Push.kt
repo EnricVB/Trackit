@@ -3,11 +3,16 @@ package dev.enric.cli.remote
 import dev.enric.cli.TrackitCommand
 import dev.enric.core.handler.admin.RemotePathConfig
 import dev.enric.core.handler.remote.PushHandler
+import dev.enric.domain.Hash
+import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.remote.DataProtocol
 import dev.enric.exceptions.RemoteDirectionNotFoundException
 import dev.enric.exceptions.RemotePullRequestException
-import dev.enric.remote.packet.message.data.BranchSyncStatusResponseData.BranchSyncStatus.BEHIND
-import dev.enric.remote.packet.message.data.BranchSyncStatusResponseData.BranchSyncStatus.DIVERGED
+import dev.enric.logger.Logger
+import dev.enric.remote.network.handler.RemoteChannel
+import dev.enric.remote.packet.message.data.BranchSyncStatusResponseData.BranchSyncStatus.*
+import dev.enric.remote.packet.query.StatusQueryMessage
+import dev.enric.remote.packet.response.StatusResponseMessage
 import dev.enric.util.index.BranchIndex
 import kotlinx.coroutines.runBlocking
 import picocli.CommandLine.Command
@@ -24,13 +29,11 @@ class Push : TrackitCommand() {
         super.call()
         val remotePushUrl = loadAndValidateRemotePushUrl()
         val handler = PushHandler(remotePushUrl)
-        val socket = handler.startRemoteConnection()
-
-        checkRemoteBranchStatus(handler, socket)
-        validateAndPushMissingData(handler, socket)
-
+        val socket = handler.connectToRemote()
         val currentBranch = BranchIndex.getCurrentBranch()
-        handler.sendObjectsToRemote(socket, currentBranch)
+
+        checkRemoteBranchStatus(handler, socket, currentBranch)
+        handler.pushBranchObjects(socket, currentBranch)
 
         return@runBlocking 0
     }
@@ -45,17 +48,34 @@ class Push : TrackitCommand() {
             )
     }
 
-    private suspend fun checkRemoteBranchStatus(handler: PushHandler, socket: Socket) {
+    private suspend fun checkRemoteBranchStatus(handler: PushHandler, socket: Socket, currentBranch: Branch) {
         when (handler.askForRemoteBranchStatus(socket)) {
-            BEHIND, DIVERGED -> throw RemotePullRequestException(
+            BEHIND, DIVERGED, ONLY_REMOTE -> throw RemotePullRequestException(
                 "Push aborted: The remote branch is not up to date. Please pull and resolve conflicts first."
             )
-            else -> Unit
+            SYNCED -> throw RemotePullRequestException(
+                "Push aborted: The remote branch is already up to date. No changes to push."
+            )
+            AHEAD, ONLY_LOCAL -> {
+                validateAndPushMissingData(handler, socket, currentBranch)
+            }
         }
     }
 
-    private suspend fun validateAndPushMissingData(handler: PushHandler, socket: Socket) {
-        val missingData = handler.askForMissingData(socket)
+    private suspend fun validateAndPushMissingData(handler: PushHandler, socket: Socket, currentBranch: Branch) {
+        val remoteBranchHead = RemoteChannel(socket).request<StatusResponseMessage>(
+            StatusQueryMessage(currentBranch.name)
+        ).payload
+
+        val missingData = handler.askForMissingData(socket, currentBranch, Hash(remoteBranchHead)).map { (hash, byteContent) ->
+            val hashType = Hash.HashType.fromHash(hash)
+            hashType to byteContent
+        }
+
+        missingData.forEach {
+            Logger.debug("Missing data: ${it.first} with hash ${it.second}")
+        }
+
         if (missingData.isNotEmpty()) {
             if (!handler.isAutoPushEnabled()) {
                 throw RemotePullRequestException(

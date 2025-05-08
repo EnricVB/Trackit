@@ -103,22 +103,22 @@ class BranchSyncStatusQueryMessage(
             Pair(emptyList(), emptyList())
         )
 
-        val remoteHash: Commit = BranchIndex.getBranchHead(branch.generateKey())
-        var localHash: Commit? = null
+        val localHead = Hash(localCommits.first())
+        var remoteHead: Hash? = null
 
         CoroutineScope(Dispatchers.IO + coroutineExceptionHandler).launch {
             try {
-                localHash = Hash(localCommits.first()).let { BranchIndex.getBranchHead(it) }
+                remoteHead = BranchIndex.getBranchHead(branch.generateKey()).generateKey()
             } catch (e: Exception) {
                 Logger.error("Error getting local hash for branch $branchName: ${e.message}")
             }
         }
 
-        return when {
-            remoteHash == localHash -> Pair(BranchSyncStatus.SYNCED, Pair(emptyList(), emptyList()))
-
+        return when (remoteHead) {
+            localHead -> Pair(BranchSyncStatus.SYNCED, Pair(emptyList(), emptyList()))
+            null -> Pair(BranchSyncStatus.ONLY_LOCAL, Pair(emptyList(), emptyList()))
             else -> {
-                val remoteHashCommitStr = remoteHash.generateKey().string
+                val remoteHashCommitStr = remoteHead!!.string
                 val remoteCommits = getCommitListFrom(remoteHashCommitStr).map { it.string }
 
                 val missingInLocal = remoteCommits.filterNot { localCommits.contains(it) }
@@ -141,7 +141,7 @@ class BranchSyncStatusQueryMessage(
      */
     fun getCommitListFrom(startHash: String): List<Hash> {
         val commitList = mutableListOf<Hash>()
-        var currentHash : Hash? = Hash(startHash)
+        var currentHash: Hash? = Hash(startHash)
 
         while (currentHash != null) {
             commitList.add(currentHash)
@@ -156,7 +156,7 @@ class BranchSyncStatusQueryMessage(
     /**
      * Get the remote branches that are not present in the local branches.
      */
-    private fun getRemoteBranchesOnly(remoteBranches : List<String>, localBranches: List<String>) : List<String> {
+    private fun getRemoteBranchesOnly(remoteBranches: List<String>, localBranches: List<String>): List<String> {
         return remoteBranches.filterNot { localBranches.contains(it) }
     }
 }
