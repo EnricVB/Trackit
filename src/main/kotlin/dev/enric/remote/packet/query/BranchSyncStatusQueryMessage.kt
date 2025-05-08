@@ -3,6 +3,7 @@ package dev.enric.remote.packet.query
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
+import dev.enric.exceptions.CommitNotFoundException
 import dev.enric.logger.Logger
 import dev.enric.remote.ITrackitMessage
 import dev.enric.remote.network.handler.RemoteChannel
@@ -12,9 +13,6 @@ import dev.enric.remote.packet.message.data.BranchSyncStatusResponseData
 import dev.enric.remote.packet.message.data.BranchSyncStatusResponseData.BranchSyncStatus
 import dev.enric.remote.packet.response.BranchSyncStatusResponseMessage
 import dev.enric.util.index.BranchIndex
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.net.Socket
 
 /**
@@ -104,21 +102,18 @@ class BranchSyncStatusQueryMessage(
         )
 
         val localHead = Hash(localCommits.first())
-        var remoteHead: Hash? = null
-
-        CoroutineScope(Dispatchers.IO + coroutineExceptionHandler).launch {
-            try {
-                remoteHead = BranchIndex.getBranchHead(branch.generateKey()).generateKey()
-            } catch (e: Exception) {
-                Logger.error("Error getting local hash for branch $branchName: ${e.message}")
-            }
+        val remoteHead: Hash? = try {
+            BranchIndex.getBranchHead(branch.generateKey()).generateKey()
+        } catch (e: CommitNotFoundException) {
+            Logger.error("Error getting local hash for branch $branchName: ${e.message}")
+            null
         }
 
         return when (remoteHead) {
             localHead -> Pair(BranchSyncStatus.SYNCED, Pair(emptyList(), emptyList()))
             null -> Pair(BranchSyncStatus.ONLY_LOCAL, Pair(emptyList(), emptyList()))
             else -> {
-                val remoteHashCommitStr = remoteHead!!.string
+                val remoteHashCommitStr = remoteHead.string
                 val remoteCommits = getCommitListFrom(remoteHashCommitStr).map { it.string }
 
                 val missingInLocal = remoteCommits.filterNot { localCommits.contains(it) }
