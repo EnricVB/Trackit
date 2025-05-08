@@ -136,10 +136,17 @@ class ConfigCommand : TrackitCommand() {
 
     @Option(
         names = ["--autopush"],
-        description = ["Determines if missing data, as Users, Roles, etc, should be sent on push automatically or not"],
+        description = ["Determines if missing data, as Users, Roles, etc, should be sent on push automatically"],
         required = false
     )
-    var autopush: Boolean? = null
+    var autopush: Boolean = false
+
+    @Option(
+        names = ["--no-autopush"],
+        description = ["Determines if missing data, as Users, Roles, etc, should not be sent on push automatically"],
+        required = false
+    )
+    var noAutopush: Boolean = false
 
 
     /**
@@ -164,7 +171,7 @@ class ConfigCommand : TrackitCommand() {
             saveRemoteConfig()
         }
 
-        if (autopush != null) {
+        if (autopush || noAutopush) {
             saveAutoPushConfig()
         }
 
@@ -231,7 +238,7 @@ class ConfigCommand : TrackitCommand() {
      * Logs progress and completion.
      */
     private fun saveAutoPushConfig() {
-        RemoteDirectivesConfig().saveAutoPushDirective(autopush ?: false)
+        RemoteDirectivesConfig().saveAutoPushDirective(autopush && !noAutopush)
 
         Logger.info("Remote directive saved")
     }

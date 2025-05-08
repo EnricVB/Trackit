@@ -46,7 +46,6 @@ open class TrackitException(message: String, errorCode: Int) : Exception(message
             """.trimIndent())
 
         Logger.trace(stackTraceToString())
-        exitProcess(errorCode)
     }
 }
 
@@ -66,6 +65,13 @@ class MalformedDataException(message: String) : TrackitException(message, 2003)
 class InvalidPermissionException(message: String) : TrackitException(message, 3001)
 
 // Remote exceptions
-class RemoteConnectionException(message: String) : TrackitException(message, 4000)
-class RemoteDirectionNotFoundException(message: String) : TrackitException(message, 4001)
-class RemotePullRequestException(message: String) : TrackitException(message, 4002)
+open class RemoteException(message: String, errorCode: Int) : TrackitException(message, errorCode) {
+    override fun printStackTrace() {
+        super.printStackTrace()
+        exitProcess(1)
+    }
+}
+
+class RemoteConnectionException(message: String) : RemoteException(message, 4000)
+class RemoteDirectionNotFoundException(message: String) : RemoteException(message, 4001)
+class RemotePullRequestException(message: String) : RemoteException(message, 4002)
