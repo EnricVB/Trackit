@@ -35,18 +35,13 @@ class StatusQueryMessage(
 
         val branch = BranchIndex.getBranch(payload)
         if (branch == null) {
-            Logger.error("Branch not found: $payload")
-            RemoteChannel(socket).sendError("Branch not found: $payload")
+            Logger.error("Branch head not found: ${payload}}")
+            RemoteChannel(socket).send(StatusResponseMessage("null"))
             return
         }
 
-        try {
-            val head = BranchIndex.getBranchHead(branch.generateKey())
-            val headHash = head.generateKey()
-            RemoteChannel(socket).send(StatusResponseMessage(headHash.string))
-        } catch (ex: Exception) {
-            Logger.error("Branch head not found: ${ex.message}")
-            RemoteChannel(socket).send(StatusResponseMessage("null"))
-        }
+        val head = BranchIndex.getBranchHead(branch.generateKey())
+        val headHash = head.generateKey()
+        RemoteChannel(socket).send(StatusResponseMessage(headHash.string))
     }
 }
