@@ -3,7 +3,6 @@ package dev.enric.remote.packet.query
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
-import dev.enric.exceptions.CommitNotFoundException
 import dev.enric.logger.Logger
 import dev.enric.remote.ITrackitMessage
 import dev.enric.remote.network.handler.RemoteChannel
@@ -104,7 +103,7 @@ class BranchSyncStatusQueryMessage(
         val localHead = Hash(localCommits.first())
         val remoteHead: Hash? = try {
             BranchIndex.getBranchHead(branch.generateKey()).generateKey()
-        } catch (e: CommitNotFoundException) {
+        } catch (e: Exception) {
             Logger.error("Error getting local hash for branch $branchName: ${e.message}")
             null
         }

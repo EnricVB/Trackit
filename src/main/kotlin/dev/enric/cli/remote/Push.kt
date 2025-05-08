@@ -35,6 +35,8 @@ class Push : TrackitCommand() {
         checkRemoteBranchStatus(handler, socket, currentBranch)
         handler.pushBranchObjects(socket, currentBranch)
 
+        Logger.info("Push completed successfully.")
+
         return@runBlocking 0
     }
 

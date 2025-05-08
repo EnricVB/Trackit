@@ -1,6 +1,5 @@
 package dev.enric.remote.packet.query
 
-import dev.enric.exceptions.CommitNotFoundException
 import dev.enric.logger.Logger
 import dev.enric.remote.ITrackitMessage
 import dev.enric.remote.packet.response.StatusResponseMessage
@@ -42,9 +41,10 @@ class StatusQueryMessage(
         }
 
         try {
-            val branchHead = BranchIndex.getBranchHead(branch.generateKey())
-            RemoteChannel(socket).send(StatusResponseMessage(branchHead.generateKey().string))
-        } catch (ex: CommitNotFoundException) {
+            val head = BranchIndex.getBranchHead(branch.generateKey())
+            val headHash = head.generateKey()
+            RemoteChannel(socket).send(StatusResponseMessage(headHash.string))
+        } catch (ex: Exception) {
             Logger.error("Branch head not found: ${ex.message}")
             RemoteChannel(socket).send(StatusResponseMessage("null"))
         }

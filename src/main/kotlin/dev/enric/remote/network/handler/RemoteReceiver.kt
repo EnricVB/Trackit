@@ -81,8 +81,7 @@ class RemoteReceiver(
                     RemoteChannel.handleIncomingMessage(message)
 
                     Logger.debug("Received message: ${message.id}")
-
-                    val offerResult = messageQueue.offer(message)
+                    messageQueue.offer(message)
                 } catch (e: Exception) {
                     Logger.error("Error decoding message: ${e.message}")
                     remoteChannel.sendError("Failed to decode message: ${e.message}")
@@ -104,7 +103,7 @@ class RemoteReceiver(
                 withContext(dispatcher) { messageQueue.take() }?.execute(connection.socket)
             } catch (e: Exception) {
                 Logger.error("Error processing message: ${e.message}")
-                remoteChannel.sendError("Error processing message: ${e.message}")
+                remoteChannel.sendError("Error processing message: ${e.message} \n${e.stackTraceToString()}")
             }
         }
     }
