@@ -85,6 +85,6 @@ data class BranchSyncStatusResponseData(
         SYNCED,
         DIVERGED,
         ONLY_LOCAL,
-        ONLY_REMOTE
+        ONLY_REMOTE,
     }
 }

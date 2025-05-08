@@ -5,10 +5,7 @@ import dev.enric.core.handler.admin.RemoteDirectivesConfig
 import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.COMPLEX_TAG
 import dev.enric.domain.Hash.HashType.SIMPLE_TAG
-import dev.enric.domain.objects.Branch
-import dev.enric.domain.objects.Commit
-import dev.enric.domain.objects.Content
-import dev.enric.domain.objects.Tree
+import dev.enric.domain.objects.*
 import dev.enric.domain.objects.remote.DataProtocol
 import dev.enric.domain.objects.tag.ComplexTag
 import dev.enric.domain.objects.tag.SimpleTag
@@ -18,10 +15,13 @@ import dev.enric.remote.network.handler.RemoteConnection
 import dev.enric.remote.packet.message.PushMessage
 import dev.enric.remote.packet.message.data.BranchSyncStatusQueryData
 import dev.enric.remote.packet.message.data.BranchSyncStatusResponseData.BranchSyncStatus
+import dev.enric.remote.packet.message.data.MissingObjectCheckData
 import dev.enric.remote.packet.message.data.PushData
 import dev.enric.remote.packet.query.BranchSyncStatusQueryMessage
+import dev.enric.remote.packet.query.MissingObjectCheckQueryMessage
 import dev.enric.remote.packet.query.StatusQueryMessage
 import dev.enric.remote.packet.response.BranchSyncStatusResponseMessage
+import dev.enric.remote.packet.response.MissingObjectCheckResponseMessage
 import dev.enric.remote.packet.response.StatusResponseMessage
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.TagIndex
@@ -33,27 +33,20 @@ import java.net.Socket
  * determining which commits are missing on the remote, and collecting the set of objects
  * (commits, trees, contents, tags, and branches) that need to be pushed.
  */
-class PushHandler(
-    val pushDirection: DataProtocol,
-) : CommandHandler() {
+class PushHandler(val pushDirection: DataProtocol) : CommandHandler() {
+
 
     /**
-     * Starts a remote SSH connection to the given host and folder path,
-     * and launches a listener for incoming messages from the remote.
-     *
-     * @return A connected [Socket] to the remote server.
+     * Establishes and returns a socket connection to the remote.
+     * Also starts the client listener for incoming messages.
      */
-    fun startRemoteConnection(): Socket {
+    fun connectToRemote(): Socket {
         val socket = StartSSHRemote().connection(
-            username = pushDirection.user
-                ?: throw IllegalArgumentException("Username is required. Configure the Push URL in the config file."),
-            password = pushDirection.password
-                ?: throw IllegalArgumentException("Password is required. Configure the Push URL in the config file."),
-            host = pushDirection.host
-                ?: throw IllegalArgumentException("Host is required. Configure the Push URL in the config file."),
+            username = pushDirection.user ?: error("Missing username in push URL configuration."),
+            password = pushDirection.password ?: error("Missing password in push URL configuration."),
+            host = pushDirection.host ?: error("Missing host in push URL configuration."),
             port = pushDirection.port ?: 8088,
-            path = pushDirection.path
-                ?: throw IllegalArgumentException("Path is required. Configure the Push URL in the config file.")
+            path = pushDirection.path ?: error("Missing path in push URL configuration.")
         )
 
         RemoteClientListener(RemoteConnection(socket)).start()
@@ -61,57 +54,47 @@ class PushHandler(
     }
 
     /**
-     * Obtains the objects that need to be pushed to the remote server.
-     * This includes commits, trees, contents, tags, and branches.
-     *
-     * @param socket The open socket connected to the remote server.
-     * @param branch The current branch being pushed.
-     * @return A map from object [Hash] to its serialized byte representation.
+     * Sends to the remote all missing objects for the current branch:
+     * - Commits
+     * - Trees
+     * - Contents
+     * - Tags
+     * - Branch metadata
      */
-    suspend fun obtainBranchPushObjects(socket: Socket, branch: Branch): HashMap<Hash, ByteArray> {
-        val commitsToPush = obtainPosteriorCommits(
-            remoteCommitHash = askForCommitHash(socket),
-            branch = branch
-        )
+    suspend fun pushBranchObjects(socket: Socket, branch: Branch) {
+        val objectsToPush = collectPushableObjects(socket, branch)
 
-        return obtainBranchPushObjects(commitsToPush)
-    }
-
-    /**
-     * Sends the objects to the remote server.
-     *
-     * @param socket The open socket connected to the remote server.
-     * @param currentBranch The current branch being pushed.
-     */
-    suspend fun sendObjectsToRemote(socket: Socket, currentBranch: Branch) {
-        val objectsToPush = obtainBranchPushObjects(socket, currentBranch)
-        val formattedObjects = objectsToPush.map { (hash, bytes) ->
-            Pair(Hash.HashType.fromHash(hash), bytes)
+        val formatted = objectsToPush.map { (hash, bytes) ->
+            Hash.HashType.fromHash(hash) to bytes
         }
-        val branchHead = BranchIndex.getBranchHead(currentBranch.generateKey()).generateKey()
-        val branchHash = currentBranch.generateKey()
 
         val data = PushData(
-            objects = formattedObjects,
-            branchHeadHash = branchHead.toString(),
-            branchHash = branchHash.toString()
+            objects = formatted,
+            branchHeadHash = BranchIndex.getBranchHead(branch.generateKey()).generateKey().toString(),
+            branchHash = branch.generateKey().toString()
         )
 
         RemoteChannel(socket).send(PushMessage(data))
     }
 
     /**
-     * Asks the remote server for the latest commit hash of the current branch.
-     *
-     * @param socket The open socket connected to the remote server.
-     * @return The [Hash] of the latest commit on the remote side.
+     * Gathers the objects needed for push based on what's missing remotely.
      */
-    private suspend fun askForCommitHash(socket: Socket): Hash {
-        return Hash(
-            RemoteChannel(socket).request<StatusResponseMessage>(
-                message = StatusQueryMessage(BranchIndex.getCurrentBranch().name)
-            ).payload
+    private suspend fun collectPushableObjects(socket: Socket, branch: Branch): HashMap<Hash, ByteArray> {
+        val remoteHead = fetchRemoteHeadCommit(socket)
+        val missingCommits = obtainPosteriorCommits(remoteHead, branch)
+        return obtainBranchPushObjects(missingCommits)
+    }
+
+    /**
+     * Requests the latest commit hash of the current branch from the remote.
+     */
+    private suspend fun fetchRemoteHeadCommit(socket: Socket): Hash {
+        val branchName = BranchIndex.getCurrentBranch().name
+        val response = RemoteChannel(socket).request<StatusResponseMessage>(
+            StatusQueryMessage(branchName)
         )
+        return Hash(response.payload)
     }
 
     /**
@@ -190,52 +173,42 @@ class PushHandler(
     }
 
     /**
-     * Asks the remote server for any pending pull requests on the current branch.
+     * Queries the remote server for the synchronization status of the current local branch.
      *
-     * @param socket The open socket connected to the remote server.
+     * @param socket An open socket connected to the remote server.
      *
-     * @return A list of [Hash]es representing the pending commit's on the pull requests.
-     *
-     * Returns [BranchSyncStatus.SYNCED] if there are no pending pull requests.
-     *
-     * Returns [BranchSyncStatus.ONLY_LOCAL] if the local branch is not found on the remote.
-     *
-     * Returns [BranchSyncStatus.ONLY_REMOTE] if the remote branch is not found locally.
-     *
-     * Returns [BranchSyncStatus.DIVERGED] if the local and remote branches have diverged.
-     *
-     * Returns [BranchSyncStatus.AHEAD] if the local branch is ahead of the remote.
-     *
-     * Returns [BranchSyncStatus.BEHIND] if the local branch is behind the remote.
+     * @return [BranchSyncStatus] representing the state of synchronization:
+     * - [BranchSyncStatus.SYNCED]: No differences between local and remote.
+     * - [BranchSyncStatus.AHEAD]: Local branch has commits not present in remote.
+     * - [BranchSyncStatus.BEHIND]: Remote branch has commits not present locally.
+     * - [BranchSyncStatus.DIVERGED]: Both branches have diverged.
+     * - [BranchSyncStatus.ONLY_LOCAL]: Local branch doesn't exist remotely.
+     * - [BranchSyncStatus.ONLY_REMOTE]: Remote branch doesn't exist locally.
      */
     suspend fun askForRemoteBranchStatus(socket: Socket): BranchSyncStatus {
-        val branchNames = BranchIndex.getAllBranches().map { Branch.newInstance(it).name }
-        val branchCommitList = branchNames.map { branchName ->
-            val branch = BranchIndex.getBranch(branchName)
-                ?: return@map Pair(branchName, emptyList<String>())
+        val localBranches = BranchIndex.getAllBranches()
 
-            val branchHead = BranchIndex.getBranchHead(branch.generateKey())
-            val commitList = getCommitListFrom(branchHead.generateKey().string)
-            Pair(branchName, commitList)
+        val commitMap = localBranches.associate { branchKey ->
+            val branch = Branch.newInstance(branchKey)
+            val head = BranchIndex.getBranchHead(branch.generateKey())
+            val commits = getCommitListFrom(head.generateKey().string)
+            branch.name to commits
         }
 
         val response = RemoteChannel(socket).request<BranchSyncStatusResponseMessage>(
-            message = BranchSyncStatusQueryMessage(BranchSyncStatusQueryData(branchCommitList))
+            BranchSyncStatusQueryMessage(BranchSyncStatusQueryData(commitMap.toList()))
         )
 
-        return if (response.payload.objects.isEmpty()) {
-            BranchSyncStatus.ONLY_LOCAL
-        } else {
-            for ((branchName, status, _) in response.payload.objects) {
-                if (branchName == BranchIndex.getCurrentBranch().name) {
-                    return status
-                }
-            }
+        val currentBranchName = BranchIndex.getCurrentBranch().name
+        val statusEntry = response.payload.objects
+            .firstOrNull { (name, _, _) -> name == currentBranchName }
 
-            return BranchSyncStatus.ONLY_REMOTE
+        return when {
+            response.payload.objects.isEmpty() -> BranchSyncStatus.ONLY_LOCAL
+            statusEntry != null -> statusEntry.second
+            else -> BranchSyncStatus.ONLY_REMOTE
         }
     }
-
 
     /**
      * Get the list of commits from a given hash.
@@ -252,6 +225,77 @@ class PushHandler(
         }
 
         return commitList.map { it.string }
+    }
+
+    suspend fun askForMissingData(socket: Socket, branch: Branch, remoteHead: Hash): List<Pair<Hash, ByteArray>> {
+        val newData = calculateNewObjects(
+            localBranch = branch,
+            remoteHead = remoteHead
+        ).map { (hash, byteContent) ->
+            hash.string to byteContent
+        }
+
+        return RemoteChannel(socket).request<MissingObjectCheckResponseMessage>(
+            MissingObjectCheckQueryMessage(MissingObjectCheckData(newData))
+        ).payload.objects.map { (hashStr, byteContent) ->
+            Hash(hashStr) to byteContent
+        }
+    }
+
+    fun calculateNewObjects(localBranch: Branch, remoteHead: Hash): List<Pair<Hash, ByteArray>> {
+        val newData = mutableListOf<Pair<Hash, ByteArray>>()
+
+        val localCommits = getCommitListFrom(localBranch.generateKey().string)
+        val remoteCommits = getCommitListFrom(remoteHead.string)
+
+        val newCommits = localCommits.filterNot { it in remoteCommits }.map { Hash(it) }
+
+        for (commitHash in newCommits) {
+            // Add the commit object
+            val commit = Commit.newInstance(commitHash)
+            val author = User.newInstance(commit.author)
+            val confirmer = User.newInstance(commit.confirmer)
+
+            val authorBranchPermissions = author.roles.flatMap { Role.newInstance(it).getBranchPermissions() }
+            val confirmerBranchPermissions = confirmer.roles.flatMap { Role.newInstance(it).getBranchPermissions() }
+
+            val authorRolePermissions = author.roles.flatMap { Role.newInstance(it).getRolePermissions() }
+            val confirmerRolePermissions = confirmer.roles.flatMap { Role.newInstance(it).getRolePermissions() }
+
+            val roles = (author.roles + confirmer.roles).map { Role.newInstance(it) }
+            val branchPermissions = (authorBranchPermissions + confirmerBranchPermissions).distinct()
+            val rolePermissions = (authorRolePermissions + confirmerRolePermissions).distinct()
+
+            // Add to new data
+            newData.add(Pair(author.generateKey(), author.encode().second))
+            newData.add(Pair(confirmer.generateKey(), confirmer.encode().second))
+
+            for (role in roles) {
+                newData.add(Pair(role.generateKey(), role.encode().second))
+            }
+
+            for (permission in branchPermissions) {
+                newData.add(Pair(permission.generateKey(), permission.encode().second))
+            }
+
+            for (permission in rolePermissions) {
+                newData.add(Pair(permission.generateKey(), permission.encode().second))
+            }
+        }
+
+        return newData
+    }
+
+    suspend fun sendMissingData(socket: Socket, missingData: List<Pair<Hash.HashType, ByteArray>>) {
+        val data = PushData(
+            objects = missingData,
+            branchHeadHash = BranchIndex.getBranchHead(BranchIndex.getCurrentBranch().generateKey()).generateKey()
+                .toString(),
+            branchHash = BranchIndex.getCurrentBranch().generateKey().toString()
+        )
+
+        RemoteChannel(socket).send(PushMessage(data))
+
     }
 
     /**

@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream
 
 /**
  * This class represents the data structure that will be sent to Remote Server to ask for Branch Sync Status.
+ * This class also represents the data structure that will be sent to Remote Client with the missing objects.
  * Contains a list of objects with:
  * - String -> BranchName.
  * - String -> All branch commit hashes.
