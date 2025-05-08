@@ -273,7 +273,7 @@ object TagIndex {
      *
      * @return A list of all tag hashes in the repository.
      */
-    fun getTags(): List<Hash> {
+    fun getAllTags(): List<Hash> {
         val tagIndex = RepositoryFolderManager().getTagIndexPath().toFile()
         val tags = tagIndex.readLines()
 

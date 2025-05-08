@@ -12,12 +12,12 @@ import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.CommitIndex
 import java.net.Socket
 
-class PushMessage(
+class PushObjectsMessage(
     override var payload: PushData = PushData()
 ) : ITrackitMessage<PushData> {
 
     override val id: MessageFactory.MessageType
-        get() = MessageFactory.MessageType.PUSH_MESSAGE
+        get() = MessageFactory.MessageType.PUSH_OBJECTS_MESSAGE
 
     override fun encode(): ByteArray {
         return payload.encode()
@@ -37,6 +37,12 @@ class PushMessage(
             val (hash, _) = obj.encode(writeOnDisk = true)
 
             Logger.debug("Object with hash $hash and type $type has been sent to the repository.")
+        }
+
+        // In case of a branch sync, we need to update the branch head
+        if (payload.branchHash.isEmpty()) {
+            Logger.error("Branch hash is empty. Cannot update branch head.")
+            return
         }
 
         BranchIndex.setBranchHead(branchHash, branchHeadHash)

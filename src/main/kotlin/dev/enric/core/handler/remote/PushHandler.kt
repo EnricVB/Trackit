@@ -12,7 +12,8 @@ import dev.enric.domain.objects.tag.SimpleTag
 import dev.enric.remote.network.handler.RemoteChannel
 import dev.enric.remote.network.handler.RemoteClientListener
 import dev.enric.remote.network.handler.RemoteConnection
-import dev.enric.remote.packet.message.PushMessage
+import dev.enric.remote.packet.message.PushObjectsMessage
+import dev.enric.remote.packet.message.PushTagIndexMessage
 import dev.enric.remote.packet.message.data.BranchSyncStatusQueryData
 import dev.enric.remote.packet.message.data.BranchSyncStatusResponseData.BranchSyncStatus
 import dev.enric.remote.packet.message.data.MissingObjectCheckData
@@ -25,7 +26,9 @@ import dev.enric.remote.packet.response.MissingObjectCheckResponseMessage
 import dev.enric.remote.packet.response.StatusResponseMessage
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.TagIndex
+import dev.enric.util.repository.RepositoryFolderManager
 import java.net.Socket
+import kotlin.io.path.readText
 
 /**
  * Handles the logic behind the `push` command.
@@ -34,11 +37,11 @@ import java.net.Socket
  * (commits, trees, contents, tags, and branches) that need to be pushed.
  */
 class PushHandler(val pushDirection: DataProtocol) : CommandHandler() {
-
-
     /**
      * Establishes and returns a socket connection to the remote.
      * Also starts the client listener for incoming messages.
+     *
+     * @return A socket connected to the remote server.
      */
     fun connectToRemote(): Socket {
         val socket = StartSSHRemote().connection(
@@ -54,12 +57,41 @@ class PushHandler(val pushDirection: DataProtocol) : CommandHandler() {
     }
 
     /**
+     * Pushes the given objects to the remote server.
+     *
+     * @param socket An open socket connected to the remote server.
+     * @param branch The current branch being pushed.
+     * @param objects A list of pairs containing the object type and its serialized byte representation.
+     */
+    suspend fun pushObjects(socket: Socket, branch: Branch, objects: List<Pair<Hash.HashType, ByteArray>>) {
+        val data = PushData(
+            objects = objects,
+            branchHeadHash = BranchIndex.getBranchHead(branch.generateKey()).generateKey().toString(),
+            branchHash = branch.generateKey().toString()
+        )
+
+        RemoteChannel(socket).send(PushObjectsMessage(data))
+    }
+
+    suspend fun pushTagIndex(socket: Socket) {
+        val data = RepositoryFolderManager().getTagIndexPath().readText()
+
+        RemoteChannel(socket).send(PushTagIndexMessage(data))
+    }
+
+    /**
      * Sends to the remote all missing objects for the current branch:
      * - Commits
      * - Trees
      * - Contents
      * - Tags
      * - Branch metadata
+     *
+     * This is done by first collecting the objects that need to be pushed,
+     * and then sending them to the remote server.
+     *
+     * @param socket An open socket connected to the remote server.
+     * @param branch The current branch being pushed.
      */
     suspend fun pushBranchObjects(socket: Socket, branch: Branch) {
         val objectsToPush = collectPushableObjects(socket, branch)
@@ -68,17 +100,50 @@ class PushHandler(val pushDirection: DataProtocol) : CommandHandler() {
             Hash.HashType.fromHash(hash) to bytes
         }
 
-        val data = PushData(
-            objects = formatted,
-            branchHeadHash = BranchIndex.getBranchHead(branch.generateKey()).generateKey().toString(),
-            branchHash = branch.generateKey().toString()
-        )
+        pushObjects(socket, branch, formatted)
+    }
 
-        RemoteChannel(socket).send(PushMessage(data))
+    /**
+     * Pushes the given users to the remote server.
+     * This includes serializing the user objects and their associated roles and permissions.
+     *
+     * @param users A list of users to push.
+     * @param socket An open socket connected to the remote server.
+     */
+    suspend fun pushUsers(socket: Socket, users: List<User>) {
+        val objectsToPush = obtainUserPushObjects(users.map { it.generateKey() })
+
+        val formatted = objectsToPush.map { (hash, bytes) ->
+            Hash.HashType.fromHash(hash) to bytes
+        }
+
+        pushObjects(socket, BranchIndex.getCurrentBranch(), formatted)
+    }
+
+    /**
+     * Pushes the given tags to the remote server.
+     * This includes serializing the tag objects.
+     *
+     * @param tags A list of tag hashes to push.
+     * @param socket An open socket connected to the remote server.
+     */
+    suspend fun pushTags(socket: Socket, tags: List<Hash>) {
+        val objectsToPush = obtainTagPushObjects(tags)
+
+        val formatted = objectsToPush.map { (hash, bytes) ->
+            Hash.HashType.fromHash(hash) to bytes
+        }
+
+        pushObjects(socket, BranchIndex.getCurrentBranch(), formatted)
+        pushTagIndex(socket)
     }
 
     /**
      * Gathers the objects needed for push based on what's missing remotely.
+     *
+     * @param socket An open socket connected to the remote server.
+     * @param branch The current branch being pushed.
+     * @return A map from object [Hash] to its serialized byte representation.
      */
     private suspend fun collectPushableObjects(socket: Socket, branch: Branch): HashMap<Hash, ByteArray> {
         val remoteHead = fetchRemoteHeadCommit(socket)
@@ -88,6 +153,9 @@ class PushHandler(val pushDirection: DataProtocol) : CommandHandler() {
 
     /**
      * Requests the latest commit hash of the current branch from the remote.
+     *
+     * @param socket An open socket connected to the remote server.
+     * @return The hash of the latest commit on the remote branch.
      */
     private suspend fun fetchRemoteHeadCommit(socket: Socket): Hash {
         val branchName = BranchIndex.getCurrentBranch().name
@@ -168,6 +236,64 @@ class PushHandler(val pushDirection: DataProtocol) : CommandHandler() {
             val branch = Branch.newInstance(commit.branch)
             objectsToPush[branch.generateKey()] = branch.encode().second
         }
+
+        return objectsToPush
+    }
+
+    /**
+     * Serializes user objects and their associated roles and permissions for push.
+     *
+     * @param users A list of users to serialize.
+     * @return A map from user [Hash] to its serialized byte representation.
+     */
+    private fun obtainUserPushObjects(users: List<Hash>): HashMap<Hash, ByteArray> {
+        val objectsToPush = HashMap<Hash, ByteArray>()
+
+        for (userHash in users) {
+            val user = User.newInstance(userHash)
+
+            val userRoles = user.roles.map { Role.newInstance(it) }
+            val userBranchPermissions = user.roles.flatMap { Role.newInstance(it).getBranchPermissions() }
+            val userRolePermissions = user.roles.flatMap { Role.newInstance(it).getRolePermissions() }
+
+            // Add to new data
+            objectsToPush[user.generateKey()] = user.encode().second
+
+            for (role in userRoles) {
+                objectsToPush[role.generateKey()] = role.encode().second
+            }
+
+            for (permission in userBranchPermissions) {
+                objectsToPush[permission.generateKey()] = permission.encode().second
+            }
+
+            for (permission in userRolePermissions) {
+                objectsToPush[permission.generateKey()] = permission.encode().second
+            }
+        }
+
+
+        return objectsToPush
+    }
+
+    /**
+     * Serializes tag objects for push.
+     *
+     * @param tags A list of tag hashes to serialize.
+     * @return A map from tag [Hash] to its serialized byte representation.
+     */
+    private fun obtainTagPushObjects(tags: List<Hash>): HashMap<Hash, ByteArray> {
+        val objectsToPush = HashMap<Hash, ByteArray>()
+
+        for (tagHash in tags) {
+            val tagObj = when (Hash.HashType.fromHash(tagHash)) {
+                SIMPLE_TAG -> SimpleTag.newInstance(tagHash)
+                COMPLEX_TAG -> ComplexTag.newInstance(tagHash)
+                else -> continue
+            }
+            objectsToPush[tagObj.generateKey()] = tagObj.encode().second
+        }
+
 
         return objectsToPush
     }
@@ -295,7 +421,7 @@ class PushHandler(val pushDirection: DataProtocol) : CommandHandler() {
             branchHash = BranchIndex.getCurrentBranch().generateKey().toString()
         )
 
-        RemoteChannel(socket).send(PushMessage(data))
+        RemoteChannel(socket).send(PushObjectsMessage(data))
 
     }
 

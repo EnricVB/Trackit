@@ -12,9 +12,9 @@ import picocli.CommandLine.Option
     usageHelpWidth = 500,
     footer = [
         "Examples:",
-        "  trackit repo tag list-tags",
-        "  trackit repo tag list-tags --name <tag-name>",
-        "  trackit repo tag list-tags -n <tag-name>"
+        "  trackit list-tags",
+        "  trackit list-tags --name <tag-name>",
+        "  trackit list-tags -n <tag-name>"
     ]
 )
 class TagListCommand : TrackitCommand() {
