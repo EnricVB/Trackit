@@ -166,7 +166,7 @@ class TagCommandTest : CommandTest() {
         assertNotNull(commitsToTagByName, "Tag should have commits associated with it")
         assertNotNull(commitsToTagByHash, "Tag should have commits associated with it")
         assert(commitsToTagByName.size == 1) { "Tag should have only one commit associated with it but found ${commitsToTagByName.size}" }
-        assert(TagIndex.getTags().size == 1) { "Only one tag should have been created but found ${TagIndex.getTags().size}" }
+        assert(TagIndex.getAllTags().size == 1) { "Only one tag should have been created but found ${TagIndex.getAllTags().size}" }
     }
 
     @Test
@@ -205,7 +205,7 @@ class TagCommandTest : CommandTest() {
         assertNotNull(commitsToTagByName, "Tag should have commits associated with it")
         assertNotNull(commitsToTagByHash, "Tag should have commits associated with it")
         assert(commitsToTagByName.size == 1) { "Tag should have only one commit associated with it but found ${commitsToTagByName.size}" }
-        assert(TagIndex.getTags().size == 1) { "Only one tag should have been created but found ${TagIndex.getTags().size}" }
+        assert(TagIndex.getAllTags().size == 1) { "Only one tag should have been created but found ${TagIndex.getAllTags().size}" }
 
         assert(commitsByTag.size == 1) { "Tag should have one commit associated with it but found ${commitsByTag.size}" }
         assert(commitsByTag.first() == commit.generateKey()) { "Tag should have commit ${commit.generateKey()} associated with it but found ${commitsByTag.first()}" }
@@ -244,7 +244,7 @@ class TagCommandTest : CommandTest() {
         assertNotNull(commitsToTagByName, "Tag should have commits associated with it")
         assertNotNull(commitsToTagByHash, "Tag should have commits associated with it")
         assert(commitsToTagByName.size == 1) { "Tag should have only one commit associated with it but found ${commitsToTagByName.size}" }
-        assert(TagIndex.getTags().size == 1) { "Only one tag should have been created but found ${TagIndex.getTags().size}" }
+        assert(TagIndex.getAllTags().size == 1) { "Only one tag should have been created but found ${TagIndex.getAllTags().size}" }
 
         assert(commitsByTag.size == 1) { "Tag should have one commit associated with it but found ${commitsByTag.size}" }
         assert(commitsByTag.first() == commit.generateKey()) { "Tag should have commit ${commit.generateKey()} associated with it but found ${commitsByTag.first()}" }
@@ -296,7 +296,7 @@ class TagCommandTest : CommandTest() {
         assertNotNull(commitsToTagByName, "Tag should have commits associated with it")
         assertNotNull(commitsToTagByHash, "Tag should have commits associated with it")
         assert(commitsToTagByName.size == 1) { "Tag should have only one commit associated with it but found ${commitsToTagByName.size}" }
-        assert(TagIndex.getTags().size == 1) { "Only one tag should have been created but found ${TagIndex.getTags().size}" }
+        assert(TagIndex.getAllTags().size == 1) { "Only one tag should have been created but found ${TagIndex.getAllTags().size}" }
 
         assert(commitsByTag.size == 1) { "Tag should have one commit associated with it but found ${commitsByTag.size}" }
         assert(commitsByTag.first() == commit.generateKey()) { "Tag should have commit ${commit.generateKey()} associated with it but found ${commitsByTag.first()}" }
@@ -320,7 +320,7 @@ class TagCommandTest : CommandTest() {
         assertNotNull(commitsToTagByNameAfterRemove, "Tag should have commits associated with it")
         assertNotNull(commitsToTagByHashAfterRemove, "Tag should have commits associated with it")
         assert(commitsToTagByNameAfterRemove.size == 1) { "Tag should have only one commit associated with it but found ${commitsToTagByNameAfterRemove.size}" }
-        assert(TagIndex.getTags().size == 1) { "Only one tag should have been created but found ${TagIndex.getTags().size}" }
+        assert(TagIndex.getAllTags().size == 1) { "Only one tag should have been created but found ${TagIndex.getAllTags().size}" }
 
         assert(commitsByTagAfterRemove.size == 1) { "Tag should have one commit associated with it but found ${commitsByTagAfterRemove.size}" }
         assert(commitsByTagAfterRemove.first() == commit.generateKey()) { "Tag should have commit ${commit.generateKey()} associated with it but found ${commitsByTagAfterRemove.first()}" }

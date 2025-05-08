@@ -1,6 +1,7 @@
 package dev.enric.remote.packet.message
 
 import dev.enric.exceptions.RemoteConnectionException
+import dev.enric.logger.Logger
 import dev.enric.remote.ITrackitMessage
 import dev.enric.remote.network.serialize.MessageFactory
 import kotlinx.coroutines.Dispatchers
@@ -23,10 +24,11 @@ class ErrorMessage(
     }
 
     override suspend fun execute(socket: Socket) {
+        Logger.error(payload)
+
         withContext(Dispatchers.IO) {
             socket.close()
+            throw RemoteConnectionException(payload)
         }
-
-        throw RemoteConnectionException(payload)
     }
 }

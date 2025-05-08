@@ -4,7 +4,6 @@ import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.objects.*
 import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.logger.Logger
-import dev.enric.util.index.CommitIndex
 import dev.enric.util.repository.RepositoryFolderManager
 import java.nio.file.Files
 import java.nio.file.Path
@@ -89,11 +88,8 @@ class CheckoutHandler(
             } catch (e: Exception) {
                 Logger.error("Error while writing file: ${file.pathString}")
             }
-
-            Logger.debug("Created file: ${file.pathString} with content: ${String(Content.newInstance(tree.content).content)}")
         }
 
-        CommitIndex.setCurrentCommit(commit.generateKey())
         Logger.info("Checkout successful.")
     }
 }

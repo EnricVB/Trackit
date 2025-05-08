@@ -54,6 +54,7 @@ class BranchNotFoundException(message: String) : TrackitException(message, 1000)
 class UserNotFoundException(message: String) : TrackitException(message, 1001)
 class RoleNotFoundException(message: String) : TrackitException(message, 1002)
 class CommitNotFoundException(message: String) : TrackitException(message, 1003)
+class TagNotFoundException(message: String) : TrackitException(message, 1004)
 
 // Invalid data exceptions
 class IllegalArgumentValueException(message: String) : TrackitException(message, 2000)

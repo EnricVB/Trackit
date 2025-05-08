@@ -5,7 +5,8 @@ import dev.enric.logger.Logger
 import dev.enric.remote.ITrackitMessage
 import dev.enric.remote.network.serialize.MessageFactory.MessageType.*
 import dev.enric.remote.packet.message.ErrorMessage
-import dev.enric.remote.packet.message.PushMessage
+import dev.enric.remote.packet.message.PushObjectsMessage
+import dev.enric.remote.packet.message.PushTagIndexMessage
 import dev.enric.remote.packet.query.BranchSyncStatusQueryMessage
 import dev.enric.remote.packet.query.MissingObjectCheckQueryMessage
 import dev.enric.remote.packet.query.StatusQueryMessage
@@ -28,7 +29,8 @@ class MessageFactory {
             Logger.debug("Decoding message type: $type, payload: ${payload.decodeToString()}")
 
             return when (type) {
-                PUSH_MESSAGE -> PushMessage().apply { decode(payload) }
+                PUSH_OBJECTS_MESSAGE -> PushObjectsMessage().apply { decode(payload) }
+                PUSH_INDEX_MESSAGE -> PushTagIndexMessage().apply { decode(payload) }
                 STATUS_QUERY -> StatusQueryMessage().apply { decode(payload) }
                 STATUS_RESPONSE -> StatusResponseMessage().apply { decode(payload) }
                 MISSING_BRANCH_DATA_QUERY -> MissingObjectCheckQueryMessage().apply { decode(payload) }
@@ -42,7 +44,7 @@ class MessageFactory {
     }
 
     enum class MessageType {
-        PUSH_MESSAGE,
+        PUSH_OBJECTS_MESSAGE, PUSH_INDEX_MESSAGE,
         STATUS_QUERY, STATUS_RESPONSE,
         MISSING_BRANCH_DATA_QUERY, MISSING_BRANCH_DATA_RESPONSE,
         BRANCH_SYNC_STATUS_QUERY, BRANCH_SYNC_STATUS_RESPONSE,

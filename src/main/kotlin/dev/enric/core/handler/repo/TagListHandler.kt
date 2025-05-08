@@ -20,9 +20,9 @@ class TagListHandler(name: String) : TagHandler(name) {
             val isComplexTag = tagHash.string.startsWith(COMPLEX_TAG.hash.string)
 
             if (isComplexTag) {
-                ComplexTag.newInstance(tagHash).printInfo()
+                Logger.info(ComplexTag.newInstance(tagHash).printInfo())
             } else {
-                SimpleTag.newInstance(tagHash).printInfo()
+                Logger.info(SimpleTag.newInstance(tagHash).printInfo())
             }
         }
     }
