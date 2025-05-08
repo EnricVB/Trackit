@@ -85,22 +85,6 @@ class BranchCommand : TrackitCommand() {
     var checkoutBranch: Boolean = false
 
     /**
-     * The push direction for the branch. If not specified, the current branch's push direction is used.
-     */
-    @Option(
-        names = ["--push"], description = ["Push direction.", "By default gets the current branch direction"]
-    )
-    var pushDirection: String = ""
-
-    /**
-     * The fetch direction for the branch. If not specified, the current branch's fetch direction is used.
-     */
-    @Option(
-        names = ["--fetch"], description = ["Fetch direction.", "By default gets the current branch direction"]
-    )
-    var fetchDirection: String = ""
-
-    /**
      * Executes the branch operations based on the provided options.
      * Depending on the options set, it will either remove an existing branch, create a new one,
      * or switch to the newly created branch (if specified).

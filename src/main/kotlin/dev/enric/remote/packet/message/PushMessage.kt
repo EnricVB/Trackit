@@ -50,9 +50,13 @@ class PushMessage(
     }
 
     private fun resetHard(commitHash: Hash) {
-        val checkoutHandler = CheckoutHandler(Commit.newInstance(commitHash))
+        try {
+            val checkoutHandler = CheckoutHandler(Commit.newInstance(commitHash))
 
-        checkoutHandler.preCheckout()
-        checkoutHandler.checkout()
+            checkoutHandler.preCheckout()
+            checkoutHandler.checkout()
+        } catch (e: Exception) {
+            Logger.error("Failed to reset hard to commit $commitHash: ${e.message}")
+        }
     }
 }

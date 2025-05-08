@@ -31,7 +31,6 @@ data class RepositoryFolderManager(private val initFolder: Path = Path.of(System
         const val CONFIG_FILE = "config.cfg"
         const val STAGING_INDEX = "staging.index"
         const val CURRENT_COMMIT = "CURRENT_COMMIT"
-        const val REMOTE_POINTER = "REMOTE_POINTER"
         const val BRANCH_HEAD = "BRANCH_HEAD"
         const val TAG_INDEX = "TAG_INDEX"
     }
@@ -64,7 +63,6 @@ data class RepositoryFolderManager(private val initFolder: Path = Path.of(System
         getConfigFilePath().toFile().createNewFile()
         getStagingIndexPath().toFile().createNewFile()
         getCurrentCommitPath().toFile().createNewFile()
-        getRemotePointerPath().toFile().createNewFile()
         getBranchHeadPath().toFile().createNewFile()
         getTagIndexPath().toFile().createNewFile()
 
@@ -123,10 +121,6 @@ data class RepositoryFolderManager(private val initFolder: Path = Path.of(System
 
     fun getCurrentCommitPath(): Path {
         return getIndexFolderPath().resolve(CURRENT_COMMIT)
-    }
-
-    fun getRemotePointerPath(): Path {
-        return getIndexFolderPath().resolve(REMOTE_POINTER)
     }
 
     fun getBranchHeadPath(): Path {

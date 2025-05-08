@@ -43,7 +43,7 @@ class RemoteClientListener(private val connection: RemoteConnection) : Coroutine
                     messageQueue.take()
                 }?.execute(connection.socket)
             } catch (e: Exception) {
-                remoteChannel.sendError("Error procesando mensaje: ${e.message}")
+                remoteChannel.sendError("Error processing message: ${e.message}")
             }
         }
     }
