@@ -65,9 +65,10 @@ class Push : TrackitCommand() {
     private suspend fun validateAndPushMissingData(handler: PushHandler, socket: Socket, currentBranch: Branch) {
         val remoteBranchHead = RemoteChannel(socket).request<StatusResponseMessage>(
             StatusQueryMessage(currentBranch.name)
-        ).payload
+        ).payload.takeIf { it != "null" }
+        val remoteHeadHash = remoteBranchHead?.let { Hash(it) }
 
-        val missingData = handler.askForMissingData(socket, currentBranch, Hash(remoteBranchHead)).map { (hash, byteContent) ->
+        val missingData = handler.askForMissingData(socket, currentBranch, remoteHeadHash).map { (hash, byteContent) ->
             val hashType = Hash.HashType.fromHash(hash)
             hashType to byteContent
         }

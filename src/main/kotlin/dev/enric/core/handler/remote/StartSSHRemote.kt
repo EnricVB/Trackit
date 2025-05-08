@@ -20,7 +20,7 @@ class StartSSHRemote {
         val (_, _, _, _, redirectPort, _) = DataProtocol.validateRequest(responseStr)?.destructured
             ?: throw MalformedDataException("Invalid response format")
 
-        return retryConnection(host, redirectPort.toInt(), 20, 100)
+        return retryConnection(host, redirectPort.toInt(), 40, 100)
     }
 
     private fun sendConnectionPetition(

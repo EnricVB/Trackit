@@ -10,6 +10,7 @@ import dev.enric.remote.packet.query.BranchSyncStatusQueryMessage
 import dev.enric.remote.packet.query.MissingObjectCheckQueryMessage
 import dev.enric.remote.packet.query.StatusQueryMessage
 import dev.enric.remote.packet.response.BranchSyncStatusResponseMessage
+import dev.enric.remote.packet.response.MissingObjectCheckResponseMessage
 import dev.enric.remote.packet.response.StatusResponseMessage
 import java.io.DataInputStream
 
@@ -31,6 +32,7 @@ class MessageFactory {
                 STATUS_QUERY -> StatusQueryMessage().apply { decode(payload) }
                 STATUS_RESPONSE -> StatusResponseMessage().apply { decode(payload) }
                 MISSING_BRANCH_DATA_QUERY -> MissingObjectCheckQueryMessage().apply { decode(payload) }
+                MISSING_BRANCH_DATA_RESPONSE -> MissingObjectCheckResponseMessage().apply { decode(payload) }
                 BRANCH_SYNC_STATUS_QUERY -> BranchSyncStatusQueryMessage().apply { decode(payload) }
                 BRANCH_SYNC_STATUS_RESPONSE -> BranchSyncStatusResponseMessage().apply { decode(payload) }
                 ERROR -> ErrorMessage().apply { decode(payload) }
