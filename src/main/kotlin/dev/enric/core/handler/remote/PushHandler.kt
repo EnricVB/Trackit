@@ -227,7 +227,7 @@ class PushHandler(val pushDirection: DataProtocol) : CommandHandler() {
         return commitList.map { it.string }
     }
 
-    suspend fun askForMissingData(socket: Socket, branch: Branch, remoteHead: Hash): List<Pair<Hash, ByteArray>> {
+    suspend fun askForMissingData(socket: Socket, branch: Branch, remoteHead: Hash?): List<Pair<Hash, ByteArray>> {
         val newData = calculateNewObjects(
             localBranch = branch,
             remoteHead = remoteHead
@@ -242,11 +242,12 @@ class PushHandler(val pushDirection: DataProtocol) : CommandHandler() {
         }
     }
 
-    fun calculateNewObjects(localBranch: Branch, remoteHead: Hash): List<Pair<Hash, ByteArray>> {
+    fun calculateNewObjects(localBranch: Branch, remoteHead: Hash?): List<Pair<Hash, ByteArray>> {
         val newData = mutableListOf<Pair<Hash, ByteArray>>()
+        val localBranchHead = BranchIndex.getBranchHead(localBranch.generateKey()).generateKey()
 
-        val localCommits = getCommitListFrom(localBranch.generateKey().string)
-        val remoteCommits = getCommitListFrom(remoteHead.string)
+        val localCommits = getCommitListFrom(localBranchHead.string)
+        val remoteCommits = remoteHead?.string?.let { getCommitListFrom(it) } ?: emptyList()
 
         val newCommits = localCommits.filterNot { it in remoteCommits }.map { Hash(it) }
 
