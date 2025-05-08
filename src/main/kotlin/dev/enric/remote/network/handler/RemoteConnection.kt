@@ -11,7 +11,7 @@ class RemoteConnection(val socket: Socket) {
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 
     fun isAuthenticated(): Boolean {
-        return true
+        return true // TODO: Implement authentication check
     }
 
     suspend fun receiveMessage(): ByteArray? {
