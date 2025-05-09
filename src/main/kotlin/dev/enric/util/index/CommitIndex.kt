@@ -2,7 +2,6 @@ package dev.enric.util.index
 
 import dev.enric.domain.Hash
 import dev.enric.domain.Hash.HashType.COMMIT
-import dev.enric.domain.Hash.HashType.USER
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
 import dev.enric.util.repository.RepositoryFolderManager
@@ -90,7 +89,7 @@ object CommitIndex {
         return commitFolder.walk(PathWalkOption.INCLUDE_DIRECTORIES).filter {
             !it.isDirectory()
         }.map {
-            Hash(it.toString().substringAfterLast(File.separator + USER.hash + File.separator))
+            Hash(it.toString().substringAfterLast(File.separator + COMMIT.hash + File.separator))
         }.toList()
     }
 }

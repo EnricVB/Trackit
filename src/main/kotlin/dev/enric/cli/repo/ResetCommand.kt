@@ -51,7 +51,7 @@ class ResetCommand : TrackitCommand() {
         names = ["--mixed"],
         description = ["Discard all changes in the index but keep the working directory intact. The branch is moved to the specified commit."],
     )
-    var mixed: Boolean = true
+    var mixed: Boolean = false
 
     /**
      * Flag to perform a hard reset, which discards all changes in the working directory and index.
