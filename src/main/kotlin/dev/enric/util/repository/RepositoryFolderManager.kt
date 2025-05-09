@@ -111,7 +111,7 @@ data class RepositoryFolderManager(private val initFolder: Path = Path.of(System
 
     @OptIn(ExperimentalPathApi::class)
     fun assignInitialStagingIndex() {
-        StagingHandler(true).stage(ignoreFile)
+        StagingHandler(true).stagePath(ignoreFile)
     }
 
     fun assignSecretKey() {

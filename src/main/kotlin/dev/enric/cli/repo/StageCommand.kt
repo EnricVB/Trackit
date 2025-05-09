@@ -2,10 +2,8 @@ package dev.enric.cli.repo
 
 import dev.enric.cli.TrackitCommand
 import dev.enric.core.handler.repo.StagingHandler
-import dev.enric.logger.Logger
 import picocli.CommandLine.*
 import java.nio.file.Path
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.ExperimentalPathApi
 
 @OptIn(ExperimentalPathApi::class)
@@ -47,7 +45,6 @@ class StageCommand : TrackitCommand() {
     var stagePath: Path = Path.of("")
 
     private val stagingHandler = StagingHandler(force)
-    private val stagedFilesCache = ConcurrentHashMap<Path, String>()
 
     /**
      * Stage the file or folder. This will add the file to the staging index.
@@ -57,20 +54,7 @@ class StageCommand : TrackitCommand() {
     override fun call(): Int {
         super.call()
 
-        val stagedFiles = stagingHandler.stagePath(stagePath)
-
-        if (stagedFiles.isEmpty()) {
-            Logger.warning("\nNo files to stage.")
-            return 0
-        }
-
-        Logger.info("Files to Stage: [${stagedFiles.size}]")
-
-        stagedFiles.forEachIndexed { index, (file, key) ->
-            stagedFilesCache[file] = key
-            val percent = ((index + 1).toFloat() / stagedFiles.size) * 100
-            Logger.updateLine("Staging files... [${index + 1} / ${stagedFiles.size}] ($percent%)")
-        }
+        stagingHandler.stagePath(stagePath)
 
         println()
         return 0
