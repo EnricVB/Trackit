@@ -1,20 +1,14 @@
 package dev.enric.cli.repo
 
 import dev.enric.cli.TrackitCommand
-import dev.enric.core.handler.repo.IgnoreHandler
 import dev.enric.core.handler.repo.StagingHandler
-import dev.enric.domain.objects.Content
 import dev.enric.logger.Logger
-import dev.enric.util.common.FileStatus
-import dev.enric.util.common.FileStatus.*
-import dev.enric.util.repository.RepositoryFolderManager
 import picocli.CommandLine.*
-import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.io.path.*
+import kotlin.io.path.ExperimentalPathApi
 
-
+@OptIn(ExperimentalPathApi::class)
 @Command(
     name = "stage",
     description = ["Stage files to be committed"],
@@ -52,7 +46,6 @@ class StageCommand : TrackitCommand() {
     @Parameters(index = "0", paramLabel = "path", description = ["The path of the file/directory to be staged"])
     var stagePath: Path = Path.of("")
 
-    private val repositoryFolder = RepositoryFolderManager().getInitFolderPath()
     private val stagingHandler = StagingHandler(force)
     private val stagedFilesCache = ConcurrentHashMap<Path, String>()
 
@@ -64,94 +57,22 @@ class StageCommand : TrackitCommand() {
     override fun call(): Int {
         super.call()
 
-        val filesToStage = if (stagePath.isDirectory()) {
-            getFilesToStage(stagePath)
-        } else {
-            listOf(stagePath)
-        }
+        val stagedFiles = stagingHandler.stagePath(stagePath)
 
-        if (filesToStage.isEmpty()) {
+        if (stagedFiles.isEmpty()) {
             Logger.warning("\nNo files to stage.")
             return 0
         }
 
-        Logger.info("Files to Stage: [${filesToStage.size}]")
+        Logger.info("Files to Stage: [${stagedFiles.size}]")
 
-        var stagedCount = 0
-        val totalCount = filesToStage.size
-
-        filesToStage.forEachIndexed { _, file ->
-            val content = Content(Files.readAllBytes(file))
-            stagingHandler.stage(content, file)
-            stagedFilesCache[file] = content.generateKey().toString()
-            stagedCount++
-
-            val percent = (stagedCount.toFloat() / totalCount.toFloat()) * 100
-            Logger.updateLine("Staging files... [$stagedCount / $totalCount] ($percent%)")
+        stagedFiles.forEachIndexed { index, (file, key) ->
+            stagedFilesCache[file] = key
+            val percent = ((index + 1).toFloat() / stagedFiles.size) * 100
+            Logger.updateLine("Staging files... [${index + 1} / ${stagedFiles.size}] ($percent%)")
         }
 
         println()
         return 0
-    }
-
-    /**
-     * Check if the file should be staged.
-     *
-     * A file should be staged if:
-     * - The file exists
-     * - The file is modified or untracked
-     * - The file is ignored, but the force flag is set
-     *
-     * @param path The path of the file to check
-     * @return True if the file should be staged, false otherwise
-     */
-    private fun shouldStage(path: Path): Boolean {
-        if (!path.exists()) {
-            Logger.error("The file does not exist: $path")
-            return false
-        }
-
-        return when (FileStatus.getStatus(path.toFile())) {
-            MODIFIED, UNTRACKED -> true
-            IGNORED -> if (force || path != stagePath) true else run {
-                if (path == stagePath) {
-                    Logger.error("The file is being ignored: $path")
-                }
-                false
-            }
-
-            else -> false
-        }
-    }
-
-    /**
-     * Get all the files inside a folder to stage
-     * @param directory The folder to get the files from
-     * @return A list of all the files inside the folder
-     */
-    @OptIn(ExperimentalPathApi::class)
-    fun getFilesToStage(directory: Path): List<Path> {
-        val result = mutableListOf<Path>()
-        var scanned = 0
-        var toStage = 0
-
-        directory
-            .walk(PathWalkOption.INCLUDE_DIRECTORIES)
-            .forEach { path ->
-                Logger.updateLine("Scanning: [$scanned] files scanned, [$toStage] to be staged")
-                val normalized = path.normalize().toString().replace(".\\.", ".")
-                val isIgnored = IgnoreHandler().isIgnored(Path.of(normalized))
-                scanned++
-
-                if (isIgnored) return@forEach
-                if (path.isDirectory() || !shouldStage(path)) return@forEach
-
-                toStage++
-                result.add(path)
-            }
-
-        Logger.updateLine("Files found to stage: ${result.size}")
-        println()
-        return result
     }
 }

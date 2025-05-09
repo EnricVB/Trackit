@@ -1,8 +1,7 @@
 package dev.enric.util.common
 
 import dev.enric.core.handler.repo.IgnoreHandler
-import dev.enric.core.handler.repo.StagingHandler
-import dev.enric.core.handler.repo.StagingHandler.StagingCache
+import dev.enric.core.handler.repo.StagingHandler.StagingCache.getStagedFiles
 import dev.enric.domain.objects.Content
 import dev.enric.domain.objects.Tree
 import dev.enric.util.index.CommitIndex
@@ -12,6 +11,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import java.io.File
+import kotlin.io.path.ExperimentalPathApi
 
 /**
  * Enum class representing the different types of file status in Trackit.
@@ -180,6 +180,7 @@ enum class FileStatus(val symbol: String, val description: String) {
          * @return A map where each key is a [FileStatus] representing the file status,
          *         and each value is a list of files that fall under that status.
          */
+        @OptIn(ExperimentalPathApi::class)
         fun getStatus(file: File): FileStatus {
             val hash = Content(file.readBytes()).generateKey()
             val filePath = file.path
@@ -191,7 +192,7 @@ enum class FileStatus(val symbol: String, val description: String) {
             val status = when {
                 !file.exists() -> DELETE
                 IgnoreHandler().isIgnored(file.toPath()) -> IGNORED
-                StagingCache.getStagedFiles().any { it.first == hash } -> STAGED
+                getStagedFiles().any { it.first == hash } -> STAGED
                 else -> {
                     val contentExists = fileExists(file)
                     val isUpToDate = isUpToDate(file)

@@ -4,7 +4,7 @@ import com.github.difflib.text.DiffRow
 import com.github.difflib.text.DiffRow.Tag.*
 import com.github.difflib.text.DiffRowGenerator
 import dev.enric.core.handler.CommandHandler
-import dev.enric.core.handler.repo.StagingHandler
+import dev.enric.core.handler.repo.StagingHandler.StagingCache
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Commit
 import dev.enric.domain.objects.Content
@@ -25,6 +25,7 @@ import kotlin.io.path.walk
  *
  * @param fileFilter Optional file filter to only diff matching paths.
  */
+@OptIn(ExperimentalPathApi::class)
 data class DiffHandler(
     val fileFilter: String?
 ) : CommandHandler() {
@@ -169,7 +170,7 @@ data class DiffHandler(
      * @return List of Tree hashes representing staged files.
      */
     private fun getStagingAreaHashes(): List<Hash> {
-        return StagingHandler.StagingCache.getStagedFiles().map {
+        return StagingCache.getStagedFiles().map {
             val tree = Tree(it.second, it.first)
             tree.encode(true).first
         }

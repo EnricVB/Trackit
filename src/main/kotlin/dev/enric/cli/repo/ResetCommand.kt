@@ -8,6 +8,7 @@ import dev.enric.domain.objects.Commit
 import dev.enric.exceptions.IllegalArgumentValueException
 import dev.enric.util.index.CommitIndex
 import picocli.CommandLine.*
+import kotlin.io.path.ExperimentalPathApi
 
 /**
  * The ResetCommand class is responsible for resetting the current branch to a specific commit.
@@ -68,7 +69,7 @@ class ResetCommand : TrackitCommand() {
     @Option(
         names = ["--commit"],
         description = ["The commit to reset to."],
-        required = true,
+        required = false,
     )
     var commitString: String = CommitIndex.getCurrentCommit()?.generateKey()?.string ?: ""
 
@@ -80,7 +81,12 @@ class ResetCommand : TrackitCommand() {
      */
     override fun call(): Int {
         super.call()
-        val commitHash = CommitIndex.getAbbreviatedCommit(commitString)[0]
+        val commitHashes = CommitIndex.getAbbreviatedCommit(commitString)
+        if (commitHashes.isEmpty()) {
+            throw IllegalArgumentValueException("You must specify a valid commit hash.")
+        }
+
+        val commitHash = commitHashes.first()
 
         // Validate that only one reset type is used at a time
         if (soft && mixed || soft && hard || mixed && hard) {
@@ -112,6 +118,7 @@ class ResetCommand : TrackitCommand() {
      *
      * @param commitHash The hash of the commit to reset to.
      */
+    @OptIn(ExperimentalPathApi::class)
     private fun mixedReset(commitHash : Hash) {
         CommitIndex.setCurrentCommit(commitHash)
         StagingHandler.clearStagingArea()
