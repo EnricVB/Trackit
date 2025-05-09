@@ -9,6 +9,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.nio.file.attribute.PosixFilePermissions
+import kotlin.io.path.ExperimentalPathApi
 
 /**
  * This class is responsible for managing the repository folder structure.
@@ -108,6 +109,7 @@ data class RepositoryFolderManager(private val initFolder: Path = Path.of(System
         }
     }
 
+    @OptIn(ExperimentalPathApi::class)
     fun assignInitialStagingIndex() {
         StagingHandler(true).stage(ignoreFile)
     }

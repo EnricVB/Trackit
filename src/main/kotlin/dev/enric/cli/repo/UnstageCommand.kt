@@ -11,6 +11,7 @@ import java.nio.file.Path
 import kotlin.io.path.*
 
 
+@OptIn(ExperimentalPathApi::class)
 @Command(
     name = "unstage",
     description = ["Remove a file from the staging area"],

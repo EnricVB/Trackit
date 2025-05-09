@@ -1,7 +1,7 @@
 package dev.enric.core.handler.branch
 
 import dev.enric.core.handler.CommandHandler
-import dev.enric.core.handler.repo.StagingHandler
+import dev.enric.core.handler.repo.StagingHandler.StagingCache
 import dev.enric.core.handler.repo.StatusHandler
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
@@ -14,6 +14,7 @@ import dev.enric.util.index.BranchIndex
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
+import kotlin.io.path.ExperimentalPathApi
 
 class MergeHandler(
     private val workingBranch: Branch?,
@@ -29,6 +30,7 @@ class MergeHandler(
      * @throws InvalidPermissionException if the user does not have permission to merge branches.
      * @return true if the user has permission to merge branches, false otherwise.
      */
+    @OptIn(ExperimentalPathApi::class)
     fun canMerge(): Boolean {
         if (workingBranch == null || mergeBranch == null) {
             throw IllegalStateException("Branches cannot be null.")
@@ -44,7 +46,7 @@ class MergeHandler(
 
         // If the user has not used the --force option, check if the working area is clean
         if (!force) {
-            val stagingIsEmpty = StagingHandler.StagingCache.getStagedFiles().isEmpty()
+            val stagingIsEmpty = StagingCache.getStagedFiles().isEmpty()
             val workingAreaUpToDate = !StatusHandler().getFilesStatus().containsKey(FileStatus.MODIFIED)
 
             if (!stagingIsEmpty || !workingAreaUpToDate) {

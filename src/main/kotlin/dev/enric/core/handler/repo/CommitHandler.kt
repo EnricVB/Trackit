@@ -2,6 +2,7 @@ package dev.enric.core.handler.repo
 
 import dev.enric.cli.repo.StageCommand
 import dev.enric.core.handler.CommandHandler
+import dev.enric.core.handler.repo.StagingHandler.StagingCache
 import dev.enric.domain.Hash
 import dev.enric.core.security.AuthUtil
 import dev.enric.domain.objects.*
@@ -19,6 +20,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.sql.Timestamp
+import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.relativeTo
 
 /**
@@ -26,6 +28,7 @@ import kotlin.io.path.relativeTo
  * This includes creating commit trees, checking out commits,
  * and verifying file states in relation to commits.
  */
+@ExperimentalPathApi
 class CommitHandler(val commit: Commit) : CommandHandler() {
 
     /**
@@ -60,7 +63,7 @@ class CommitHandler(val commit: Commit) : CommandHandler() {
     private fun hasFilesToCommit() {
         val hasDeletedFilesToCommit = FileStatus.getDeletedFiles().isNotEmpty()
 
-        if (StagingHandler.StagingCache.getStagedFiles().isEmpty() && !hasDeletedFilesToCommit) {
+        if (StagingCache.getStagedFiles().isEmpty() && !hasDeletedFilesToCommit) {
             throw IllegalStateException("The staging area is empty. Add files to commit.")
         } else if (hasDeletedFilesToCommit) {
             Logger.warning("There are only files to be deleted. The commit will be empty.")
@@ -170,7 +173,7 @@ class CommitHandler(val commit: Commit) : CommandHandler() {
      * @return A list of Tree objects representing the commit tree.
      */
     private fun createCommitTree(): List<Tree> {
-        return mapStagedFilesToTree(StagingHandler.StagingCache.getStagedFiles())
+        return mapStagedFilesToTree(StagingCache.getStagedFiles())
     }
 
     /**
@@ -220,11 +223,6 @@ class CommitHandler(val commit: Commit) : CommandHandler() {
     fun stageAllFiles() {
         Logger.info("Staging all files before committing")
 
-        val stageCommand = StageCommand()
-
-        stageCommand.stagePath = RepositoryFolderManager().getInitFolderPath()
-        stageCommand.force = false
-
-        stageCommand.call()
+        StagingHandler().stagePath(RepositoryFolderManager().getInitFolderPath())
     }
 }

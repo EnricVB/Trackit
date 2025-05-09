@@ -24,7 +24,9 @@ import picocli.CommandLine.Command
 import picocli.CommandLine.Help.Ansi
 import kotlin.system.exitProcess
 import picocli.CommandLine.Help.ColorScheme
+import kotlin.io.path.ExperimentalPathApi
 
+@ExperimentalPathApi
 @Command(
     name = "trackit",
     mixinStandardHelpOptions = true,

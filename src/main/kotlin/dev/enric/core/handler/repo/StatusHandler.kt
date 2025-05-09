@@ -1,6 +1,7 @@
 package dev.enric.core.handler.repo
 
 import dev.enric.core.handler.CommandHandler
+import dev.enric.core.handler.repo.StagingHandler.StagingCache
 import dev.enric.domain.objects.User
 import dev.enric.logger.Logger
 import dev.enric.util.common.ColorUtil
@@ -28,6 +29,7 @@ class StatusHandler() : CommandHandler() {
      * - The latest commit details (hash, author, date).
      * - The list of files grouped by their status (modified, staged, untracked, etc.).
      */
+    @OptIn(ExperimentalPathApi::class)
     fun printStatus(showIgnored: Boolean) {
         val statusMap = getFilesStatus()
         val branch = BranchIndex.getCurrentBranch()
@@ -52,7 +54,7 @@ class StatusHandler() : CommandHandler() {
             pathToShow.forEach { file -> if(showIgnored || status != IGNORED) Logger.info("\t[${status.symbol}] ${ColorUtil.message(file)}") }
         }
 
-        if (StagingHandler.StagingCache.getStagedFiles().isEmpty()) {
+        if (StagingCache.getStagedFiles().isEmpty()) {
             Logger.info("")
             Logger.info("no changes added to commit (use \"trackit stage\" and/or \"trackit commit -a\")")
         }

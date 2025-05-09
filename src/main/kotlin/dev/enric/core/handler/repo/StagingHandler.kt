@@ -3,6 +3,8 @@ package dev.enric.core.handler.repo
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Content
 import dev.enric.logger.Logger
+import dev.enric.util.common.FileStatus
+import dev.enric.util.common.FileStatus.*
 import dev.enric.util.common.SerializablePath
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.IOException
@@ -12,12 +14,14 @@ import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import kotlin.io.path.*
 
 /**
  * Manages the staging area in Trackit, handling the addition and removal of files before committing.
  * It interacts with the staging index, which keeps track of staged files and their hashes.
  * @param force If true, allows forcing changes in staging.
  */
+@ExperimentalPathApi
 data class StagingHandler(val force: Boolean = false) {
     private val repositoryFolderManager = RepositoryFolderManager()
     private val stagingIndex = repositoryFolderManager.getStagingIndexPath()
@@ -45,6 +49,95 @@ data class StagingHandler(val force: Boolean = false) {
             }
         } catch (e: IOException) {
             Logger.error("Error loading staging index into cache: ${e.message}")
+        }
+    }
+
+    /**
+     * Stages a file or directory to be committed.
+     * If the path is a directory, all files inside it will be staged.
+     *
+     * @param path The path of the file or directory to be staged.
+     * @return A list of pairs containing the path and hash of the staged files.
+     */
+    fun stagePath(path: Path): List<Pair<Path, String>> {
+        val filesToStage = if (path.isDirectory()) {
+            getFilesToStage(path)
+        } else {
+            listOf(path).filter { shouldStage(it, path) }
+        }
+
+        val stagedFiles = mutableListOf<Pair<Path, String>>()
+
+        for (file in filesToStage) {
+            val content = Content(Files.readAllBytes(file))
+            stage(content, file)
+            stagedFiles.add(file to content.generateKey().toString())
+        }
+
+        return stagedFiles
+    }
+
+
+    /**
+     * Get all the files inside a folder to stage
+     * @param directory The folder to get the files from
+     * @return A list of all the files inside the folder
+     */
+    @OptIn(ExperimentalPathApi::class)
+    fun getFilesToStage(directory: Path): List<Path> {
+        val result = mutableListOf<Path>()
+        var scanned = 0
+        var toStage = 0
+
+        directory
+            .walk(PathWalkOption.INCLUDE_DIRECTORIES)
+            .forEach { path ->
+                Logger.updateLine("Scanning: [$scanned] files scanned, [$toStage] to be staged")
+                val normalized = path.normalize().toString().replace(".\\.", ".")
+                val isIgnored = IgnoreHandler().isIgnored(Path.of(normalized))
+                scanned++
+
+                if (isIgnored) return@forEach
+                if (path.isDirectory() || !shouldStage(path, directory)) return@forEach
+
+                toStage++
+                result.add(path)
+            }
+
+        Logger.updateLine("Files found to stage: ${result.size}")
+        println()
+        return result
+    }
+
+
+    /**
+     * Check if the file should be staged.
+     *
+     * A file should be staged if:
+     * - The file exists
+     * - The file is modified or untracked
+     * - The file is ignored, but the force flag is set
+     *
+     * @param path The path of the file to check
+     * @param originalPath The original path of the file
+     * @return True if the file should be staged, false otherwise
+     */
+    private fun shouldStage(path: Path, originalPath: Path): Boolean {
+        if (!path.exists()) {
+            Logger.error("The file does not exist: $path")
+            return false
+        }
+
+        return when (FileStatus.getStatus(path.toFile())) {
+            MODIFIED, UNTRACKED -> true
+            IGNORED -> if (force || path != originalPath) true else run {
+                if (path == originalPath) {
+                    Logger.error("The file is being ignored: $path")
+                }
+                false
+            }
+
+            else -> false
         }
     }
 
@@ -169,7 +262,8 @@ data class StagingHandler(val force: Boolean = false) {
      */
     fun unstage(unstagePath: Path): Boolean {
         val tempFile = Files.createTempFile("temp", ".temp")
-        val relativeUnstagePath = SerializablePath.of(unstagePath).relativePath(RepositoryFolderManager().getInitFolderPath())
+        val relativeUnstagePath =
+            SerializablePath.of(unstagePath).relativePath(RepositoryFolderManager().getInitFolderPath())
 
         return try {
             Files.newBufferedReader(stagingIndex).use { reader ->

@@ -5,6 +5,7 @@ import dev.enric.core.consumer.SudoArgsConsumer
 import dev.enric.core.handler.repo.CommitHandler
 import dev.enric.domain.objects.Commit
 import picocli.CommandLine.*
+import kotlin.io.path.ExperimentalPathApi
 
 /**
  * Command to create a new commit in the repository.
@@ -17,6 +18,7 @@ import picocli.CommandLine.*
  *   trackit commit "Fix login bug" "Fixed NPE on login when user has no roles"
  *   trackit commit "Add tests" --all
  */
+@ExperimentalPathApi
 @Command(
     name = "commit",
     description = ["Commits the staged files"],
