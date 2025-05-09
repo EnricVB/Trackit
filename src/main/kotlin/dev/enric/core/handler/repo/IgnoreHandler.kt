@@ -9,7 +9,6 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import java.util.regex.Pattern
 
 /**
  * Class that handles the .ignore file in the repository.
@@ -17,7 +16,7 @@ import java.util.regex.Pattern
  */
 class IgnoreHandler : CommandHandler() {
     private val ignoreFile = RepositoryFolderManager().getInitFolderPath().resolve(".ignore")
-    private val ignoredFilesCache = mutableListOf<String>()
+    private val ignoredPatterns = mutableListOf<String>()
 
     init {
         loadIgnoredFiles()
@@ -29,7 +28,7 @@ class IgnoreHandler : CommandHandler() {
      */
     private fun loadIgnoredFiles() {
         try {
-            Files.lines(ignoreFile).map { it.trim() }.forEach { ignoredFilesCache.add(it) }
+            Files.lines(ignoreFile).map { it.trim() }.forEach { ignoredPatterns.add(it) }
         } catch (e: IOException) {
             Logger.error("Error while reading .ignore file: ${e.message}")
         }
@@ -45,7 +44,7 @@ class IgnoreHandler : CommandHandler() {
     fun ignore(path: Path) {
         val relativePath = SerializablePath.of(path).relativePath(RepositoryFolderManager().getInitFolderPath())
 
-        if (ignoredFilesCache.contains(relativePath.toString())) {
+        if (ignoredPatterns.contains(relativePath.toString())) {
             Logger.warning("The file or directory is already being ignored")
             return
         }
@@ -57,7 +56,7 @@ class IgnoreHandler : CommandHandler() {
             }
 
             Files.writeString(ignoreFile, "$relativePath\n", StandardOpenOption.CREATE, StandardOpenOption.APPEND)
-            ignoredFilesCache.add(relativePath.toString())
+            ignoredPatterns.add(relativePath.toString())
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -69,30 +68,40 @@ class IgnoreHandler : CommandHandler() {
      * @return True if the file or directory is being ignored, false otherwise
      */
     fun isIgnored(path: Path): Boolean {
-        val relativePath = SerializablePath.of(path).relativePath(RepositoryFolderManager().getInitFolderPath())
+        val relativePath = SerializablePath.of(path).relativePath(RepositoryFolderManager().getInitFolderPath()).toString()
 
-        ignoredFilesCache.forEach { ignoredPattern ->
-            if (matchesPattern(ignoredPattern, relativePath.toString())) {
-                return true
-            }
+        return ignoredPatterns.any { pattern ->
+            val normalizedPath = relativePath.replace(Regex("/+"), "/").replace(Regex("\\\\+"), "/")
+            val regex = globToRegex(pattern)
+
+            regex.containsMatchIn(normalizedPath)
         }
-
-        return false
     }
 
     /**
-     * Matches a path with a glob-like pattern (supports * and **).
-     * @param pattern The pattern to match, supporting * and **.
-     * @param path The path to check.
-     * @return True if the path matches the pattern, false otherwise.
+     * Convierte un patrón tipo glob a una expresión regular
+     * @param globPattern El patrón tipo glob (ej: "**.ignore", "folder/")
+     * @return Expresión regular equivalente
      */
-    private fun matchesPattern(pattern: String, path: String): Boolean {
-        val regexPattern = pattern
-            .replace("**", ".*")
-            .replace("*", "[^/]*")
+    fun globToRegex(globPattern: String): Regex {
+        var regex = globPattern
+            .replace(".", "\\.")
+            .replace("$", "\\$")
+            .replace("^", "\\^")
+            .replace("+", "\\+")
+            .replace("(", "\\(")
+            .replace(")", "\\)")
+            .replace("|", "\\|")
+            .replace("{", "\\{")
+            .replace("}", "\\}")
+            .replace("[", "\\[")
+            .replace("]", "\\]")
 
-        // Compile and match the regex
-        return Pattern.matches(regexPattern, path)
+        regex = regex.replace("**", ".*")
+        regex = regex.replace("*", "[^/]*")
+        regex = regex.replace("?", "[^/]")
+
+        return Regex(regex)
     }
 
     /**
@@ -100,6 +109,6 @@ class IgnoreHandler : CommandHandler() {
      * @return List of ignored files and directories
      */
     fun getIgnoredFiles(): List<String> {
-        return ignoredFilesCache
+        return ignoredPatterns
     }
 }

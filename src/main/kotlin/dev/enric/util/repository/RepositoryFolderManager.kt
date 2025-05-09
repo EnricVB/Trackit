@@ -96,14 +96,13 @@ data class RepositoryFolderManager(private val initFolder: Path = Path.of(System
                 "*.coverage",                   // Ignore coverage files
                 "test-results",                 // Ignore test result directories
                 "logs",                         // Ignore log directories
-                "*.bak",                        // Backup files
             )
 
             initialIgnoreList.forEach { pattern ->
                 Files.writeString(ignoreFile, "$pattern\n", StandardOpenOption.CREATE, StandardOpenOption.APPEND)
             }
 
-            Logger.info("Initial .ignore file created with default ignore entries")
+            Logger.debug("Initial .ignore file created with default ignore entries")
         } catch (e: IOException) {
             Logger.error("Error while writing to .ignore file: ${e.message}")
         }
