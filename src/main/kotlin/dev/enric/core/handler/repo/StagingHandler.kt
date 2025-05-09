@@ -25,31 +25,10 @@ import kotlin.io.path.*
 data class StagingHandler(val force: Boolean = false) {
     private val repositoryFolderManager = RepositoryFolderManager()
     private val stagingIndex = repositoryFolderManager.getStagingIndexPath()
-    private val indexCache: MutableMap<Hash, Path> = mutableMapOf()
     private val lock = ReentrantLock()
 
     init {
-        loadIndexIntoCache()
-    }
-
-    /**
-     * Loads the staging index into the cache for faster access.
-     * This is done by reading the staging index file line by line and storing the hash and path in a map.
-     *
-     * This method is called during the initialization of the StagingHandler.
-     * It is not thread-safe and should be called only once.
-     *
-     * @throws IOException if an error occurs while reading the staging index file.
-     */
-    private fun loadIndexIntoCache() {
-        try {
-            Files.lines(stagingIndex).forEach { line ->
-                val (hash, path) = line.split(" : ")
-                indexCache[Hash(hash)] = Path.of(path)
-            }
-        } catch (e: IOException) {
-            Logger.error("Error loading staging index into cache: ${e.message}")
-        }
+        StagingCache.loadStagedFiles()
     }
 
     /**
@@ -57,24 +36,35 @@ data class StagingHandler(val force: Boolean = false) {
      * If the path is a directory, all files inside it will be staged.
      *
      * @param path The path of the file or directory to be staged.
-     * @return A list of pairs containing the path and hash of the staged files.
      */
-    fun stagePath(path: Path): List<Pair<Path, String>> {
+    fun stagePath(path: Path) {
+        IS_STAGING_FILES = true
+
+        // Get the files to stage filtered by the shouldStage function
         val filesToStage = if (path.isDirectory()) {
             getFilesToStage(path)
         } else {
             listOf(path).filter { shouldStage(it, path) }
         }
 
-        val stagedFiles = mutableListOf<Pair<Path, String>>()
+        Logger.info("Files to Stage: [${filesToStage.size}]")
 
-        for (file in filesToStage) {
-            val content = Content(Files.readAllBytes(file))
-            stage(content, file)
-            stagedFiles.add(file to content.generateKey().toString())
+        // Check if there are files to stage, if not, return
+        if (filesToStage.isEmpty()) {
+            Logger.warning("\nNo files to stage.")
+            return
         }
 
-        return stagedFiles
+        // Stage the files
+        filesToStage.forEachIndexed { index, file ->
+            val content = Content(Files.readAllBytes(file))
+            val percent = ((index + 1).toFloat() / filesToStage.size) * 100
+
+            stage(content, file)
+            Logger.updateLine("Staging files... [${index + 1} / ${filesToStage.size}] ($percent%)")
+        }
+
+        IS_STAGING_FILES = false
     }
 
 
@@ -84,7 +74,7 @@ data class StagingHandler(val force: Boolean = false) {
      * @return A list of all the files inside the folder
      */
     @OptIn(ExperimentalPathApi::class)
-    fun getFilesToStage(directory: Path): List<Path> {
+    private fun getFilesToStage(directory: Path): List<Path> {
         val result = mutableListOf<Path>()
         var scanned = 0
         var toStage = 0
@@ -143,21 +133,11 @@ data class StagingHandler(val force: Boolean = false) {
 
     /**
      * Stages a file to be committed by storing its hash and path in the staging index.
-     * @param path The absolute path of the file to be staged.
-     * @return True if the file was successfully staged, false otherwise.
-     */
-    fun stage(path: Path): Boolean {
-        val content = Content(Files.readAllBytes(path))
-        return stage(content, path)
-    }
-
-    /**
-     * Stages a file to be committed by storing its hash and path in the staging index.
      * @param content The content of the file to be staged.
      * @param path The absolute path of the file to be staged.
      * @return True if the file was successfully staged, false otherwise.
      */
-    fun stage(content: Content, path: Path): Boolean {
+    private fun stage(content: Content, path: Path): Boolean {
         val hash = content.encode(true).first
         val relativePath = SerializablePath.of(path).relativePath(repositoryFolderManager.getInitFolderPath())
 
@@ -174,7 +154,7 @@ data class StagingHandler(val force: Boolean = false) {
      * @return True if the file was successfully staged, false otherwise.
      */
     private fun stageNewFile(hash: Hash, relativePath: Path): Boolean {
-        if (indexCache.contains(hash)) return false
+        if (StagingCache.containsHash(hash)) return false
 
         return try {
             lock.withLock {
@@ -184,7 +164,8 @@ data class StagingHandler(val force: Boolean = false) {
                     StandardOpenOption.CREATE, StandardOpenOption.APPEND
                 )
             }
-            indexCache[hash] = relativePath
+
+            StagingCache.saveStagedFile(hash, relativePath)
             true
         } catch (e: IOException) {
             Logger.error("Error staging file $relativePath: ${e.message}")
@@ -218,7 +199,7 @@ data class StagingHandler(val force: Boolean = false) {
                 }
 
                 Files.move(tempFile, stagingIndex, StandardCopyOption.REPLACE_EXISTING)
-                indexCache[hash] = path
+                StagingCache.saveStagedFile(hash, path)
                 return true
             } catch (e: IOException) {
                 Logger.error("Error replacing outdated staged file $path: ${e.message}")
@@ -294,6 +275,7 @@ data class StagingHandler(val force: Boolean = false) {
      * @return True if the file is staged, false otherwise
      */
     private fun checkIfStaged(hash: Hash, path: Path): Boolean {
+        val indexCache = StagingCache.getStagedFiles().associate { it.first to it.second }
         return indexCache.contains(hash) && indexCache[hash] == path
     }
 
@@ -304,20 +286,34 @@ data class StagingHandler(val force: Boolean = false) {
      * @return True if the staged file is present and has the same content, false otherwise
      */
     private fun checkIfOutdated(hash: Hash, path: Path): Boolean {
+        val indexCache = StagingCache.getStagedFiles().associate { it.first to it.second }
         return indexCache.contains(hash) && indexCache[hash] != path
     }
 
     object StagingCache {
-        private var stagedFiles: List<Pair<Hash, Path>>? = null
+        private var stagedFiles: List<Pair<Hash, Path>> = emptyList()
 
         fun getStagedFiles(): List<Pair<Hash, Path>> {
-            if (stagedFiles == null) {
+            if (stagedFiles.isEmpty()) {
                 stagedFiles = loadStagedFiles()
             }
-            return stagedFiles!!
+
+            return stagedFiles
         }
 
-        private fun loadStagedFiles(): List<Pair<Hash, Path>> {
+        fun containsHash(hash: Hash): Boolean {
+            return getStagedFiles().any { it.first == hash }
+        }
+
+        fun saveStagedFile(hash: Hash, path: Path) {
+            stagedFiles = getStagedFiles() + Pair(hash, path)
+        }
+
+        fun clearStagedFiles() {
+            stagedFiles = emptyList()
+        }
+
+        fun loadStagedFiles(): List<Pair<Hash, Path>> {
             val repositoryFolderManager = RepositoryFolderManager()
             val stagingIndex = repositoryFolderManager.getStagingIndexPath()
             val stagedFiles = mutableListOf<Pair<Hash, Path>>()
@@ -338,6 +334,8 @@ data class StagingHandler(val force: Boolean = false) {
     }
 
     companion object {
+        @Volatile
+        var IS_STAGING_FILES: Boolean = false
 
         /**
          * Clears the staging area.
@@ -350,6 +348,7 @@ data class StagingHandler(val force: Boolean = false) {
 
             try {
                 Files.write(stagingIndex, byteArrayOf())
+                StagingCache.clearStagedFiles()
             } catch (e: IOException) {
                 Logger.error("Error clearing staging area ${e.printStackTrace()}")
             }

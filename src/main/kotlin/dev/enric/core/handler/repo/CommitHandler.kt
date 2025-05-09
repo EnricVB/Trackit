@@ -2,6 +2,7 @@ package dev.enric.core.handler.repo
 
 import dev.enric.cli.repo.StageCommand
 import dev.enric.core.handler.CommandHandler
+import dev.enric.core.handler.repo.StagingHandler.Companion.IS_STAGING_FILES
 import dev.enric.core.handler.repo.StagingHandler.StagingCache
 import dev.enric.domain.Hash
 import dev.enric.core.security.AuthUtil
@@ -62,6 +63,10 @@ class CommitHandler(val commit: Commit) : CommandHandler() {
      */
     private fun hasFilesToCommit() {
         val hasDeletedFilesToCommit = FileStatus.getDeletedFiles().isNotEmpty()
+
+        while (IS_STAGING_FILES) {
+            // Wait for the staging process to finish
+        }
 
         if (StagingCache.getStagedFiles().isEmpty() && !hasDeletedFilesToCommit) {
             throw IllegalStateException("The staging area is empty. Add files to commit.")
