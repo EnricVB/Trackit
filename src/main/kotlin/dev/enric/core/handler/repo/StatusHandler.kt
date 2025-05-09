@@ -52,7 +52,7 @@ class StatusHandler() : CommandHandler() {
             pathToShow.forEach { file -> if(showIgnored || status != IGNORED) Logger.info("\t[${status.symbol}] ${ColorUtil.message(file)}") }
         }
 
-        if (StagingHandler.getStagedFiles().isEmpty()) {
+        if (StagingHandler.StagingCache.getStagedFiles().isEmpty()) {
             Logger.info("")
             Logger.info("no changes added to commit (use \"trackit stage\" and/or \"trackit commit -a\")")
         }

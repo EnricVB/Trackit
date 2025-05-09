@@ -54,10 +54,10 @@ class StageCommandCommandTest : CommandTest() {
         // Then
         val relativizedPath = RepositoryFolderManager().getInitFolderPath().relativize(path)
 
-        assertTrue { StagingHandler.getStagedFiles().find { it.second == relativizedPath } != null }
-        assertTrue { StagingHandler.getStagedFiles().find { it.second == relativizedPath }!!.first == Content(Files.readAllBytes(path)).generateKey() }
-        assertFalse { StagingHandler.getStagedFiles().find { it.second == relativizedPath }!!.first == Content("".toByteArray()).generateKey() }
-        assertEquals(2, StagingHandler.getStagedFiles().size)
+        assertTrue { StagingHandler.StagingCache.getStagedFiles().find { it.second == relativizedPath } != null }
+        assertTrue { StagingHandler.StagingCache.getStagedFiles().find { it.second == relativizedPath }!!.first == Content(Files.readAllBytes(path)).generateKey() }
+        assertFalse { StagingHandler.StagingCache.getStagedFiles().find { it.second == relativizedPath }!!.first == Content("".toByteArray()).generateKey() }
+        assertEquals(2, StagingHandler.StagingCache.getStagedFiles().size)
     }
 
     @Test
@@ -83,15 +83,15 @@ class StageCommandCommandTest : CommandTest() {
         val relativizedPath1 = RepositoryFolderManager().getInitFolderPath().relativize(file1)
         val relativizedPath2 = RepositoryFolderManager().getInitFolderPath().relativize(file2)
 
-        assertTrue { StagingHandler.getStagedFiles().find { it.second == relativizedPath1 } != null }
-        assertTrue { StagingHandler.getStagedFiles().find { it.second == relativizedPath1 }!!.first == Content(Files.readAllBytes(file1)).generateKey() }
-        assertFalse { StagingHandler.getStagedFiles().find { it.second == relativizedPath1 }!!.first == Content("A".toByteArray()).generateKey() }
+        assertTrue { StagingHandler.StagingCache.getStagedFiles().find { it.second == relativizedPath1 } != null }
+        assertTrue { StagingHandler.StagingCache.getStagedFiles().find { it.second == relativizedPath1 }!!.first == Content(Files.readAllBytes(file1)).generateKey() }
+        assertFalse { StagingHandler.StagingCache.getStagedFiles().find { it.second == relativizedPath1 }!!.first == Content("A".toByteArray()).generateKey() }
 
-        assertTrue { StagingHandler.getStagedFiles().find { it.second == relativizedPath2 } != null }
-        assertTrue { StagingHandler.getStagedFiles().find { it.second == relativizedPath2 }!!.first == Content(Files.readAllBytes(file2)).generateKey() }
-        assertFalse { StagingHandler.getStagedFiles().find { it.second == relativizedPath2 }!!.first == Content("A".toByteArray()).generateKey() }
+        assertTrue { StagingHandler.StagingCache.getStagedFiles().find { it.second == relativizedPath2 } != null }
+        assertTrue { StagingHandler.StagingCache.getStagedFiles().find { it.second == relativizedPath2 }!!.first == Content(Files.readAllBytes(file2)).generateKey() }
+        assertFalse { StagingHandler.StagingCache.getStagedFiles().find { it.second == relativizedPath2 }!!.first == Content("A".toByteArray()).generateKey() }
 
-        assertEquals(3, StagingHandler.getStagedFiles().size)
+        assertEquals(3, StagingHandler.StagingCache.getStagedFiles().size)
     }
 
     @Test
@@ -107,8 +107,8 @@ class StageCommandCommandTest : CommandTest() {
         // Then
         val relativizedPath = RepositoryFolderManager().getInitFolderPath().relativize(path)
 
-        assertTrue { StagingHandler.getStagedFiles().find { it.second == relativizedPath } == null }
-        assertEquals(1, StagingHandler.getStagedFiles().size)
+        assertTrue { StagingHandler.StagingCache.getStagedFiles().find { it.second == relativizedPath } == null }
+        assertEquals(1, StagingHandler.StagingCache.getStagedFiles().size)
     }
 
     @Test
@@ -122,7 +122,7 @@ class StageCommandCommandTest : CommandTest() {
         StageCommand().stageFile(path)
 
         // Then
-        assertEquals(1, StagingHandler.getStagedFiles().size)
+        assertEquals(1, StagingHandler.StagingCache.getStagedFiles().size)
     }
 
     @Test
@@ -139,7 +139,7 @@ class StageCommandCommandTest : CommandTest() {
         stage.stageFile(path)
 
         // Then
-        assertEquals(2, StagingHandler.getStagedFiles().size)
+        assertEquals(2, StagingHandler.StagingCache.getStagedFiles().size)
     }
 
     @Test
@@ -159,8 +159,8 @@ class StageCommandCommandTest : CommandTest() {
         // Then
         val relativizedPath = RepositoryFolderManager().getInitFolderPath().relativize(path)
 
-        assertTrue { StagingHandler.getStagedFiles().find { it.second == relativizedPath } == null }
-        assertEquals(1, StagingHandler.getStagedFiles().size)
+        assertTrue { StagingHandler.StagingCache.getStagedFiles().find { it.second == relativizedPath } == null }
+        assertEquals(1, StagingHandler.StagingCache.getStagedFiles().size)
     }
 
     @Test
@@ -188,9 +188,9 @@ class StageCommandCommandTest : CommandTest() {
         val relativizedPath1 = RepositoryFolderManager().getInitFolderPath().relativize(file1)
         val relativizedPath2 = RepositoryFolderManager().getInitFolderPath().relativize(file2)
 
-        assertTrue { StagingHandler.getStagedFiles().find { it.second == relativizedPath1 } == null }
-        assertTrue { StagingHandler.getStagedFiles().find { it.second == relativizedPath2 } == null }
-        assertEquals(1, StagingHandler.getStagedFiles().size)
+        assertTrue { StagingHandler.StagingCache.getStagedFiles().find { it.second == relativizedPath1 } == null }
+        assertTrue { StagingHandler.StagingCache.getStagedFiles().find { it.second == relativizedPath2 } == null }
+        assertEquals(1, StagingHandler.StagingCache.getStagedFiles().size)
     }
 
     @Test
@@ -204,6 +204,6 @@ class StageCommandCommandTest : CommandTest() {
         UnstageCommand().unstageFile(path)
 
         // Then
-        assertEquals(1, StagingHandler.getStagedFiles().size) //
+        assertEquals(1, StagingHandler.StagingCache.getStagedFiles().size) //
     }
 }

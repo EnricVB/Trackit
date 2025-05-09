@@ -5,6 +5,7 @@ import dev.enric.core.handler.management.UserCreationHandler
 import dev.enric.core.handler.repo.CommitHandler
 import dev.enric.core.handler.repo.InitHandler
 import dev.enric.core.handler.repo.StagingHandler
+import dev.enric.core.handler.repo.StagingHandler.StagingCache
 import dev.enric.domain.objects.Commit
 import dev.enric.domain.objects.User
 import dev.enric.exceptions.IllegalStateException
@@ -77,7 +78,7 @@ class CommitCommandCommandTest : CommandTest() {
         // Then
         val indexCommit = CommitIndex.getCurrentCommit()!!
 
-        assertTrue { StagingHandler.getStagedFiles().isEmpty() }
+        assertTrue { StagingCache.getStagedFiles().isEmpty() }
 
         // Assert that the commit is not null and has the expected properties
         assertNotNull(indexCommit)
@@ -112,7 +113,7 @@ class CommitCommandCommandTest : CommandTest() {
 
         // Then
         assertFailsWith<InvalidPermissionException> { commitHandler.canDoCommit() }
-        assertFalse { StagingHandler.getStagedFiles().isEmpty() }
+        assertFalse { StagingHandler.StagingCache.getStagedFiles().isEmpty() }
         assertNull(CommitIndex.getCurrentCommit())
     }
 
@@ -139,7 +140,7 @@ class CommitCommandCommandTest : CommandTest() {
         // Then
         val indexCommit = CommitIndex.getCurrentCommit()!!
 
-        assertTrue { StagingHandler.getStagedFiles().isEmpty() }
+        assertTrue { StagingHandler.StagingCache.getStagedFiles().isEmpty() }
 
         // Assert that the commit is not null and has the expected properties
         assertNotNull(indexCommit)
@@ -176,7 +177,7 @@ class CommitCommandCommandTest : CommandTest() {
         // Then
         val indexCommit = CommitIndex.getCurrentCommit()!!
 
-        assertTrue { StagingHandler.getStagedFiles().isEmpty() }
+        assertTrue { StagingHandler.StagingCache.getStagedFiles().isEmpty() }
 
         // Assert that the commit is not null and has the expected properties
         assertNotNull(indexCommit)

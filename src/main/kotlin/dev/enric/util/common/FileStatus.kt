@@ -2,6 +2,7 @@ package dev.enric.util.common
 
 import dev.enric.core.handler.repo.IgnoreHandler
 import dev.enric.core.handler.repo.StagingHandler
+import dev.enric.core.handler.repo.StagingHandler.StagingCache
 import dev.enric.domain.objects.Content
 import dev.enric.domain.objects.Tree
 import dev.enric.util.index.CommitIndex
@@ -69,17 +70,11 @@ enum class FileStatus(val symbol: String, val description: String) {
     IGNORED(
         "I",
         """Ignored files:
-            |   (use "trackit unignore <file>..." to start tracking)""".trimMargin() //TODO: Unignore
+            |   (use "trackit unignore <file>..." to start tracking)""".trimMargin()
     );
 
     companion object {
-        /**
-         * Retrieves a [FileStatus] from its symbol.
-         * Returns null if the symbol does not match any status.
-         */
-        fun fromSymbol(symbol: String): FileStatus? {
-            return entries.find { it.symbol == symbol }
-        }
+        private val fileStatusCache = mutableMapOf<String, FileStatus>()
 
         /**
          * Checks if a given content has been added to the repository.
@@ -114,7 +109,9 @@ enum class FileStatus(val symbol: String, val description: String) {
             val currentCommit = CommitIndex.getCurrentCommit() ?: return emptyList()
             val initFolderPath = RepositoryFolderManager().getInitFolderPath()
 
-            return runBlocking {
+            val deletedFilesCache = mutableListOf<File>()
+
+            runBlocking {
                 currentCommit.tree.map { treeHash ->
                     async(Dispatchers.IO) {
                         val treeObject = Tree.newInstance(treeHash)
@@ -122,10 +119,14 @@ enum class FileStatus(val symbol: String, val description: String) {
                         val filePath = initFolderPath.resolve(treePathRelative)
                         val file = filePath.toFile()
 
-                        if (!file.exists()) file else null
+                        if (!file.exists()) {
+                            deletedFilesCache.add(file)
+                        }
                     }
-                }.awaitAll().filterNotNull()
+                }.awaitAll()
             }
+
+            return deletedFilesCache
         }
 
         /**
@@ -139,18 +140,14 @@ enum class FileStatus(val symbol: String, val description: String) {
         fun hasBeenDeleted(file: File): Boolean {
             val currentCommit = CommitIndex.getCurrentCommit() ?: return false
             val repositoryFolderManager = RepositoryFolderManager()
+            val filePath = SerializablePath.of(file.path).relativePath(repositoryFolderManager.getInitFolderPath())
 
-            currentCommit.tree.forEach { tree ->
+            val treePaths = currentCommit.tree.map { tree ->
                 val treeObject = Tree.newInstance(tree)
-                val treePath = treeObject.serializablePath.relativePath(repositoryFolderManager.getInitFolderPath())
-                val filePath = SerializablePath.of(file.path).relativePath(repositoryFolderManager.getInitFolderPath())
+                treeObject.serializablePath.relativePath(repositoryFolderManager.getInitFolderPath())
+            }.toSet()
 
-                if (treePath == filePath && !file.exists()) {
-                    return true
-                }
-            }
-
-            return false
+            return file.exists().not() && filePath in treePaths
         }
 
         /**
@@ -162,21 +159,19 @@ enum class FileStatus(val symbol: String, val description: String) {
         fun isUpToDate(file: File): Boolean {
             val currentCommit = CommitIndex.getCurrentCommit() ?: return true
             val repositoryFolderManager = RepositoryFolderManager()
+            val filePath = SerializablePath.of(file.path).relativePath(repositoryFolderManager.getInitFolderPath())
 
-            currentCommit.tree.forEach { tree ->
+            val treeContentMap = currentCommit.tree.associate { tree ->
                 val treeObject = Tree.newInstance(tree)
                 val treePath = treeObject.serializablePath.relativePath(repositoryFolderManager.getInitFolderPath())
-                val filePath = SerializablePath.of(file.path).relativePath(repositoryFolderManager.getInitFolderPath())
-
-                if (treePath == filePath) {
-                    val treeFileContent = String(Content.newInstance(treeObject.content).content).trim()
-                    val fileContent = String(file.readText().toByteArray()).trim()
-
-                    return treeFileContent == fileContent
-                }
+                val treeContent = String(Content.newInstance(treeObject.content).content).trim()
+                treePath to treeContent
             }
 
-            return false
+            return treeContentMap[filePath]?.let { treeContent ->
+                val fileContent = file.readText().trim()
+                treeContent == fileContent
+            } ?: false
         }
 
         /**
@@ -186,21 +181,31 @@ enum class FileStatus(val symbol: String, val description: String) {
          *         and each value is a list of files that fall under that status.
          */
         fun getStatus(file: File): FileStatus {
-            if (!file.exists()) return DELETE
-            if (IgnoreHandler().isIgnored(file.toPath())) return IGNORED
-
             val hash = Content(file.readBytes()).generateKey()
+            val filePath = file.path
 
-            val contentExists = FileStatus.fileExists(file)
-            val isUpToDate = FileStatus.isUpToDate(file)
-            val isStaged = StagingHandler.getStagedFiles().any { it.first == hash }
-
-            return when {
-                isStaged -> STAGED
-                contentExists && isUpToDate -> UNMODIFIED
-                contentExists && !isUpToDate -> MODIFIED
-                else -> UNTRACKED
+            fileStatusCache[filePath]?.let {
+                return it
             }
+
+            val status = when {
+                !file.exists() -> DELETE
+                IgnoreHandler().isIgnored(file.toPath()) -> IGNORED
+                StagingCache.getStagedFiles().any { it.first == hash } -> STAGED
+                else -> {
+                    val contentExists = fileExists(file)
+                    val isUpToDate = isUpToDate(file)
+
+                    when {
+                        contentExists && isUpToDate -> UNMODIFIED
+                        contentExists && !isUpToDate -> MODIFIED
+                        else -> UNTRACKED
+                    }
+                }
+            }
+
+            fileStatusCache[filePath] = status
+            return status
         }
     }
 }

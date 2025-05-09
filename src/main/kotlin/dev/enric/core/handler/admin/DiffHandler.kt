@@ -169,7 +169,7 @@ data class DiffHandler(
      * @return List of Tree hashes representing staged files.
      */
     private fun getStagingAreaHashes(): List<Hash> {
-        return StagingHandler.getStagedFiles().map {
+        return StagingHandler.StagingCache.getStagedFiles().map {
             val tree = Tree(it.second, it.first)
             tree.encode(true).first
         }
