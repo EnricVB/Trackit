@@ -1,14 +1,13 @@
 package dev.enric.cli.repo
 
 import dev.enric.cli.TrackitCommand
+import dev.enric.core.handler.repo.IgnoreHandler
 import dev.enric.core.handler.repo.StagingHandler
 import dev.enric.domain.objects.Content
-import dev.enric.exceptions.IllegalStateException
 import dev.enric.logger.Logger
 import dev.enric.util.common.FileStatus
 import dev.enric.util.common.FileStatus.*
 import dev.enric.util.repository.RepositoryFolderManager
-import dev.enric.util.common.SerializablePath
 import picocli.CommandLine.*
 import java.nio.file.Files
 import java.nio.file.Path
@@ -65,50 +64,63 @@ class StageCommand : TrackitCommand() {
     override fun call(): Int {
         super.call()
 
-        if (stagePath.isDirectory()) {
-            stageFolder(stagePath)
+        val filesToStage = if (stagePath.isDirectory()) {
+            getFilesToStage(stagePath)
         } else {
-            stageFile(stagePath)
+            listOf(stagePath)
         }
 
+        if (filesToStage.isEmpty()) {
+            Logger.warning("\nNo files to stage.")
+            return 0
+        }
+
+        Logger.info("Files to Stage: [${filesToStage.size}]")
+
+        var stagedCount = 0
+        val totalCount = filesToStage.size
+
+        filesToStage.forEachIndexed { _, file ->
+            val content = Content(Files.readAllBytes(file))
+            stagingHandler.stage(content, file)
+            stagedFilesCache[file] = content.generateKey().toString()
+            stagedCount++
+
+            val percent = (stagedCount.toFloat() / totalCount.toFloat()) * 100
+            Logger.updateLine("Staging files... [$stagedCount / $totalCount] ($percent%)")
+        }
+
+        println()
         return 0
     }
 
     /**
-     * Stage all the files inside the folder
-     * @param directory The folder to stage
-     * @see stageFile
+     * Check if the file should be staged.
+     *
+     * A file should be staged if:
+     * - The file exists
+     * - The file is modified or untracked
+     * - The file is ignored, but the force flag is set
+     *
+     * @param path The path of the file to check
+     * @return True if the file should be staged, false otherwise
      */
-    fun stageFolder(directory: Path) {
-        getFilesToStage(directory).forEach { stageFile(it) }
-    }
-
-    /**
-     * Stage a single file and his content
-     * @param path The file to stage
-     */
-    fun stageFile(path: Path) {
+    private fun shouldStage(path: Path): Boolean {
         if (!path.exists()) {
-            throw IllegalStateException("The file does not exist: $path")
+            Logger.error("The file does not exist: $path")
+            return false
         }
 
-        when (val status = FileStatus.getStatus(path.toFile())) {
-            MODIFIED, UNTRACKED, IGNORED -> {
-                if (!force && status == IGNORED) {
-                    if(path == stagePath) Logger.error("The file is being ignored: $path")
-                    return
+        return when (FileStatus.getStatus(path.toFile())) {
+            MODIFIED, UNTRACKED -> true
+            IGNORED -> if (force || path != stagePath) true else run {
+                if (path == stagePath) {
+                    Logger.error("The file is being ignored: $path")
                 }
-
-                val content = Content(Files.readAllBytes(path))
-                val relativePath = SerializablePath.of(path).relativePath(repositoryFolder)
-
-                // Stage the content, cache the result, and log
-                stagingHandler.stage(content, path)
-                stagedFilesCache[path] = content.generateKey().toString()
-                Logger.info("Staging file: $relativePath")
+                false
             }
 
-            else -> {}
+            else -> false
         }
     }
 
@@ -119,8 +131,27 @@ class StageCommand : TrackitCommand() {
      */
     @OptIn(ExperimentalPathApi::class)
     fun getFilesToStage(directory: Path): List<Path> {
-        return directory.walk(PathWalkOption.INCLUDE_DIRECTORIES)
-            .filter { !it.isDirectory() && !it.toFile().toString().contains(".trackit") }
-            .toList()
+        val result = mutableListOf<Path>()
+        var scanned = 0
+        var toStage = 0
+
+        directory
+            .walk(PathWalkOption.INCLUDE_DIRECTORIES)
+            .forEach { path ->
+                Logger.updateLine("Scanning: [$scanned] files scanned, [$toStage] to be staged")
+                val normalized = path.normalize().toString().replace(".\\.", ".")
+                val isIgnored = IgnoreHandler().isIgnored(Path.of(normalized))
+                scanned++
+
+                if (isIgnored) return@forEach
+                if (path.isDirectory() || !shouldStage(path)) return@forEach
+
+                toStage++
+                result.add(path)
+            }
+
+        Logger.updateLine("Files found to stage: ${result.size}")
+        println()
+        return result
     }
 }

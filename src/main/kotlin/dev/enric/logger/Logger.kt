@@ -82,6 +82,19 @@ object Logger {
     }
 
     /**
+     * Logs a line message to the console.
+     * In case the log level is set to anything but INFO, the message will not be printed.
+     *
+     * This method will overwrite the previous line in the console.
+     */
+    fun updateLine(message: String) {
+        if(logLevel.isAtLeast(INFO)) {
+            print("\r$message")
+            System.out.flush()
+        }
+    }
+
+    /**
      * Logs a warning message to the console.
      * In case the log level is set to anything but VERBOSE, the message will not be printed.
      *

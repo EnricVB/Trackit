@@ -44,7 +44,7 @@ class MergeHandler(
 
         // If the user has not used the --force option, check if the working area is clean
         if (!force) {
-            val stagingIsEmpty = StagingHandler.getStagedFiles().isEmpty()
+            val stagingIsEmpty = StagingHandler.StagingCache.getStagedFiles().isEmpty()
             val workingAreaUpToDate = !StatusHandler().getFilesStatus().containsKey(FileStatus.MODIFIED)
 
             if (!stagingIsEmpty || !workingAreaUpToDate) {

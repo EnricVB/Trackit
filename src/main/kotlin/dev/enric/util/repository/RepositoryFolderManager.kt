@@ -4,6 +4,7 @@ import dev.enric.core.handler.repo.StagingHandler
 import dev.enric.core.security.SecretKey
 import dev.enric.logger.Logger
 import dev.enric.util.common.Utility
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
@@ -66,8 +67,46 @@ data class RepositoryFolderManager(private val initFolder: Path = Path.of(System
         getBranchHeadPath().toFile().createNewFile()
         getTagIndexPath().toFile().createNewFile()
 
+        assignInitialIgnoreFile()
         assignInitialStagingIndex()
         assignSecretKey()
+    }
+
+    fun assignInitialIgnoreFile() {
+        try {
+            val initialIgnoreList = listOf(
+                ".trackit",                     // Ignore Trackit folder
+                ".git",                         // Ignore Git folder
+                ".gitignore",                   // Ignore Git ignore file
+                "key.secret",                   // Ignore secret key file
+                "node_modules",                 // Ignore Node.js modules
+                "build",                        // Ignore build directories
+                "dist",                         // Ignore distribution directories
+                "*.log",                        // Ignore log files
+                "*.tmp",                        // Ignore temporary files
+                "*.bak",                        // Ignore backup files
+                ".idea",                        // Ignore IntelliJ IDEA project files
+                ".vscode",                      // Ignore VSCode project files
+                "*.swp",                        // Ignore Vim swap files
+                "*.sublime-workspace",          // Ignore Sublime Text workspace files
+                "*.sublime-project",            // Ignore Sublime Text project files
+                "*.DS_Store",                   // Ignore macOS Finder files
+                ".env",                         // Ignore environment files
+                "coverage",                     // Ignore coverage directories
+                "*.coverage",                   // Ignore coverage files
+                "test-results",                 // Ignore test result directories
+                "logs",                         // Ignore log directories
+                "*.bak",                        // Backup files
+            )
+
+            initialIgnoreList.forEach { pattern ->
+                Files.writeString(ignoreFile, "$pattern\n", StandardOpenOption.CREATE, StandardOpenOption.APPEND)
+            }
+
+            Logger.info("Initial .ignore file created with default ignore entries")
+        } catch (e: IOException) {
+            Logger.error("Error while writing to .ignore file: ${e.message}")
+        }
     }
 
     fun assignInitialStagingIndex() {
@@ -76,7 +115,6 @@ data class RepositoryFolderManager(private val initFolder: Path = Path.of(System
 
     fun assignSecretKey() {
         Files.writeString(secretKey, SecretKey.generateKey())
-        Files.writeString(ignoreFile, "key.secret\n", StandardOpenOption.CREATE, StandardOpenOption.APPEND)
 
         // Assign permissions to the secret key file, so only the owner can read and write it.
         try {

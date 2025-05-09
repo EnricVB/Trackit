@@ -60,7 +60,7 @@ class CommitHandler(val commit: Commit) : CommandHandler() {
     private fun hasFilesToCommit() {
         val hasDeletedFilesToCommit = FileStatus.getDeletedFiles().isNotEmpty()
 
-        if (StagingHandler.getStagedFiles().isEmpty() && !hasDeletedFilesToCommit) {
+        if (StagingHandler.StagingCache.getStagedFiles().isEmpty() && !hasDeletedFilesToCommit) {
             throw IllegalStateException("The staging area is empty. Add files to commit.")
         } else if (hasDeletedFilesToCommit) {
             Logger.warning("There are only files to be deleted. The commit will be empty.")
@@ -170,7 +170,7 @@ class CommitHandler(val commit: Commit) : CommandHandler() {
      * @return A list of Tree objects representing the commit tree.
      */
     private fun createCommitTree(): List<Tree> {
-        return mapStagedFilesToTree(StagingHandler.getStagedFiles())
+        return mapStagedFilesToTree(StagingHandler.StagingCache.getStagedFiles())
     }
 
     /**
