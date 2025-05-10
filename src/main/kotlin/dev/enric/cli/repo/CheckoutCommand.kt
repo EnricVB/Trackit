@@ -43,6 +43,13 @@ import picocli.CommandLine.*
 class CheckoutCommand : TrackitCommand() {
 
     /**
+     * Flag to remove all untracked files not present in the target commit.
+     * If set, all untracked files will be deleted.
+     */
+    @Option(names = ["--clean"], description = ["Remove all untracked files not present in the target commit"])
+    var clean: Boolean = false
+
+    /**
      * The hash of the commit to checkout.
      * Supports full and abbreviated hashes.
      */
@@ -69,7 +76,9 @@ class CheckoutCommand : TrackitCommand() {
             return 1
         }
 
-        checkoutHandler.preCheckout()
+        if (clean) {
+            checkoutHandler.preCheckout()
+        }
         checkoutHandler.checkout()
 
         return 0
