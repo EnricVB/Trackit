@@ -6,22 +6,27 @@ import dev.enric.domain.objects.User
 import dev.enric.logger.Logger
 import dev.enric.util.common.ColorUtil
 import dev.enric.util.common.FileStatus
-import dev.enric.util.common.FileStatus.*
+import dev.enric.util.common.FileStatus.DELETE
 import dev.enric.util.common.SerializablePath
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.CommitIndex
 import dev.enric.util.repository.RepositoryFolderManager
 import java.io.File
+import java.io.IOException
+import java.nio.file.FileVisitResult
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.SimpleFileVisitor
+import java.nio.file.attribute.BasicFileAttributes
 import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.PathWalkOption
-import kotlin.io.path.walk
 
 /**
  * Handles the status of files in the repository.
  * This class provides functionality to check the state of files in the working directory,
  * determine which files have been modified, staged, or ignored, and display this information.
  */
-class StatusHandler() : CommandHandler() {
+@OptIn(ExperimentalPathApi::class)
+class StatusHandler : CommandHandler() {
     /**
      * Prints the current repository status to the logger.
      * It displays:
@@ -29,9 +34,8 @@ class StatusHandler() : CommandHandler() {
      * - The latest commit details (hash, author, date).
      * - The list of files grouped by their status (modified, staged, untracked, etc.).
      */
-    @OptIn(ExperimentalPathApi::class)
-    fun printStatus(showIgnored: Boolean) {
-        val statusMap = getFilesStatus()
+    fun printStatus(showIgnored: Boolean, showUpdated: Boolean) {
+        val statusMap = getFilesStatus(showIgnored, showUpdated)
         val branch = BranchIndex.getCurrentBranch()
         val currentCommit = CommitIndex.getCurrentCommit()
 
@@ -51,7 +55,7 @@ class StatusHandler() : CommandHandler() {
             Logger.info("")
             Logger.info(status.description)
 
-            pathToShow.forEach { file -> if(showIgnored || status != IGNORED) Logger.info("\t[${status.symbol}] ${ColorUtil.message(file)}") }
+            pathToShow.forEach { file -> Logger.info("\t[${status.symbol}] ${ColorUtil.message(file)}") }
         }
 
         if (StagingCache.getStagedFiles().isEmpty()) {
@@ -66,23 +70,43 @@ class StatusHandler() : CommandHandler() {
      * @return A map where each key is a [FileStatus] representing the file status,
      *         and each value is a list of files that fall under that status.
      */
-    @OptIn(ExperimentalPathApi::class)
-    fun getFilesStatus(): Map<FileStatus, List<File>> {
+    fun getFilesStatus(showIgnored: Boolean = false, showUpdated: Boolean = false): Map<FileStatus, List<File>> {
+        val ignorehandler = IgnoreHandler()
+
         val statusMap = mutableMapOf<FileStatus, MutableList<File>>()
         val repositoryFolderManager = RepositoryFolderManager()
+        val initPath = repositoryFolderManager.getInitFolderPath()
 
-        repositoryFolderManager.getInitFolderPath()
-            .walk(PathWalkOption.INCLUDE_DIRECTORIES)
-            .toMutableList()
-            .filterNot {
-                it.toFile().isDirectory || it.toRealPath().toString().contains(".trackit")
-            }
-            .forEach { path ->
-                val file = path.toFile()
-                val status = FileStatus.getStatus(file)
+        Files.walkFileTree(initPath, object : SimpleFileVisitor<Path>() {
+            override fun visitFile(file: Path?, attrs: BasicFileAttributes): FileVisitResult {
+                val fileObj = file?.toFile() ?: return FileVisitResult.CONTINUE
+                val status = FileStatus.getStatus(fileObj)
 
-                statusMap.getOrPut(status) { mutableListOf() }.add(file)
+                val isIgnored = ignorehandler.isIgnored(fileObj.toPath())
+                val isUpdated = status == FileStatus.UNMODIFIED
+
+                if ((isIgnored && !showIgnored) || (isUpdated && !showUpdated)) {
+                    return FileVisitResult.CONTINUE
+                }
+
+                statusMap.getOrPut(status) { mutableListOf() }.add(fileObj)
+                return super.visitFile(file, attrs)
             }
+
+            override fun visitFileFailed(file: Path?, exc: IOException): FileVisitResult {
+                return FileVisitResult.CONTINUE
+            }
+
+            override fun preVisitDirectory(dir: Path?, attrs: BasicFileAttributes): FileVisitResult {
+                val dirObj = dir?.toFile() ?: return FileVisitResult.SKIP_SUBTREE
+
+                return if (ignorehandler.isIgnored(dirObj.toPath()) && !showIgnored) {
+                    FileVisitResult.SKIP_SUBTREE
+                } else {
+                    FileVisitResult.CONTINUE
+                }
+            }
+        })
 
         FileStatus.getDeletedFiles().forEach { file ->
             statusMap.getOrPut(DELETE) { mutableListOf() }.add(file)

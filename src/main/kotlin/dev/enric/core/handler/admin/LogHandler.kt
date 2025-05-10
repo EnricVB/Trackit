@@ -127,9 +127,11 @@ class LogHandler(
         val branchOrder = branches.map { it.generateKey() }
         val lineStructure = buildLineStructure(commits, branchOrder)
 
-        commits.forEach { commit ->
+        commits.forEachIndexed { index, commit ->
+            if (index >= limit && limit != 0) return@forEachIndexed
+
             val lines = buildCommitLines(commit, branchOrder, lineStructure)
-            lines.forEach { println(it) }
+            lines.forEach { line -> println(line) }
         }
     }
 

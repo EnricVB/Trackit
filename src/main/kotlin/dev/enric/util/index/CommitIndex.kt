@@ -25,12 +25,12 @@ object CommitIndex {
      *
      * @return The current commit.
      */
-    fun getCurrentCommit() : Commit? {
+    fun getCurrentCommit(): Commit? {
         try {
             val hashString = Files.readString(RepositoryFolderManager().getCurrentCommitPath()) ?: null
 
-            return if(hashString.isNullOrEmpty()) null else Commit.newInstance(Hash(hashString))
-        } catch (ex : NoSuchFileException) {
+            return if (hashString.isNullOrEmpty()) null else Commit.newInstance(Hash(hashString))
+        } catch (ex: NoSuchFileException) {
             return null
         }
     }
@@ -48,10 +48,19 @@ object CommitIndex {
      * Retrieves a commit based on the first X letters of the hash.
      * In case multiple commits start with the same pattern, returns all.
      *
+     * If HEAD is passed, it will return the current branch HEAD commit.
+     *
      * @param abbreviatedHash An abbreviated string hash of the commit searched.
      * @return A [Hash] or list of [Hash] objects representing the found commit.
      */
-    fun getAbbreviatedCommit(abbreviatedHash: String) : List<Hash> {
+    fun getAbbreviatedCommit(abbreviatedHash: String): List<Hash> {
+        if (abbreviatedHash.trim() == "HEAD") {
+            val currentBranch = BranchIndex.getCurrentBranch()
+            val branchHead = BranchIndex.getBranchHead(currentBranch.generateKey())
+
+            return listOf(branchHead.generateKey())
+        }
+
         return getAllCommit().filter { it.string.startsWith(abbreviatedHash.trim()) }
     }
 
@@ -62,7 +71,9 @@ object CommitIndex {
      * @return True if the commit exists, false otherwise.
      */
     fun commitExists(hash: Hash): Boolean {
-        return Files.exists(RepositoryFolderManager().getObjectsFolderPath().resolve(COMMIT.hash.toString()).resolve(hash.string))
+        return Files.exists(
+            RepositoryFolderManager().getObjectsFolderPath().resolve(COMMIT.hash.toString()).resolve(hash.string)
+        )
     }
 
     /**

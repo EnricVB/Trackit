@@ -88,7 +88,7 @@ class LogCommand : TrackitCommand() {
      */
     @Option(
         names = ["--limit", "-l"],
-        description = ["Shows the specified quantity directly without pressing enter"],
+        description = ["Shows the specified quantity."],
         required = false
     )
     var limit: Int = 10

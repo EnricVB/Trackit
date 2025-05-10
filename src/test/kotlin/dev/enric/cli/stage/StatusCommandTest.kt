@@ -11,12 +11,13 @@ import dev.enric.util.common.console.SystemConsoleInput
 import dev.enric.util.repository.RepositoryFolderManager
 import org.junit.Before
 import org.junit.Test
+import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createFile
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
-class StatusCommandCommandTest : CommandTest() {
+class StatusCommandTest : CommandTest() {
 
     companion object {
         // Given
@@ -39,6 +40,7 @@ class StatusCommandCommandTest : CommandTest() {
             writeText(content)
         }
 
+    @OptIn(ExperimentalPathApi::class)
     private fun commitFile() {
         CommitCommand().apply {
             title = "Initial commit"
@@ -109,13 +111,14 @@ class StatusCommandCommandTest : CommandTest() {
         assertEquals(FileStatus.MODIFIED, FileStatus.getStatus(file))
     }
 
+    @OptIn(ExperimentalPathApi::class)
     @Test
     fun `File added to staging area, no matter if committed, must be STAGED`() {
         // Given
         val file = createAndWriteFile()
 
         // When
-        StagingHandler().stage(file.toPath())
+        StagingHandler().stagePath(file.toPath())
 
         // Obtain the status of the files
         val files = StatusHandler().getFilesStatus().flatMap { it.value }

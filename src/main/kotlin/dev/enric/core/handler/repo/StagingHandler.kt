@@ -42,8 +42,10 @@ data class StagingHandler(val force: Boolean = false) {
 
         // Get the files to stage filtered by the shouldStage function
         val filesToStage = if (path.isDirectory()) {
+            Logger.debug("Staging directory: $path")
             getFilesToStage(path)
         } else {
+            Logger.debug("Staging file: $path")
             listOf(path).filter { shouldStage(it, path) }
         }
 
@@ -51,7 +53,9 @@ data class StagingHandler(val force: Boolean = false) {
 
         // Check if there are files to stage, if not, return
         if (filesToStage.isEmpty()) {
-            Logger.warning("\nNo files to stage.")
+            Logger.warning("\nNo more files to stage.")
+            IS_STAGING_FILES = false
+
             return
         }
 
@@ -82,10 +86,11 @@ data class StagingHandler(val force: Boolean = false) {
         directory
             .walk(PathWalkOption.INCLUDE_DIRECTORIES)
             .forEach { path ->
-                Logger.updateLine("Scanning: [$scanned] files scanned, [$toStage] to be staged")
+                Logger.updateLine("Scanning: [$scanned] files scanned,  [$toStage] to be staged")
                 val normalized = path.normalize().toString().replace(".\\.", ".")
                 val isIgnored = IgnoreHandler().isIgnored(Path.of(normalized))
                 scanned++
+
 
                 if (isIgnored) return@forEach
                 if (path.isDirectory() || !shouldStage(path, directory)) return@forEach
@@ -94,7 +99,6 @@ data class StagingHandler(val force: Boolean = false) {
                 result.add(path)
             }
 
-        Logger.updateLine("Files found to stage: ${result.size}")
         println()
         return result
     }
