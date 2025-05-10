@@ -53,6 +53,17 @@ class StatusCommand : TrackitCommand() {
     var showIgnored: Boolean = false
 
     /**
+     * Updated option for the log command.
+     *
+     * This option is used to filter the files shown.
+     * By default, the log doesn't show updated files.
+     */
+    @Option(
+        names = ["--show-updated", "-u"], description = ["Shows updated files"], required = false
+    )
+    var showUpdated: Boolean = false
+
+    /**
      * Executes the status check on the current repository.
      *
      * Flow:
@@ -67,7 +78,7 @@ class StatusCommand : TrackitCommand() {
         super.call()
 
         // Delegates status computation and printing to the handler
-        StatusHandler().printStatus(showIgnored)
+        StatusHandler().printStatus(showIgnored, showUpdated)
 
         return 0
     }

@@ -191,7 +191,6 @@ enum class FileStatus(val symbol: String, val description: String) {
 
             val status = when {
                 !file.exists() -> DELETE
-                IgnoreHandler().isIgnored(file.toPath()) -> IGNORED
                 getStagedFiles().any { it.first == hash } -> STAGED
                 else -> {
                     val contentExists = fileExists(file)
@@ -200,6 +199,7 @@ enum class FileStatus(val symbol: String, val description: String) {
                     when {
                         contentExists && isUpToDate -> UNMODIFIED
                         contentExists && !isUpToDate -> MODIFIED
+                        IgnoreHandler().isIgnored(file.toPath()) -> IGNORED
                         else -> UNTRACKED
                     }
                 }
