@@ -1,6 +1,7 @@
 package dev.enric.core.handler.branch
 
 import dev.enric.core.handler.CommandHandler
+import dev.enric.core.handler.repo.CommitHandler
 import dev.enric.core.handler.repo.StagingHandler.StagingCache
 import dev.enric.core.handler.repo.StatusHandler
 import dev.enric.domain.objects.Branch
@@ -23,6 +24,8 @@ class MergeHandler(
     private val sudoArgs: Array<String>?,
     private val force: Boolean = false,
 ) : CommandHandler() {
+
+    private var areConflicts: Boolean = false
 
     /**
      * Checks if the user has permission to merge branches.
@@ -50,10 +53,6 @@ class MergeHandler(
             val stagingIsEmpty = StagingCache.getStagedFiles().isEmpty()
             val workingAreaUpToDate = !StatusHandler().getFilesStatus().containsKey(FileStatus.MODIFIED)
 
-            StatusHandler().getFilesStatus().forEach {
-                Logger.debug("File status: ${it.key} -> ${it.value}")
-            }
-
             if (!workingAreaUpToDate) {
                 throw IllegalStateException("Working area is not clean. Please commit or stash your changes before merging or use '--force'.")
             } else if (!stagingIsEmpty) {
@@ -69,7 +68,8 @@ class MergeHandler(
     /**
      * Merges the working branch with the merge branch.
      */
-    fun doMerge() {
+    @OptIn(ExperimentalPathApi::class)
+    fun doMerge(autoCommit: Boolean) {
         val mergedFiles = prepareFileContent(getFilesToMerge())
 
         // Write the merged content to the files
@@ -78,6 +78,28 @@ class MergeHandler(
 
             Files.writeString(path, content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
         }
+
+        // If there are no conflicts, commit the changes
+        if (autoCommit && !areConflicts) {
+            val commit = Commit(title = "Automatic merge", message = "Merged ${mergeBranch?.name} into ${workingBranch?.name}")
+            val commitHandler = CommitHandler(commit)
+
+            // Initialize commit metadata such as author and confirmer
+            commitHandler.initializeCommitProperties(sudoArgs, sudoArgs)
+
+            // Stage all files if the flag is set and serialize the tree structure
+            commitHandler.preCommit(true)
+
+            // Check if commit is allowed; will throw if invalid
+            if (!commitHandler.canDoCommit()) {
+                throw IllegalStateException("Cant automatically commit the merge due to permissions. Please commit manually.")
+            }
+
+            // Execute the commit process
+            commitHandler.processCommit()
+        }
+
+        Logger.info("Merge completed successfully.")
     }
 
     /**

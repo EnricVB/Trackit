@@ -43,6 +43,13 @@ class MergeCommand : TrackitCommand() {
     var mergeBranch: String = ""
 
     /**
+     * A flag indicating whether to automatically commit the merge changes if no conflicts are present.
+     * If true, the merge will be committed automatically.
+     */
+    @Option(names = ["-a", "--auto-commit"], description = ["Automatically commit the merge changes if no conflicts are present."])
+    var autoCommit: Boolean = false
+
+    /**
      * A flag indicating whether to force the merge even if files are not up to date.
      * If true, the merge will proceed even if there are conflicts or outdated files.
      */
@@ -75,7 +82,7 @@ class MergeCommand : TrackitCommand() {
         }
 
         // Perform the merge
-        mergeHandler.doMerge()
+        mergeHandler.doMerge(autoCommit)
 
         return 0
     }
