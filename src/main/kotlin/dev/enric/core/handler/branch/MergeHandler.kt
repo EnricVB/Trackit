@@ -9,6 +9,7 @@ import dev.enric.domain.objects.Content
 import dev.enric.domain.objects.Tree
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.exceptions.InvalidPermissionException
+import dev.enric.logger.Logger
 import dev.enric.util.common.FileStatus
 import dev.enric.util.index.BranchIndex
 import java.nio.file.Files
@@ -49,8 +50,16 @@ class MergeHandler(
             val stagingIsEmpty = StagingCache.getStagedFiles().isEmpty()
             val workingAreaUpToDate = !StatusHandler().getFilesStatus().containsKey(FileStatus.MODIFIED)
 
-            if (!stagingIsEmpty || !workingAreaUpToDate) {
+            StatusHandler().getFilesStatus().forEach {
+                Logger.debug("File status: ${it.key} -> ${it.value}")
+            }
+
+            if (!workingAreaUpToDate) {
                 throw IllegalStateException("Working area is not clean. Please commit or stash your changes before merging or use '--force'.")
+            } else if (!stagingIsEmpty) {
+                throw IllegalStateException("Staging area is not empty. Please commit or stash your changes before merging or use '--force'.")
+            } else if (getFilesToMerge().isEmpty()) {
+                throw IllegalStateException("No files to merge. Please check the branches and try again.")
             }
         }
 
@@ -175,6 +184,7 @@ class MergeHandler(
                     flushConflictIfNeeded()
                     if (baseRaw.isNotEmpty()) result.appendLine(baseRaw)
                 }
+
                 conflict -> { // conflict found, add to conflict blocks
                     oldBlock.add(ourRaw)
                     newBlock.add(theirRaw)
@@ -260,7 +270,7 @@ class MergeHandler(
      *
      * @return the common ancestor commit
      */
-    fun getCommonAncestor() : Commit {
+    fun getCommonAncestor(): Commit {
         val workingBranchAncestors = getAllAncestors(workingBranch!!).toSet()
         val mergeBranchAncestors = getAllAncestors(mergeBranch!!).toSet()
 
@@ -276,9 +286,9 @@ class MergeHandler(
      * @param branch the branch to get ancestors from
      * @return a list of commits representing the ancestors of the branch
      */
-    fun getAllAncestors(branch: Branch) : List<Commit> {
+    fun getAllAncestors(branch: Branch): List<Commit> {
         val ancestors = mutableListOf<Commit>()
-        var commit : Commit? = BranchIndex.getBranchHead(branch.generateKey())
+        var commit: Commit? = BranchIndex.getBranchHead(branch.generateKey())
 
         while (commit != null) {
             ancestors.add(commit)

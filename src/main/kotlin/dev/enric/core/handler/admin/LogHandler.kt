@@ -197,6 +197,15 @@ class LogHandler(
         return line
     }
 
+
+    /**
+     * Function to build connection lines between branches
+     * @param fromIndex The index of the source branch
+     * @param toIndex The index of the target branch
+     * @param branchOrder List of branch hashes in display order
+     * @param commitDate The timestamp of the current commit
+     * @return List of StringBuilders representing connection lines
+     */
     private fun buildConnectionLines(
         fromIndex: Int,
         toIndex: Int,
@@ -206,7 +215,10 @@ class LogHandler(
         val lines = mutableListOf<StringBuilder>()
         val distance = kotlin.math.abs(toIndex - fromIndex)
         val startIndex = minOf(fromIndex, toIndex)
+        val endIndex = maxOf(fromIndex, toIndex)
+        val isRightToLeft = fromIndex < toIndex
 
+        // For each step of the connection
         for (step in 1..distance) {
             val line = StringBuilder().append(" ".repeat(14))
             val currentStep = distance - step + 1
@@ -216,9 +228,10 @@ class LogHandler(
                 val isOldEnough = branch.creationDate < commitDate
 
                 when {
-                    index == startIndex + currentStep - 1 -> line.append("/ ")
+                    index == startIndex + currentStep - 1 -> line.append(if (isRightToLeft) " \\" else " /")
                     !isOldEnough -> line.append("  ")
-                    index in startIndex..startIndex + distance -> line.append("| ")
+                    index == fromIndex && step >= 1 -> line.append("  ")
+                    index in startIndex..endIndex -> line.append("| ")
                     else -> line.append("| ")
                 }
             }
@@ -226,6 +239,16 @@ class LogHandler(
         }
 
         return lines
+    }
+
+    /**
+     * This function should be called before buildConnectionLines to ensure branches are correctly ordered
+     * @param branches List of branches to sort
+     * @return Sorted list of branches with newer branches on the right
+     */
+    private fun sortBranchesByCreationDate(branches: List<Branch>): List<Branch> {
+        // Sort branches by creation date - oldest first
+        return branches.sortedBy { it.creationDate }
     }
 
     /**

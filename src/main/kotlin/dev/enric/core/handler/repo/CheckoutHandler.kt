@@ -4,6 +4,7 @@ import dev.enric.core.handler.CommandHandler
 import dev.enric.domain.objects.*
 import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.logger.Logger
+import dev.enric.util.index.CommitIndex
 import dev.enric.util.repository.RepositoryFolderManager
 import java.nio.file.Files
 import java.nio.file.Path
@@ -90,6 +91,7 @@ class CheckoutHandler(
             }
         }
 
+        CommitIndex.setCurrentCommit(commit.generateKey())
         Logger.info("Checkout successful.")
     }
 }
