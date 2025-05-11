@@ -81,7 +81,7 @@ class MergeHandler(
 
         // If there are no conflicts, commit the changes
         if (autoCommit && !areConflicts) {
-            val commit = Commit(title = "Automatic merge", message = "Merged ${mergeBranch?.name} into ${workingBranch?.name}")
+            val commit = Commit(title = "Automatic commit merge from Branch ${mergeBranch?.name}", message = "Merged ${mergeBranch?.name} into ${workingBranch?.name}")
             val commitHandler = CommitHandler(commit)
 
             // Initialize commit metadata such as author and confirmer
@@ -97,6 +97,7 @@ class MergeHandler(
 
             // Execute the commit process
             commitHandler.processCommit()
+            commitHandler.postCommit(emptyList())
         }
 
         Logger.info("Merge completed successfully.")
