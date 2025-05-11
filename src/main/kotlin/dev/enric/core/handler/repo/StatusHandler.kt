@@ -8,6 +8,7 @@ import dev.enric.util.common.ColorUtil
 import dev.enric.util.common.FileStatus
 import dev.enric.util.common.FileStatus.DELETE
 import dev.enric.util.common.SerializablePath
+import dev.enric.util.common.Utility
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.CommitIndex
 import dev.enric.util.repository.RepositoryFolderManager
@@ -39,7 +40,6 @@ class StatusHandler : CommandHandler() {
      * @param showUpdated If true, updated files will be included in the status.
      */
     fun printStatus(shouldPrintFilesStatus: Boolean, showIgnored: Boolean, showUpdated: Boolean) {
-        val statusMap = getFilesStatus(showIgnored, showUpdated)
         val branch = BranchIndex.getCurrentBranch()
         val currentCommit = CommitIndex.getCurrentCommit()
 
@@ -51,7 +51,9 @@ class StatusHandler : CommandHandler() {
             Logger.info("Date: ${currentCommit.date}")
         }
 
-        if (shouldPrintFilesStatus) {
+        if (shouldPrintFilesStatus || showIgnored || showUpdated) {
+            val statusMap = getFilesStatus(showIgnored, showUpdated)
+
             statusMap.forEach { (status, files) ->
                 val pathToShow = files.map {
                     SerializablePath.of(it.path).relativePath(RepositoryFolderManager().getInitFolderPath()).toString()
@@ -82,6 +84,8 @@ class StatusHandler : CommandHandler() {
         val statusMap = mutableMapOf<FileStatus, MutableList<File>>()
         val repositoryFolderManager = RepositoryFolderManager()
         val initPath = repositoryFolderManager.getInitFolderPath()
+
+        Utility.printWaitingBar()
 
         Files.walkFileTree(initPath, object : SimpleFileVisitor<Path>() {
             override fun visitFile(file: Path?, attrs: BasicFileAttributes): FileVisitResult {
