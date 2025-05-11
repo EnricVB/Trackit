@@ -4,6 +4,7 @@ import com.github.difflib.text.DiffRow
 import com.github.difflib.text.DiffRow.Tag.*
 import com.github.difflib.text.DiffRowGenerator
 import dev.enric.core.handler.CommandHandler
+import dev.enric.core.handler.repo.IgnoreHandler
 import dev.enric.core.handler.repo.StagingHandler.StagingCache
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Commit
@@ -11,13 +12,9 @@ import dev.enric.domain.objects.Content
 import dev.enric.domain.objects.Tree
 import dev.enric.logger.Logger
 import dev.enric.util.common.ColorUtil
-import dev.enric.util.common.SerializablePath
 import dev.enric.util.repository.RepositoryFolderManager
 import java.nio.file.Path
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.PathWalkOption
-import kotlin.io.path.relativeTo
-import kotlin.io.path.walk
+import kotlin.io.path.*
 
 /**
  * Handles diff operations between Workdir, Staging Area, Commits, and Branches.
@@ -71,12 +68,10 @@ data class DiffHandler(
             Logger.info("Showing diffs for files containing '$fileFilter'")
         }
 
-        allPaths.forEach {
-            val versions = it.value
-            val path = SerializablePath.of(it.key).relativePath(RepositoryFolderManager().getInitFolderPath())
-
-            // Skip if path doesn't match filter
-            if (!fileFilter.isNullOrEmpty() && !path.toString().contains(fileFilter)) return@forEach
+        allPaths.forEach { path ->
+            val versions = path.value
+            val pathString = path.key.toString().replace("\\", "/")
+            if (!fileFilter.isNullOrEmpty() && !pathString.contains(fileFilter)) return@forEach
 
             val version1 = versions.first?.let { hash -> String(Content.newInstance(hash).content) } ?: ""
             val version2 = versions.second?.let { hash -> String(Content.newInstance(hash).content) } ?: ""
@@ -84,7 +79,7 @@ data class DiffHandler(
             // Skip identical content
             if (version1 == version2) return@forEach
 
-            Logger.info("File: $path")
+            Logger.info("File: ${path.key}")
             Logger.info(fileDiff(version1, version2))
             Logger.info("--------------------")
         }
@@ -152,11 +147,8 @@ data class DiffHandler(
         return repositoryFolderManager.getInitFolderPath()
             .walk(PathWalkOption.INCLUDE_DIRECTORIES)
             .toMutableList()
-            .filterNot {
-                it.toFile().isDirectory ||
-                        it.toRealPath().startsWith(repositoryFolderManager.getTrackitFolderPath()) ||
-                        it.toRealPath().startsWith(repositoryFolderManager.getSecretKeyPath()) ||
-                        it.toRealPath() == repositoryFolderManager.getInitFolderPath()
+            .filter {
+                !IgnoreHandler().isIgnored(it) && !it.isDirectory()
             }.map {
                 val content = Content(it.toFile().readBytes())
                 val tree = Tree(it.toFile().toPath(), content.encode(true).first)
@@ -211,8 +203,7 @@ data class DiffHandler(
                 CHANGE -> diff.appendLine(
                     """
                     - ${if (it.oldLine.isNotBlank()) ColorUtil.deleteLine(it.oldLine) else ""}
-                    + ${if (it.newLine.isNotBlank()) ColorUtil.deleteLine(it.oldLine) else ""}"""
-                        .trimIndent()
+                    + ${if (it.newLine.isNotBlank()) ColorUtil.deleteLine(it.newLine) else ""}"""
                 )
 
                 else -> diff.appendLine("  ${it.oldLine}")

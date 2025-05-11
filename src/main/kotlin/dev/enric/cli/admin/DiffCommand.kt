@@ -9,6 +9,7 @@ import dev.enric.domain.objects.Commit
 import dev.enric.exceptions.IllegalStateException
 import dev.enric.logger.Logger
 import dev.enric.util.index.BranchIndex
+import dev.enric.util.index.CommitIndex
 import picocli.CommandLine.*
 
 /**
@@ -130,7 +131,7 @@ class DiffCommand : TrackitCommand() {
 
             hashes.size == 1 -> {
                 Logger.info("Diff ${hashes[0]} vs WORKDIR\n")
-                diffHandler.executeDiffBetweenWorkdirAndCommit(Commit.newInstance(Hash(hashes[0])))
+                diffHandler.executeDiffBetweenWorkdirAndCommit(Commit.newInstance(CommitIndex.getAbbreviatedCommit(hashes[0])[0]))
             }
 
             hashes.size == 2 -> {
@@ -147,7 +148,7 @@ class DiffCommand : TrackitCommand() {
 
                 val firstHash = when (firstHashType) {
                     BRANCH -> BranchIndex.getBranchHead(Hash(hashes[0]))
-                    COMMIT -> Commit.newInstance(Hash(hashes[0]))
+                    COMMIT -> Commit.newInstance(CommitIndex.getAbbreviatedCommit(hashes[0])[0])
                     else -> hashes[0].let { BranchIndex.getBranch(it)?.generateKey() }
                         ?.let { BranchIndex.getBranchHead(it) }
                         ?: throw IllegalStateException("Invalid hash type for ${hashes[0]}")
@@ -155,7 +156,7 @@ class DiffCommand : TrackitCommand() {
 
                 val secondHash = when (secondHashType) {
                     BRANCH -> BranchIndex.getBranchHead(Hash(hashes[1]))
-                    COMMIT -> Commit.newInstance(Hash(hashes[1]))
+                    COMMIT -> Commit.newInstance(CommitIndex.getAbbreviatedCommit(hashes[1])[0])
                     else -> hashes[1].let { BranchIndex.getBranch(it)?.generateKey() }
                         ?.let { BranchIndex.getBranchHead(it) }
                         ?: throw IllegalStateException("Invalid hash type for ${hashes[0]}")

@@ -18,10 +18,10 @@ open class TrackitException(message: String, errorCode: Int) : Exception(message
             "Yikes! An unexpected error occurred.",
             "This is fine. *flames intensify*",
             "Hmm... Something broke.",
-            "The bug is not a bug. It’s a surprise feature!",
+            "The bug is not a bug. Its a surprise feature!",
             "Oh no! A wild error appeared.",
             "Oh snap! An error appeared.",
-            "Ahhh! There's a bug",
+            "Ahhh! Theres a bug",
             "Welp, time to blame the intern."
         )
 
