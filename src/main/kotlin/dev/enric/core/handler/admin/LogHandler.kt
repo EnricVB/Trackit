@@ -205,19 +205,18 @@ class LogHandler(
     ): List<StringBuilder> {
         val lines = mutableListOf<StringBuilder>()
         val distance = kotlin.math.abs(toIndex - fromIndex)
-        val isRightToLeft = fromIndex < toIndex
         val startIndex = minOf(fromIndex, toIndex)
 
         for (step in 1..distance) {
             val line = StringBuilder().append(" ".repeat(14))
-            val currentStep = if (isRightToLeft) step else distance - step + 1
+            val currentStep = distance - step + 1
 
             branchOrder.forEachIndexed { index, branchKey ->
                 val branch = Branch.newInstance(branchKey)
                 val isOldEnough = branch.creationDate < commitDate
 
                 when {
-                    index == startIndex + currentStep - 1 -> line.append(if (isRightToLeft) "\\ " else "/ ")
+                    index == startIndex + currentStep - 1 -> line.append("/ ")
                     !isOldEnough -> line.append("  ")
                     index in startIndex..startIndex + distance -> line.append("| ")
                     else -> line.append("| ")
