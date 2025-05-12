@@ -8,7 +8,7 @@ import dev.enric.domain.objects.User
 import dev.enric.logger.Logger
 import dev.enric.remote.packet.message.data.BranchSyncStatusResponseData.BranchSyncStatus.*
 import dev.enric.util.common.*
-import dev.enric.util.common.FileStatus.DELETE
+import dev.enric.util.common.FileStatus.DELETED
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.CommitIndex
 import dev.enric.util.repository.RepositoryFolderManager
@@ -145,8 +145,6 @@ class StatusHandler : CommandHandler() {
         val repositoryFolderManager = RepositoryFolderManager()
         val initPath = repositoryFolderManager.getInitFolderPath()
 
-        Utility.printWaitingBar()
-
         Files.walkFileTree(initPath, object : SimpleFileVisitor<Path>() {
             override fun visitFile(file: Path?, attrs: BasicFileAttributes): FileVisitResult {
                 val fileObj = file?.toFile() ?: return FileVisitResult.CONTINUE
@@ -179,7 +177,7 @@ class StatusHandler : CommandHandler() {
         })
 
         FileStatus.getDeletedFiles().forEach { file ->
-            statusMap.getOrPut(DELETE) { mutableListOf() }.add(file)
+            statusMap.getOrPut(DELETED) { mutableListOf() }.add(file)
         }
 
         return statusMap.mapValues { (_, files) -> files.sortedBy { it.path } }

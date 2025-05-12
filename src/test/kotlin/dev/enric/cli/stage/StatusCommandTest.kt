@@ -145,7 +145,7 @@ class StatusCommandTest : CommandTest() {
 
         // Then
         assertContains(files, file)
-        assertEquals(FileStatus.DELETE, FileStatus.getStatus(file))
+        assertEquals(FileStatus.DELETED, FileStatus.getStatus(file))
     }
 
     @Test

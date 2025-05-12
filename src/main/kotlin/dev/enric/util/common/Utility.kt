@@ -13,10 +13,6 @@ object Utility {
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern(format))
     }
 
-    fun formatDateTime(dateTime: LocalDateTime, format: String): String {
-        return dateTime.format(DateTimeFormatter.ofPattern(format))
-    }
-
     fun formatDateTime(dateTime: Timestamp, format: String): String {
         return dateTime.toLocalDateTime().format(DateTimeFormatter.ofPattern(format))
     }
@@ -33,22 +29,5 @@ object Utility {
         }
 
         return commitList.map { it.string }
-    }
-
-    fun printWaitingBar() {
-        val progressThread = Thread {
-            var dots = 0
-            println()
-
-            while (!Thread.currentThread().isInterrupted) {
-                val dotString = ".".repeat(dots + 1)
-                Logger.updateLine("$dotString   ")
-                Thread.sleep(700)
-                dots = (dots + 1) % 3
-            }
-
-            Logger.updateLine("\r\n")
-        }
-        progressThread.start()
     }
 }
