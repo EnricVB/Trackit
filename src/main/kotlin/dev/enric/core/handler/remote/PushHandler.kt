@@ -14,16 +14,13 @@ import dev.enric.remote.network.handler.RemoteClientListener
 import dev.enric.remote.network.handler.RemoteConnection
 import dev.enric.remote.packet.message.PushObjectsMessage
 import dev.enric.remote.packet.message.PushTagIndexMessage
-import dev.enric.remote.packet.message.data.BranchSyncStatusQueryData
-import dev.enric.remote.packet.message.data.BranchSyncStatusResponseData.BranchSyncStatus
 import dev.enric.remote.packet.message.data.MissingObjectCheckData
 import dev.enric.remote.packet.message.data.PushData
-import dev.enric.remote.packet.query.BranchSyncStatusQueryMessage
 import dev.enric.remote.packet.query.MissingObjectCheckQueryMessage
 import dev.enric.remote.packet.query.StatusQueryMessage
-import dev.enric.remote.packet.response.BranchSyncStatusResponseMessage
 import dev.enric.remote.packet.response.MissingObjectCheckResponseMessage
 import dev.enric.remote.packet.response.StatusResponseMessage
+import dev.enric.util.common.Utility
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.TagIndex
 import dev.enric.util.repository.RepositoryFolderManager
@@ -298,61 +295,6 @@ class PushHandler(val pushDirection: DataProtocol) : CommandHandler() {
         return objectsToPush
     }
 
-    /**
-     * Queries the remote server for the synchronization status of the current local branch.
-     *
-     * @param socket An open socket connected to the remote server.
-     *
-     * @return [BranchSyncStatus] representing the state of synchronization:
-     * - [BranchSyncStatus.SYNCED]: No differences between local and remote.
-     * - [BranchSyncStatus.AHEAD]: Local branch has commits not present in remote.
-     * - [BranchSyncStatus.BEHIND]: Remote branch has commits not present locally.
-     * - [BranchSyncStatus.DIVERGED]: Both branches have diverged.
-     * - [BranchSyncStatus.ONLY_LOCAL]: Local branch doesn't exist remotely.
-     * - [BranchSyncStatus.ONLY_REMOTE]: Remote branch doesn't exist locally.
-     */
-    suspend fun askForRemoteBranchStatus(socket: Socket): BranchSyncStatus {
-        val localBranches = BranchIndex.getAllBranches()
-
-        val commitMap = localBranches.associate { branchKey ->
-            val branch = Branch.newInstance(branchKey)
-            val head = BranchIndex.getBranchHead(branch.generateKey())
-            val commits = getCommitListFrom(head.generateKey().string)
-            branch.name to commits
-        }
-
-        val response = RemoteChannel(socket).request<BranchSyncStatusResponseMessage>(
-            BranchSyncStatusQueryMessage(BranchSyncStatusQueryData(commitMap.toList()))
-        )
-
-        val currentBranchName = BranchIndex.getCurrentBranch().name
-        val statusEntry = response.payload.objects
-            .firstOrNull { (name, _, _) -> name == currentBranchName }
-
-        return when {
-            response.payload.objects.isEmpty() -> BranchSyncStatus.ONLY_LOCAL
-            statusEntry != null -> statusEntry.second
-            else -> BranchSyncStatus.ONLY_REMOTE
-        }
-    }
-
-    /**
-     * Get the list of commits from a given hash.
-     */
-    fun getCommitListFrom(startHash: String): List<String> {
-        val commitList = mutableListOf<Hash>()
-        var currentHash: Hash? = Hash(startHash)
-
-        while (currentHash != null) {
-            commitList.add(currentHash)
-
-            val commit = Commit.newInstance(currentHash)
-            currentHash = commit.previousCommit
-        }
-
-        return commitList.map { it.string }
-    }
-
     suspend fun askForMissingData(socket: Socket, branch: Branch, remoteHead: Hash?): List<Pair<Hash, ByteArray>> {
         val newData = calculateNewObjects(
             localBranch = branch,
@@ -372,8 +314,8 @@ class PushHandler(val pushDirection: DataProtocol) : CommandHandler() {
         val newData = mutableListOf<Pair<Hash, ByteArray>>()
         val localBranchHead = BranchIndex.getBranchHead(localBranch.generateKey()).generateKey()
 
-        val localCommits = getCommitListFrom(localBranchHead.string)
-        val remoteCommits = remoteHead?.string?.let { getCommitListFrom(it) } ?: emptyList()
+        val localCommits = Utility.getCommitListFrom(localBranchHead.string)
+        val remoteCommits = remoteHead?.string?.let { Utility.getCommitListFrom(it) } ?: emptyList()
 
         val newCommits = localCommits.filterNot { it in remoteCommits }.map { Hash(it) }
 

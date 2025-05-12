@@ -2,6 +2,7 @@ package dev.enric.cli.repo
 
 import dev.enric.cli.TrackitCommand
 import dev.enric.core.handler.repo.StatusHandler
+import kotlinx.coroutines.runBlocking
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 
@@ -73,13 +74,13 @@ class StatusCommand : TrackitCommand() {
      *
      * @return Exit code 0 on success.
      */
-    override fun call(): Int {
+    override fun call(): Int = runBlocking {
         // Ensures any setup from TrackitCommand is performed (e.g., sudo checks, env validation)
         super.call()
 
         // Delegates status computation and printing to the handler
         StatusHandler().printStatus(showIgnored, showUpdated)
 
-        return 0
+        return@runBlocking 0
     }
 }

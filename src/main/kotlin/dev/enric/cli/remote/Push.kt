@@ -1,18 +1,17 @@
 package dev.enric.cli.remote
 
 import dev.enric.cli.TrackitCommand
-import dev.enric.core.handler.admin.RemotePathConfig
 import dev.enric.core.handler.remote.PushHandler
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.User
-import dev.enric.domain.objects.remote.DataProtocol
 import dev.enric.exceptions.*
 import dev.enric.logger.Logger
 import dev.enric.remote.network.handler.RemoteChannel
 import dev.enric.remote.packet.message.data.BranchSyncStatusResponseData.BranchSyncStatus.*
 import dev.enric.remote.packet.query.StatusQueryMessage
 import dev.enric.remote.packet.response.StatusResponseMessage
+import dev.enric.util.common.RemoteUtil
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.TagIndex
 import dev.enric.util.index.UserIndex
@@ -77,7 +76,7 @@ class Push : TrackitCommand() {
 
     override fun call(): Int = runBlocking {
         super.call()
-        val remotePushUrl = loadAndValidateRemotePushUrl()
+        val remotePushUrl = RemoteUtil.loadAndValidateRemotePushUrl()
         val handler = PushHandler(remotePushUrl)
         val socket = handler.connectToRemote()
         val currentBranch = BranchIndex.getBranch(branchName) ?:
@@ -138,18 +137,8 @@ class Push : TrackitCommand() {
         handler.pushTags(socket, tagsHash)
     }
 
-    private fun loadAndValidateRemotePushUrl(): DataProtocol {
-        val (remotePush, _) = RemotePathConfig().load()
-
-        return remotePush?.let { DataProtocol.validateRequest(it) }
-            ?.let { DataProtocol.toDataProtocol(it) }
-            ?: throw RemoteDirectionNotFoundException(
-                "Remote push URL is missing or invalid. Set it using the 'trackit config' command."
-            )
-    }
-
     private suspend fun checkRemoteBranchStatus(handler: PushHandler, socket: Socket, currentBranch: Branch) {
-        when (handler.askForRemoteBranchStatus(socket)) {
+        when (RemoteUtil.askForRemoteBranchStatus(currentBranch.name, socket).first) {
             BEHIND, DIVERGED, ONLY_REMOTE -> throw RemotePullRequestException(
                 "Push aborted: The remote branch is not up to date. Please pull and resolve conflicts first."
             )
