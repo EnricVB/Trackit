@@ -1,7 +1,6 @@
 package dev.enric.cli.stage
 
 import dev.enric.cli.CommandTest
-import dev.enric.cli.repo.StageCommand
 import dev.enric.cli.repo.UnstageCommand
 import dev.enric.core.handler.repo.InitHandler
 import dev.enric.core.handler.repo.StagingHandler
@@ -13,11 +12,13 @@ import dev.enric.util.repository.RepositoryFolderManager
 import org.junit.Before
 import org.junit.Test
 import java.nio.file.Files
+import kotlin.io.path.ExperimentalPathApi
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+@ExperimentalPathApi
 class StageCommandCommandTest : CommandTest() {
 
     companion object {
@@ -49,7 +50,7 @@ class StageCommandCommandTest : CommandTest() {
         Files.writeString(path, "content")
 
         // When
-        StageCommand().stageFile(path)
+        StagingHandler(false).stagePath(path)
 
         // Then
         val relativizedPath = RepositoryFolderManager().getInitFolderPath().relativize(path)
@@ -77,7 +78,7 @@ class StageCommandCommandTest : CommandTest() {
         Files.writeString(file2, "content2")
 
         // When
-        StageCommand().stageFolder(folder)
+        StagingHandler(false).stagePath(folder)
 
         // Then
         val relativizedPath1 = RepositoryFolderManager().getInitFolderPath().relativize(file1)
@@ -102,7 +103,7 @@ class StageCommandCommandTest : CommandTest() {
         val path = RepositoryFolderManager().getInitFolderPath().resolve(FILE_PATH)
 
         // When
-        assertFailsWith<IllegalStateException> { StageCommand().stageFile(path) }
+        assertFailsWith<IllegalStateException> { StagingHandler(false).stagePath(path) }
 
         // Then
         val relativizedPath = RepositoryFolderManager().getInitFolderPath().relativize(path)
@@ -119,7 +120,7 @@ class StageCommandCommandTest : CommandTest() {
         val path = RepositoryFolderManager().getSecretKeyPath()
 
         // When
-        StageCommand().stageFile(path)
+        StagingHandler(false).stagePath(path)
 
         // Then
         assertEquals(1, StagingHandler.StagingCache.getStagedFiles().size)
@@ -133,10 +134,7 @@ class StageCommandCommandTest : CommandTest() {
         val path = RepositoryFolderManager().getSecretKeyPath()
 
         // When
-        val stage = StageCommand()
-        stage.force = true
-
-        stage.stageFile(path)
+        StagingHandler(true).stagePath(path)
 
         // Then
         assertEquals(2, StagingHandler.StagingCache.getStagedFiles().size)
@@ -151,7 +149,7 @@ class StageCommandCommandTest : CommandTest() {
         path.toFile().createNewFile()
         Files.writeString(path, "content")
 
-        StageCommand().stageFile(path)
+        StagingHandler(false).stagePath(path)
 
         // When
         UnstageCommand().unstageFile(path)
@@ -179,7 +177,7 @@ class StageCommandCommandTest : CommandTest() {
         Files.writeString(file1, "content1")
         Files.writeString(file2, "content2")
 
-        StageCommand().stageFolder(folder)
+        StagingHandler(false).stagePath(folder)
 
         // When
         UnstageCommand().unstageFolder(folder)

@@ -16,8 +16,10 @@ import dev.enric.util.index.CommitIndex
 import dev.enric.util.index.TagIndex
 import org.junit.Before
 import org.junit.Test
+import kotlin.io.path.ExperimentalPathApi
 import kotlin.test.*
 
+@ExperimentalPathApi
 class CommitCommandCommandTest : CommandTest() {
 
     companion object {
@@ -113,7 +115,7 @@ class CommitCommandCommandTest : CommandTest() {
 
         // Then
         assertFailsWith<InvalidPermissionException> { commitHandler.canDoCommit() }
-        assertFalse { StagingHandler.StagingCache.getStagedFiles().isEmpty() }
+        assertFalse { StagingCache.getStagedFiles().isEmpty() }
         assertNull(CommitIndex.getCurrentCommit())
     }
 
@@ -140,7 +142,7 @@ class CommitCommandCommandTest : CommandTest() {
         // Then
         val indexCommit = CommitIndex.getCurrentCommit()!!
 
-        assertTrue { StagingHandler.StagingCache.getStagedFiles().isEmpty() }
+        assertTrue { StagingCache.getStagedFiles().isEmpty() }
 
         // Assert that the commit is not null and has the expected properties
         assertNotNull(indexCommit)
@@ -177,7 +179,7 @@ class CommitCommandCommandTest : CommandTest() {
         // Then
         val indexCommit = CommitIndex.getCurrentCommit()!!
 
-        assertTrue { StagingHandler.StagingCache.getStagedFiles().isEmpty() }
+        assertTrue { StagingCache.getStagedFiles().isEmpty() }
 
         // Assert that the commit is not null and has the expected properties
         assertNotNull(indexCommit)

@@ -93,9 +93,9 @@ class InitCommandCommandTest : CommandTest() {
 
         val projectManager = RoleIndex.getRoleByName("projectManager") ?: error("Role projectManager not found")
 
-        assertEquals("projectManager", projectManager.name)       // Check the role name
+        assertEquals("projectManager", projectManager.name)        // Check the role name
         assertEquals(2, projectManager.permissionLevel)           // Check the role permission level
-        assertContains(projectManager.permissions, musaRolePermission.generateKey())  // Check the role permissions
+        assertContains(projectManager.permissions, musaRolePermission.generateKey())   // Check the role permissions
         assertContains(projectManager.permissions, branchPermission.generateKey())    // Check the role permissions
 
         /* Check the undefined role */
@@ -104,7 +104,7 @@ class InitCommandCommandTest : CommandTest() {
 
         assertEquals("undefined", undefined.name)       // Check the role name
         assertEquals(Int.MAX_VALUE, undefined.permissionLevel)  // Check the role permission level
-        assertFalse { undefined.permissions.contains(branchPermission.generateKey()) } // Check does not have branch permission
+        assertFalse { undefined.permissions.contains(branchPermission.generateKey()) }  // Check does not have branch permission
         assertContains(undefined.permissions, noneRolePermission.generateKey())        // Check the role permissions
     }
 }

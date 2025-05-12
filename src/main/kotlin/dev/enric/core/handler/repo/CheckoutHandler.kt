@@ -82,16 +82,16 @@ class CheckoutHandler(
                 Files.writeString(
                     file,
                     String(Content.newInstance(tree.content).content),
-                    StandardOpenOption.TRUNCATE_EXISTING,
                     StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING,
                     StandardOpenOption.WRITE
                 )
             } catch (e: Exception) {
-                Logger.error("Error while writing file: ${file.pathString}")
+                Logger.error("\nError while writing file: ${file.pathString}")
             }
         }
 
         CommitIndex.setCurrentCommit(commit.generateKey())
-        Logger.info("Checkout successful.")
+        Logger.info("\nCheckout successful.")
     }
 }

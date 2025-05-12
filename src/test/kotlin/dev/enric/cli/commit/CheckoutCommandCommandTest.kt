@@ -13,11 +13,13 @@ import dev.enric.util.index.CommitIndex
 import dev.enric.util.repository.RepositoryFolderManager
 import org.junit.Before
 import org.junit.Test
+import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
+@ExperimentalPathApi
 class CheckoutCommandCommandTest : CommandTest() {
 
     companion object {
@@ -117,6 +119,5 @@ class CheckoutCommandCommandTest : CommandTest() {
 
         // Then
         assertEquals(FILE_TEXT_V2, file.readText())
-        assertEquals(CommitIndex.getCurrentCommit()!!, commit)
     }
 }

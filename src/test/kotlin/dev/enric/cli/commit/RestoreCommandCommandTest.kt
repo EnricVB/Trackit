@@ -14,11 +14,13 @@ import dev.enric.util.index.CommitIndex
 import dev.enric.util.repository.RepositoryFolderManager
 import org.junit.Before
 import org.junit.Test
+import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
+@ExperimentalPathApi
 class RestoreCommandCommandTest : CommandTest() {
 
     companion object {
