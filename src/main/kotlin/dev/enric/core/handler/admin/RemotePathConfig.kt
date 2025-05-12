@@ -61,4 +61,22 @@ class RemotePathConfig(
 
         return Pair(push, fetch)
     }
+
+    /**
+     * Checks if the remote push URL is set in the configuration.
+     *
+     * @return True if the remote push URL is set, false otherwise.
+     */
+    fun isRemotePushSet(): Boolean {
+        return load().first != null
+    }
+
+    /**
+     * Checks if the remote fetch URL is set in the configuration.
+     *
+     * @return True if the remote fetch URL is set, false otherwise.
+     */
+    fun isRemoteFetchSet(): Boolean {
+        return load().second != null
+    }
 }

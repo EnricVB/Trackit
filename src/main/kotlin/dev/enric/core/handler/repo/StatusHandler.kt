@@ -1,6 +1,7 @@
 package dev.enric.core.handler.repo
 
 import dev.enric.core.handler.CommandHandler
+import dev.enric.core.handler.admin.RemotePathConfig
 import dev.enric.core.handler.remote.PushHandler
 import dev.enric.core.handler.repo.StagingHandler.StagingCache
 import dev.enric.domain.objects.User
@@ -57,6 +58,10 @@ class StatusHandler : CommandHandler() {
 
     suspend fun printRemoteStatus() {
         try {
+            if (!RemotePathConfig().isRemotePushSet()) {
+                return
+            }
+
             val remotePushUrl = RemoteUtil.loadAndValidateRemotePushUrl()
             val handler = PushHandler(remotePushUrl)
             val socket = handler.connectToRemote()
