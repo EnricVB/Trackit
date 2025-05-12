@@ -1,10 +1,7 @@
 package dev.enric.util.common
 
-import dev.enric.core.handler.admin.RemotePathConfig
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Commit
-import dev.enric.domain.objects.remote.DataProtocol
-import dev.enric.exceptions.RemoteDirectionNotFoundException
 import dev.enric.logger.Logger
 import java.sql.Timestamp
 import java.time.LocalDateTime
@@ -46,11 +43,11 @@ object Utility {
             while (!Thread.currentThread().isInterrupted) {
                 val dotString = ".".repeat(dots + 1)
                 Logger.updateLine("$dotString   ")
-                Thread.sleep(1000)
+                Thread.sleep(700)
                 dots = (dots + 1) % 3
             }
 
-            Logger.updateLine("\n")
+            Logger.updateLine("\r\n")
         }
         progressThread.start()
     }
