@@ -46,6 +46,7 @@ bin/
 
 ### Trackit ###
 /tktFolder/
+tktFolder
 .idea/
 docker/jar
 docker/trackit

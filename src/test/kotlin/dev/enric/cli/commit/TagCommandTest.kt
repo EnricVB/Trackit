@@ -12,11 +12,13 @@ import dev.enric.util.common.console.SystemConsoleInput
 import dev.enric.util.index.TagIndex
 import org.junit.Before
 import org.junit.Test
+import kotlin.io.path.ExperimentalPathApi
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.fail
 
+@ExperimentalPathApi
 class TagCommandTest : CommandTest() {
 
     companion object {

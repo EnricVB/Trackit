@@ -64,17 +64,6 @@ class StatusCommand : TrackitCommand() {
     var showUpdated: Boolean = false
 
     /**
-     * Print files option for the log command.
-     *
-     * This option is used to filter the files shown.
-     * By default, the log doesn't show files.
-     */
-    @Option(
-        names = ["--print-files", "-p"], description = ["Indicates if should print files status or just repository status."], required = false
-    )
-    var printFiles: Boolean = false
-
-    /**
      * Executes the status check on the current repository.
      *
      * Flow:
@@ -89,7 +78,7 @@ class StatusCommand : TrackitCommand() {
         super.call()
 
         // Delegates status computation and printing to the handler
-        StatusHandler().printStatus(printFiles, showIgnored, showUpdated)
+        StatusHandler().printStatus(showIgnored, showUpdated)
 
         return 0
     }

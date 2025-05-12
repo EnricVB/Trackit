@@ -35,11 +35,10 @@ class StatusHandler : CommandHandler() {
      * - The latest commit details (hash, author, date).
      * - The list of files grouped by their status (modified, staged, untracked, etc.).
      *
-     * @param shouldPrintFilesStatus If true, the status of files will be printed.
      * @param showIgnored If true, ignored files will be included in the status.
      * @param showUpdated If true, updated files will be included in the status.
      */
-    fun printStatus(shouldPrintFilesStatus: Boolean, showIgnored: Boolean, showUpdated: Boolean) {
+    fun printStatus(showIgnored: Boolean, showUpdated: Boolean) {
         val branch = BranchIndex.getCurrentBranch()
         val currentCommit = CommitIndex.getCurrentCommit()
 
@@ -51,19 +50,17 @@ class StatusHandler : CommandHandler() {
             Logger.info("Date: ${currentCommit.date}")
         }
 
-        if (shouldPrintFilesStatus || showIgnored || showUpdated) {
-            val statusMap = getFilesStatus(showIgnored, showUpdated)
+        val statusMap = getFilesStatus(showIgnored, showUpdated)
 
-            statusMap.forEach { (status, files) ->
-                val pathToShow = files.map {
-                    SerializablePath.of(it.path).relativePath(RepositoryFolderManager().getInitFolderPath()).toString()
-                }
-
-                Logger.info("")
-                Logger.info(status.description)
-
-                pathToShow.forEach { file -> Logger.info("\t[${status.symbol}] ${ColorUtil.message(file)}") }
+        statusMap.forEach { (status, files) ->
+            val pathToShow = files.map {
+                SerializablePath.of(it.path).relativePath(RepositoryFolderManager().getInitFolderPath()).toString()
             }
+
+            Logger.info("")
+            Logger.info(status.description)
+
+            pathToShow.forEach { file -> Logger.info("\t[${status.symbol}] ${ColorUtil.message(file)}") }
         }
 
         if (StagingCache.getStagedFiles().isEmpty()) {

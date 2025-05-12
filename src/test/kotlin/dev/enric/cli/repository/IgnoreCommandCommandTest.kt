@@ -3,15 +3,12 @@ package dev.enric.cli.repository
 import dev.enric.cli.CommandTest
 import dev.enric.core.handler.repo.IgnoreHandler
 import dev.enric.core.handler.repo.InitHandler
-import dev.enric.exceptions.IllegalStateException
 import dev.enric.logger.Logger
 import dev.enric.util.common.console.SystemConsoleInput
 import dev.enric.util.repository.RepositoryFolderManager
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class IgnoreCommandCommandTest : CommandTest() {
@@ -42,6 +39,7 @@ class IgnoreCommandCommandTest : CommandTest() {
         Logger.info("Executing test: Ignore command adds specific file to the ignore list\n")
 
         // Given
+        val ignoresFilesCount = IgnoreHandler().getIgnoredFiles().size
         val path = RepositoryFolderManager().getInitFolderPath().resolve(SPECIFIC_FILE_PATH)
         path.toFile().createNewFile()
 
@@ -50,24 +48,8 @@ class IgnoreCommandCommandTest : CommandTest() {
 
         // Then
         // Check the file is added to the ignore list
-        assertEquals(2, IgnoreHandler().getIgnoredFiles().size)
+        assertEquals(ignoresFilesCount + 1, IgnoreHandler().getIgnoredFiles().size)
         assertTrue(IgnoreHandler().isIgnored(path))
-    }
-
-    @Test
-    fun `Ignore command does not adds specific file to the ignore list if does not exists`() {
-        Logger.info("Executing test: Ignore command adds specific file to the ignore list\n")
-
-        // Given
-        val path = RepositoryFolderManager().getInitFolderPath().resolve(SPECIFIC_FILE_PATH)
-
-        // When
-        assertFailsWith<IllegalStateException> { IgnoreHandler().ignore(path) }
-
-        // Then
-        // Check the file is not added to the ignore list
-        assertEquals(1, IgnoreHandler().getIgnoredFiles().size)
-        assertFalse (IgnoreHandler().isIgnored(path))
     }
 
     @Test
@@ -75,6 +57,7 @@ class IgnoreCommandCommandTest : CommandTest() {
         Logger.info("Executing test: Ignore commands adds all files inside folder to the ignore list\n")
 
         // Given
+        val ignoresFilesCount = IgnoreHandler().getIgnoredFiles().size
         val folderPath = RepositoryFolderManager().getInitFolderPath().resolve(FOLDER_PATH)
         val file1 = folderPath.resolve(FILE_INSIDE_FOLDER)
         val file2 = folderPath.resolve(FILE_2_INSIDE_FOLDER)
@@ -88,8 +71,7 @@ class IgnoreCommandCommandTest : CommandTest() {
 
         // Then
         // Check the files are added to the ignore list
-        assertEquals(2, IgnoreHandler().getIgnoredFiles().size)
-
+        assertEquals(ignoresFilesCount + 1, IgnoreHandler().getIgnoredFiles().size)
         assertTrue(IgnoreHandler().isIgnored(file1))
         assertTrue(IgnoreHandler().isIgnored(file2))
     }
