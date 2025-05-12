@@ -68,6 +68,7 @@ data class StagingHandler(val force: Boolean = false) {
             Logger.updateLine("Staging files... [${index + 1} / ${filesToStage.size}] ($percent%)")
         }
 
+        println()
         IS_STAGING_FILES = false
     }
 

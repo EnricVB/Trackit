@@ -58,7 +58,7 @@ enum class FileStatus(val symbol: String, val description: String) {
     /**
      * The file has been deleted and the deletion has been staged.
      */
-    DELETE(
+    DELETED(
         "D",
         """Deleted files:
             |   (use "trackit restore <file>..." to restore the file)""".trimMargin()
@@ -190,7 +190,7 @@ enum class FileStatus(val symbol: String, val description: String) {
             }
 
             val status = when {
-                !file.exists() -> DELETE
+                !file.exists() -> DELETED
                 getStagedFiles().any { it.first == hash } -> STAGED
                 else -> {
                     val contentExists = fileExists(file)
