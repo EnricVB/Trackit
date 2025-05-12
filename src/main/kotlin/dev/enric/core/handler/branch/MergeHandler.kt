@@ -277,7 +277,7 @@ class MergeHandler(
 
         commit.tree.forEach {
             val tree = Tree.newInstance(it)
-            val filePath = Path.of(tree.serializablePath.pathString)
+            val filePath = tree.serializablePath.toPath()
             val fileContent = String(Content.newInstance(tree.content).content)
 
             files[filePath] = fileContent

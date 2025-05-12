@@ -72,7 +72,7 @@ class CheckoutHandler(
 
         commit.tree.forEach {
             val tree = Tree.newInstance(it)
-            val relativePath = Path.of(tree.serializablePath.pathString)
+            val relativePath = tree.serializablePath.toPath()
             val file = repoRoot.resolve(relativePath)
             if (!file.parent.exists()) {
                 file.parent.createDirectories()
