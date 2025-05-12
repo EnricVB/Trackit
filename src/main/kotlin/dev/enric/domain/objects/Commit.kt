@@ -57,7 +57,7 @@ data class Commit(
         tree.forEach {
             val tree = Tree.newInstance(it)
 
-            if (tree.serializablePath.pathString == path.toString() && tree.content == content.generateKey()) {
+            if (tree.serializablePath.toPath().toString() == path.toString() && tree.content == content.generateKey()) {
                 return tree
             }
         }

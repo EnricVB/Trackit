@@ -1,5 +1,6 @@
 package dev.enric.util.common
 
+import java.io.File
 import java.io.Serializable
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -7,7 +8,7 @@ import java.nio.file.Paths
 /**
  * SerializablePath is a wrapper class for Path that allows it to be serialized.
  */
-data class SerializablePath(val pathString: String) : Serializable {
+data class SerializablePath(private val pathString: String) : Serializable {
 
     constructor(path: Path) : this(path.toString())
 
@@ -22,7 +23,7 @@ data class SerializablePath(val pathString: String) : Serializable {
         return normalizedRoot.relativize(normalizedPath)
     }
 
-    fun toPath(): Path = Paths.get(pathString)
+    fun toPath(): Path = Paths.get(pathString.replace("/", File.separator).replace("\\", File.separator))
 
     override fun toString(): String { return pathString }
 
