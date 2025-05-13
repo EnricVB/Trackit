@@ -61,7 +61,7 @@ data class StagingHandler(val force: Boolean = false) {
             val percent = ((index + 1).toFloat() / filesToStage.size) * 100
 
             stage(content, file)
-            Logger.updateLine("Staging files... [${index + 1} / ${filesToStage.size}] ($percent%)")
+            Logger.updateLine("Staging files... [${index + 1} / ${filesToStage.size}] ($percent%)         ")
         }
 
         println()

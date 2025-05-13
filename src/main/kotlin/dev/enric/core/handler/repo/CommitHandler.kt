@@ -69,8 +69,6 @@ class CommitHandler(val commit: Commit) : CommandHandler() {
 
         if (!StagingHandler.hasStagedFiles() && !hasDeletedFilesToCommit) {
             throw IllegalStateException("The staging area is empty. Add files to commit.")
-        } else if (hasDeletedFilesToCommit) {
-            Logger.warning("There are only files to be deleted. The commit will be empty.")
         }
     }
 
