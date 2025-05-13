@@ -5,6 +5,7 @@ import dev.enric.domain.objects.*
 import dev.enric.exceptions.CommitNotFoundException
 import dev.enric.exceptions.InvalidPermissionException
 import dev.enric.logger.Logger
+import dev.enric.util.common.SerializablePath
 import dev.enric.util.index.CommitIndex
 import dev.enric.util.repository.RepositoryFolderManager
 import java.nio.file.Files
@@ -68,12 +69,15 @@ class RestoreHandler(
         }
 
         // Restore the commit's tree structure and content.
-        commit.tree.forEach {
-            val tree = Tree.newInstance(it)
+        commit.tree.forEach { treeHash ->
+            val tree = Tree.newInstance(treeHash)
+            val treePath = tree.serializablePath.relativePath(RepositoryFolderManager().getInitFolderPath())
+            val filePath = file?.toFile()?.toPath()?.let { file -> SerializablePath.of(file) }?.relativePath(RepositoryFolderManager().getInitFolderPath())
+
 
             // Determine if we should restore this file
             val restoreAll = file == null
-            val isCorrectFile = tree.serializablePath.toPath().toFile() == file?.toFile() || restoreAll
+            val isCorrectFile = treePath == filePath || restoreAll
             if (!isCorrectFile) return@forEach
 
             // Ensure parent directories exist

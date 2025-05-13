@@ -29,7 +29,7 @@ import java.nio.file.Path
         "  trackit restore a1b2c3d",
         "    Restores all files from the commit with hash 'a1b2c3d' into the current working directory.",
         "",
-        "  trackit restore README.md a1b2c3d",
+        "  trackit restore a1b2c3d README.md",
         "    Restores the 'README.md' file from the commit with hash 'a1b2c3d' into the working directory.",
         "",
         "Notes:",
@@ -44,25 +44,27 @@ import java.nio.file.Path
 class RestoreCommand : TrackitCommand() {
 
     /**
-     * The file to restore from the commit.
-     */
-    @Parameters(
-        paramLabel = "File path",
-        description = ["The file to restore from the commit"],
-        index = "0",
-    )
-    var restoreFile: Path? = null
-
-    /**
      * The hash of the commit to restore from.
      * Supports full and abbreviated hashes.
      */
-    @Parameters(
+    @Option(
+        names = ["-c", "--commit"],
         paramLabel = "Commit Hash",
         description = ["The hash of the commit to restore from"],
-        index = "1",
+        required = false
     )
     var commitHash: String? = null
+
+    /**
+     * The file to restore from the commit.
+     */
+    @Option(
+        names = ["-f", "--file"],
+        paramLabel = "File path",
+        description = ["The file to restore from the commit"],
+        required = false
+    )
+    var restoreFile: Path? = null
 
     /**
      * Executes the restore process.
