@@ -3,7 +3,6 @@ package dev.enric.core.handler.repo
 import dev.enric.core.handler.CommandHandler
 import dev.enric.core.handler.admin.RemotePathConfig
 import dev.enric.core.handler.remote.PushHandler
-import dev.enric.core.handler.repo.StagingHandler.StagingCache
 import dev.enric.domain.objects.User
 import dev.enric.logger.Logger
 import dev.enric.remote.packet.message.data.BranchSyncStatusResponseData.BranchSyncStatus.*
@@ -126,7 +125,7 @@ class StatusHandler : CommandHandler() {
             }
         }
 
-        if (StagingCache.getStagedFiles().isEmpty()) {
+        if (!StagingHandler.hasStagedFiles()) {
             Logger.info("")
             Logger.info("no changes added to commit (use \"trackit stage\" and/or \"trackit commit -a\")")
         }

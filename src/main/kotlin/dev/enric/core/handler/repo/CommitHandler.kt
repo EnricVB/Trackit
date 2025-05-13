@@ -3,7 +3,6 @@ package dev.enric.core.handler.repo
 import dev.enric.cli.repo.StageCommand
 import dev.enric.core.handler.CommandHandler
 import dev.enric.core.handler.repo.StagingHandler.Companion.IS_STAGING_FILES
-import dev.enric.core.handler.repo.StagingHandler.StagingCache
 import dev.enric.domain.Hash
 import dev.enric.core.security.AuthUtil
 import dev.enric.domain.objects.*
@@ -68,7 +67,7 @@ class CommitHandler(val commit: Commit) : CommandHandler() {
             // Wait for the staging process to finish
         }
 
-        if (StagingCache.getStagedFiles().isEmpty() && !hasDeletedFilesToCommit) {
+        if (!StagingHandler.hasStagedFiles() && !hasDeletedFilesToCommit) {
             throw IllegalStateException("The staging area is empty. Add files to commit.")
         } else if (hasDeletedFilesToCommit) {
             Logger.warning("There are only files to be deleted. The commit will be empty.")
@@ -178,7 +177,7 @@ class CommitHandler(val commit: Commit) : CommandHandler() {
      * @return A list of Tree objects representing the commit tree.
      */
     private fun createCommitTree(): List<Tree> {
-        return mapStagedFilesToTree(StagingCache.getStagedFiles())
+        return mapStagedFilesToTree(StagingHandler.loadStagedFiles())
     }
 
     /**
@@ -196,7 +195,10 @@ class CommitHandler(val commit: Commit) : CommandHandler() {
 
             val fileContent = safeFileRead(relativePath.toFile())
 
+            println("\nWriting file: ${relativePath.toString()}")
+
             if (fileContent != null) {
+                println("Adding file: ${relativePath.toString()}")
                 val content = fileContent.encode(true).first
                 return@mapNotNull Tree(SerializablePath.of(relativePath.toString()), content)
             }
