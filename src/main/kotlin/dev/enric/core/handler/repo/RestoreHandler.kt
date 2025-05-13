@@ -80,9 +80,9 @@ class RestoreHandler(
             tree.serializablePath.toPath().parent.toFile().mkdirs()
 
             // Write the content to the file
-            Files.writeString(
+            Files.write(
                 tree.serializablePath.toPath(),
-                String(Content.newInstance(tree.content).content),
+                Content.newInstance(tree.content).content,
                 StandardOpenOption.CREATE,
                 StandardOpenOption.TRUNCATE_EXISTING,
                 StandardOpenOption.WRITE

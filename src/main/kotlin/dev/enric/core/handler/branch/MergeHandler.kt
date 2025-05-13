@@ -76,12 +76,15 @@ class MergeHandler(
         mergedFiles.forEach { file ->
             val (path, content) = file
 
-            Files.writeString(path, content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+            Files.write(path, content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
         }
 
         // If there are no conflicts, commit the changes
         if (autoCommit && !areConflicts) {
-            val commit = Commit(title = "Automatic commit merge from Branch ${mergeBranch?.name}", message = "Merged ${mergeBranch?.name} into ${workingBranch?.name}")
+            val commit = Commit(
+                title = "Automatic commit merge from Branch ${mergeBranch?.name}",
+                message = "Merged ${mergeBranch?.name} into ${workingBranch?.name}"
+            )
             val commitHandler = CommitHandler(commit)
 
             // Initialize commit metadata such as author and confirmer
@@ -116,32 +119,48 @@ class MergeHandler(
      *
      * @return a map of file paths to their merged content
      */
-    fun prepareFileContent(filesToMerge: Map<Path, Triple<String?, String?, String?>>): Map<Path, String> {
+    fun prepareFileContent(filesToMerge: Map<Path, Triple<ByteArray?, ByteArray?, ByteArray?>>): Map<Path, ByteArray> {
         val workingBranchName = workingBranch?.name ?: "CURRENT"
         val mergeBranchName = mergeBranch?.name ?: "THEIRS"
-        val mergedFiles = mutableMapOf<Path, String>()
+        val mergedFiles = mutableMapOf<Path, ByteArray>()
 
         filesToMerge.forEach { (path, triple) ->
             val (baseContent, workingContent, mergeContent) = triple
 
             val result = when {
-                baseContent == workingContent && baseContent == mergeContent -> ConflictResult.SAME
-                baseContent != workingContent && baseContent == mergeContent -> ConflictResult.OURS
-                baseContent == workingContent && baseContent != mergeContent -> ConflictResult.THEIRS
+                baseContent.contentEquals(workingContent) && baseContent.contentEquals(mergeContent) -> ConflictResult.SAME
+                !baseContent.contentEquals(workingContent) && baseContent.contentEquals(mergeContent) -> ConflictResult.OURS
+                baseContent.contentEquals(workingContent) && !baseContent.contentEquals(mergeContent) -> ConflictResult.THEIRS
                 else -> ConflictResult.CONFLICT
             }
 
             when (result) {
-                ConflictResult.SAME -> mergedFiles[path] = baseContent ?: ""
-                ConflictResult.OURS -> mergedFiles[path] = workingContent ?: ""
-                ConflictResult.THEIRS -> mergedFiles[path] = mergeContent ?: ""
+                ConflictResult.SAME -> mergedFiles[path] = baseContent ?: ByteArray(0)
+                ConflictResult.OURS -> mergedFiles[path] = workingContent ?: ByteArray(0)
+                ConflictResult.THEIRS -> mergedFiles[path] = mergeContent ?: ByteArray(0)
                 ConflictResult.CONFLICT -> {
-                    val baseLines = baseContent ?: ""
-                    val workingBranchPair = Pair(workingBranchName, workingContent ?: "")
-                    val mergeBranchPair = Pair(mergeBranchName, mergeContent ?: "")
+                    val baseIsText = baseContent?.let { isProbablyText(it) } ?: false
+                    val workingIsText = workingContent?.let { isProbablyText(it) } ?: false
+                    val mergeIsText = mergeContent?.let { isProbablyText(it) } ?: false
 
-                    val mergedContent = tryMerge(baseLines, workingBranchPair, mergeBranchPair)
-                    mergedFiles[path] = mergedContent
+                    val isText = baseIsText && workingIsText && mergeIsText
+
+                    if (!isText) {
+                        Logger.error("Cannot merge byte files ($path). Please resolve conflicts manually.")
+                        mergedFiles[path] = baseContent ?: ByteArray(0)
+                    } else {
+                        val baseLines = String(baseContent ?: "".toByteArray())
+                        val workingBranchPair = Pair(workingBranchName, String(workingContent ?: "".toByteArray()))
+                        val mergeBranchPair = Pair(mergeBranchName, String(mergeContent ?: "".toByteArray()))
+
+                        val mergedContent = tryMerge(
+                            baseLines,
+                            workingBranchPair,
+                            mergeBranchPair
+                        )
+
+                        mergedFiles[path] = mergedContent.toByteArray()
+                    }
                 }
             }
         }
@@ -233,12 +252,12 @@ class MergeHandler(
      *
      * @return a map of file paths to a triple of their contents (base, ours, theirs)
      */
-    fun getFilesToMerge(): Map<Path, Triple<String?, String?, String?>> {
+    fun getFilesToMerge(): Map<Path, Triple<ByteArray?, ByteArray?, ByteArray?>> {
         val workingBranchFiles = workingBranch?.let { getFilesFromBranch(it) }
         val mergeBranchFiles = mergeBranch?.let { getFilesFromBranch(it) }
         val commonAncestorFiles = getFilesFromCommit(getCommonAncestor())
 
-        val filesToMerge = mutableMapOf<Path, Triple<String?, String?, String?>>()
+        val filesToMerge = mutableMapOf<Path, Triple<ByteArray?, ByteArray?, ByteArray?>>()
 
         val allPaths = mutableSetOf<Path>()
         workingBranchFiles?.keys?.let { allPaths.addAll(it) }
@@ -246,9 +265,9 @@ class MergeHandler(
         commonAncestorFiles.keys.let { allPaths.addAll(it) }
 
         for (path in allPaths) {
-            val baseContent = commonAncestorFiles[path]
-            val workingContent = workingBranchFiles?.get(path)
-            val mergeContent = mergeBranchFiles?.get(path)
+            val baseContent = commonAncestorFiles[path]?.toByteArray()
+            val workingContent = workingBranchFiles?.get(path)?.toByteArray()
+            val mergeContent = mergeBranchFiles?.get(path)?.toByteArray()
 
             filesToMerge[path] = Triple(baseContent, workingContent, mergeContent)
         }
@@ -319,6 +338,15 @@ class MergeHandler(
         }
 
         return ancestors
+    }
+
+    fun isProbablyText(bytes: ByteArray): Boolean {
+        return try {
+            val str = bytes.toString(Charsets.UTF_8)
+            str.all { it.isLetterOrDigit() || it.isWhitespace() || it in ' '..'~' }
+        } catch (e: Exception) {
+            false
+        }
     }
 
     enum class ConflictResult {

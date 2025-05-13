@@ -7,7 +7,6 @@ import dev.enric.logger.Logger
 import dev.enric.util.index.CommitIndex
 import dev.enric.util.repository.RepositoryFolderManager
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import kotlin.io.path.*
 
@@ -79,9 +78,11 @@ class CheckoutHandler(
             }
 
             try {
-                Files.writeString(
+                println("\nWriting file: ${file.pathString}")
+
+                Files.write(
                     file,
-                    String(Content.newInstance(tree.content).content),
+                    Content.newInstance(tree.content).content,
                     StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING,
                     StandardOpenOption.WRITE
