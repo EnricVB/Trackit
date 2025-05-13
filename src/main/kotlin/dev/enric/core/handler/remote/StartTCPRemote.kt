@@ -7,7 +7,7 @@ import dev.enric.logger.Logger
 import java.io.PrintWriter
 import java.net.Socket
 
-class StartSSHRemote {
+class StartTCPRemote {
 
     // TODO: Dont use the clean password, use TLS
     fun connection(username: String, password: String, host: String, port: Int, path: String): Socket {

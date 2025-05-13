@@ -41,7 +41,7 @@ class PushHandler(val pushDirection: DataProtocol) : CommandHandler() {
      * @return A socket connected to the remote server.
      */
     fun connectToRemote(): Socket {
-        val socket = StartSSHRemote().connection(
+        val socket = StartTCPRemote().connection(
             username = pushDirection.user ?: error("Missing username in push URL configuration."),
             password = pushDirection.password ?: error("Missing password in push URL configuration."),
             host = pushDirection.host ?: error("Missing host in push URL configuration."),

@@ -29,20 +29,20 @@ class RemoteReceiver(
             }
 
         } catch (e: Exception) {
-            Logger.error("Could not start SSHReceiver: ${e.message}")
+            Logger.error("Could not start TCPReceiver: ${e.message}")
         } finally {
             serverSocket?.close()
         }
     }
 
     /**
-     * Starts the SSH server and listens for incoming connections.
+     * Starts the TCP server and listens for incoming connections.
      *
-     * This method is called to initiate the SSH server and start accepting connections.
+     * This method is called to initiate the TCP server and start accepting connections.
      * It runs in a separate thread to avoid blocking the main thread.
      */
     fun startConnection(connection: RemoteConnection) {
-        // Start the SSH server and listen for incoming connections
+        // Start the TCP server and listen for incoming connections
         val remoteChannel = RemoteChannel(connection.socket)
 
         launch {
@@ -58,7 +58,7 @@ class RemoteReceiver(
                 receivingJob.join()
                 processingJob.join()
             } catch (e: Exception) {
-                Logger.error("Unexpected error in SSHReceiver: ${e.message}")
+                Logger.error("Unexpected error in TCPReceiver: ${e.message}")
             } finally {
                 connection.close()
             }
@@ -66,7 +66,7 @@ class RemoteReceiver(
     }
 
     /**
-     * Continuously receives messages from the SSH connection and puts them into the queue.
+     * Continuously receives messages from the TCP connection and puts them into the queue.
      */
     private suspend fun startReceivingMessages(connection: RemoteConnection) {
         val remoteChannel = RemoteChannel(connection.socket)
