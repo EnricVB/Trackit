@@ -29,4 +29,21 @@ object Utility {
 
         return commitList.map { it.string }
     }
+
+    fun openInBrowser(url: String) {
+        val os = System.getProperty("os.name").lowercase()
+
+        val processBuilder = when {
+            os.contains("win") -> ProcessBuilder("rundll32", "url.dll,FileProtocolHandler", url)
+            os.contains("mac") -> ProcessBuilder("open", url)
+            os.contains("nix") || os.contains("nux") || os.contains("aix") -> ProcessBuilder("xdg-open", url)
+            else -> throw UnsupportedOperationException("Unsupported OS: $os. Unable to open URL $url.")
+        }
+
+        try {
+            processBuilder.start()
+        } catch (e: Exception) {
+            println("Error al intentar abrir el navegador: ${e.message}")
+        }
+    }
 }

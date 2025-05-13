@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "dev.zanckor"
-version = "1.0-SNAPSHOT"
+version = ""
 
 repositories {
     gradlePluginPortal()
