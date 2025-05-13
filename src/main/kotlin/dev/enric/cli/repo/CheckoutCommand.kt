@@ -7,6 +7,7 @@ import dev.enric.domain.Hash.HashType.BRANCH
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
 import dev.enric.exceptions.IllegalArgumentValueException
+import dev.enric.logger.Logger
 import dev.enric.util.index.BranchIndex
 import dev.enric.util.index.CommitIndex
 import picocli.CommandLine.*
@@ -78,7 +79,11 @@ class CheckoutCommand : TrackitCommand() {
 
         if (clean) {
             checkoutHandler.preCheckout()
+        } else {
+            Logger.warning("--clean option is not set. Working Area files will not be cleared with current changes.")
+            Logger.warning("If you checkout to a previous commit, the changes will remain.")
         }
+
         checkoutHandler.checkout()
 
         return 0

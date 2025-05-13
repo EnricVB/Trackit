@@ -53,12 +53,10 @@ class MergeHandler(
             val stagingIsEmpty = StagingHandler.loadStagedFiles().isEmpty()
             val workingAreaUpToDate = !StatusHandler().getFilesStatus().containsKey(FileStatus.MODIFIED)
 
-            if (!workingAreaUpToDate) {
-                throw IllegalStateException("Working area is not clean. Please commit or stash your changes before merging or use '--force'.")
-            } else if (!stagingIsEmpty) {
-                throw IllegalStateException("Staging area is not empty. Please commit or stash your changes before merging or use '--force'.")
-            } else if (getFilesToMerge().isEmpty()) {
-                throw IllegalStateException("No files to merge. Please check the branches and try again.")
+            when {
+                !workingAreaUpToDate -> throw IllegalStateException("Working area is not clean. Please commit or stash your changes before merging or use '--force'.")
+                !stagingIsEmpty -> throw IllegalStateException("Staging area is not empty. Please commit or stash your changes before merging or use '--force'.")
+                getFilesToMerge().isEmpty() -> throw IllegalStateException("No files to merge. Please check the branches and try again.")
             }
         }
 

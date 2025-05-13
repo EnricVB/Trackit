@@ -73,11 +73,11 @@ class RestoreHandler(
 
             // Determine if we should restore this file
             val restoreAll = file == null
-            val isCorrectFile = tree.serializablePath.toPath().toString() == file?.toString() || restoreAll
+            val isCorrectFile = tree.serializablePath.toPath().toFile() == file?.toFile() || restoreAll
             if (!isCorrectFile) return@forEach
 
             // Ensure parent directories exist
-            tree.serializablePath.toPath().parent.toFile().mkdirs()
+            tree.serializablePath.toPath().toFile().mkdirs()
 
             // Write the content to the file
             Files.write(
