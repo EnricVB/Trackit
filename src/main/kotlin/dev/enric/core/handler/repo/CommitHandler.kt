@@ -195,10 +195,7 @@ class CommitHandler(val commit: Commit) : CommandHandler() {
 
             val fileContent = safeFileRead(relativePath.toFile())
 
-            println("\nWriting file: ${relativePath.toString()}")
-
             if (fileContent != null) {
-                println("Adding file: ${relativePath.toString()}")
                 val content = fileContent.encode(true).first
                 return@mapNotNull Tree(SerializablePath.of(relativePath.toString()), content)
             }
