@@ -1,7 +1,7 @@
 package dev.enric.util.common
 
 import dev.enric.core.handler.repo.IgnoreHandler
-import dev.enric.core.handler.repo.StagingHandler.StagingCache.getStagedFiles
+import dev.enric.core.handler.repo.StagingHandler
 import dev.enric.domain.objects.Content
 import dev.enric.domain.objects.Tree
 import dev.enric.util.index.CommitIndex
@@ -184,6 +184,7 @@ enum class FileStatus(val symbol: String, val description: String) {
         fun getStatus(file: File): FileStatus {
             val hash = Content(file.readBytes()).generateKey()
             val filePath = file.path
+            val stagingFiles = StagingHandler.loadStagedFiles()
 
             fileStatusCache[filePath]?.let {
                 return it
@@ -191,7 +192,7 @@ enum class FileStatus(val symbol: String, val description: String) {
 
             val status = when {
                 !file.exists() -> DELETED
-                getStagedFiles().any { it.first == hash } -> STAGED
+                stagingFiles.any { it.first == hash } -> STAGED
                 else -> {
                     val contentExists = fileExists(file)
                     val isUpToDate = isUpToDate(file)
