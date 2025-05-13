@@ -44,7 +44,7 @@ class RemoteConnection(val socket: Socket) {
             outputStream.close()
             socket.close()
         } catch (e: IOException) {
-            Logger.error("Failed to close SSH connection: ${e.message}")
+            Logger.error("Failed to close TCP connection: ${e.message}")
         }
     }
 }
