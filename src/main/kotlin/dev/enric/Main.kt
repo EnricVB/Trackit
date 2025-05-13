@@ -30,7 +30,7 @@ import kotlin.io.path.ExperimentalPathApi
 @Command(
     name = "trackit",
     mixinStandardHelpOptions = true,
-    version = ["Trackit 1.2.13-BETA"],
+    version = ["Trackit 1.2.14-BETA"],
     description = ["Track your files"],
     subcommands = [
         InitCommand::class, ConfigCommand::class, IgnoreCommand::class,
