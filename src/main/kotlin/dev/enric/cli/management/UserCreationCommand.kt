@@ -49,14 +49,14 @@ class UserCreationCommand : TrackitCommand() {
      * The username for the new user.
      * Must be unique within the system.
      */
-    @Option(names = ["--name", "-n"], description = ["User name."], interactive = true)
+    @Option(names = ["--name", "-n"], description = ["User name."])
     var name: String = ""
 
     /**
      * The password for the user.
      * If omitted, the password will be prompted interactively (if environment supports it).
      */
-    @Option(names = ["--password", "-p"], description = ["User password."], interactive = true, echo = false)
+    @Option(names = ["--password", "-p"], description = ["User password."])
     var password: String = ""
 
     /**
