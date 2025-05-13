@@ -17,6 +17,7 @@ import dev.enric.cli.remote.Push
 import dev.enric.cli.repo.*
 import dev.enric.exceptions.TrackitException
 import dev.enric.logger.Logger
+import dev.enric.util.common.Utility
 import dev.enric.util.repository.RepositoryFolderManager
 import org.fusesource.jansi.AnsiConsole
 import picocli.CommandLine
@@ -24,6 +25,7 @@ import picocli.CommandLine.Command
 import picocli.CommandLine.Help.Ansi
 import kotlin.system.exitProcess
 import picocli.CommandLine.Help.ColorScheme
+import picocli.CommandLine.Option
 import kotlin.io.path.ExperimentalPathApi
 
 @ExperimentalPathApi
@@ -58,7 +60,12 @@ import kotlin.io.path.ExperimentalPathApi
 )
 class Main : TrackitCommand() {
 
-
+    @Option(
+        names = ["--online-help"],
+        description = ["Show this help message and exit"],
+        order = 0
+    )
+    var onlineHelpRequested: Boolean = false
 
     companion object {
         @JvmStatic
@@ -127,6 +134,12 @@ class Main : TrackitCommand() {
 
 
     override fun call(): Int {
+        if (onlineHelpRequested) {
+            Utility.openInBrowser("https://trackit-vsc.vercel.app/")
+
+            return 0
+        }
+
         CommandLine.usage(this, System.out)
 
         return 0
