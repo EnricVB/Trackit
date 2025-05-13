@@ -27,10 +27,6 @@ data class StagingHandler(val force: Boolean = false) {
     private val stagingIndex = repositoryFolderManager.getStagingIndexPath()
     private val lock = ReentrantLock()
 
-    init {
-        StagingCache.loadStagedFiles()
-    }
-
     /**
      * Stages a file or directory to be committed.
      * If the path is a directory, all files inside it will be staged.
@@ -149,7 +145,6 @@ data class StagingHandler(val force: Boolean = false) {
         if (checkIfOutdated(hash, relativePath)) return replaceOutdatedFile(hash, relativePath)
         if (!checkIfStaged(hash, relativePath)) return stageNewFile(hash, relativePath)
 
-        StagingCache.saveStagedFile(hash, relativePath)
         return false
     }
 
@@ -160,7 +155,7 @@ data class StagingHandler(val force: Boolean = false) {
      * @return True if the file was successfully staged, false otherwise.
      */
     private fun stageNewFile(hash: Hash, relativePath: Path): Boolean {
-        if (StagingCache.containsHash(hash)) return false
+        if (containsHash(hash)) return false
 
         return try {
             lock.withLock {
@@ -279,7 +274,7 @@ data class StagingHandler(val force: Boolean = false) {
      * @return True if the file is staged, false otherwise
      */
     private fun checkIfStaged(hash: Hash, path: Path): Boolean {
-        val indexCache = StagingCache.getStagedFiles().associate { it.first to it.second }
+        val indexCache = loadStagedFiles().associate { it.first to it.second }
         return indexCache.contains(hash) && indexCache[hash] == path
     }
 
@@ -290,31 +285,16 @@ data class StagingHandler(val force: Boolean = false) {
      * @return True if the staged file is present and has the same content, false otherwise
      */
     private fun checkIfOutdated(hash: Hash, path: Path): Boolean {
-        val indexCache = StagingCache.getStagedFiles().associate { it.first to it.second }
+        val indexCache = loadStagedFiles().associate { it.first to it.second }
         return indexCache.contains(hash) && indexCache[hash] != path
     }
 
-    object StagingCache {
-        private var stagedFiles: List<Pair<Hash, Path>> = emptyList()
-
-        fun getStagedFiles(): List<Pair<Hash, Path>> {
-            if (stagedFiles.isEmpty()) {
-                stagedFiles = loadStagedFiles()
-            }
-
-            return stagedFiles
-        }
+    companion object {
+        @Volatile
+        var IS_STAGING_FILES: Boolean = false
 
         fun containsHash(hash: Hash): Boolean {
-            return getStagedFiles().any { it.first == hash }
-        }
-
-        fun saveStagedFile(hash: Hash, path: Path) {
-            stagedFiles = getStagedFiles() + Pair(hash, path)
-        }
-
-        fun clearStagedFiles() {
-            stagedFiles = emptyList()
+            return loadStagedFiles().any { it.first == hash }
         }
 
         fun loadStagedFiles(): List<Pair<Hash, Path>> {
@@ -335,11 +315,6 @@ data class StagingHandler(val force: Boolean = false) {
 
             return stagedFiles
         }
-    }
-
-    companion object {
-        @Volatile
-        var IS_STAGING_FILES: Boolean = false
 
         /**
          * Clears the staging area.
@@ -352,9 +327,20 @@ data class StagingHandler(val force: Boolean = false) {
 
             try {
                 Files.write(stagingIndex, byteArrayOf())
-                StagingCache.clearStagedFiles()
             } catch (e: IOException) {
                 Logger.error("Error clearing staging area ${e.printStackTrace()}")
+            }
+        }
+
+        fun hasStagedFiles(): Boolean {
+            val repositoryFolderManager = RepositoryFolderManager()
+            val stagingIndex = repositoryFolderManager.getStagingIndexPath()
+
+            return try {
+                Files.size(stagingIndex) > 0
+            } catch (e: IOException) {
+                Logger.error("Error checking if staging area is empty ${e.printStackTrace()}")
+                false
             }
         }
     }

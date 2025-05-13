@@ -5,7 +5,7 @@ import com.github.difflib.text.DiffRow.Tag.*
 import com.github.difflib.text.DiffRowGenerator
 import dev.enric.core.handler.CommandHandler
 import dev.enric.core.handler.repo.IgnoreHandler
-import dev.enric.core.handler.repo.StagingHandler.StagingCache
+import dev.enric.core.handler.repo.StagingHandler
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Commit
 import dev.enric.domain.objects.Content
@@ -162,7 +162,7 @@ data class DiffHandler(
      * @return List of Tree hashes representing staged files.
      */
     private fun getStagingAreaHashes(): List<Hash> {
-        return StagingCache.getStagedFiles().map {
+        return StagingHandler.loadStagedFiles().map {
             val tree = Tree(it.second, it.first)
             tree.encode(true).first
         }

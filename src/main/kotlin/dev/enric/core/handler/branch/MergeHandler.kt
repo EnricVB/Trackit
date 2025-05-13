@@ -2,7 +2,7 @@ package dev.enric.core.handler.branch
 
 import dev.enric.core.handler.CommandHandler
 import dev.enric.core.handler.repo.CommitHandler
-import dev.enric.core.handler.repo.StagingHandler.StagingCache
+import dev.enric.core.handler.repo.StagingHandler
 import dev.enric.core.handler.repo.StatusHandler
 import dev.enric.domain.objects.Branch
 import dev.enric.domain.objects.Commit
@@ -50,7 +50,7 @@ class MergeHandler(
 
         // If the user has not used the --force option, check if the working area is clean
         if (!force) {
-            val stagingIsEmpty = StagingCache.getStagedFiles().isEmpty()
+            val stagingIsEmpty = StagingHandler.loadStagedFiles().isEmpty()
             val workingAreaUpToDate = !StatusHandler().getFilesStatus().containsKey(FileStatus.MODIFIED)
 
             if (!workingAreaUpToDate) {
