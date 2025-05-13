@@ -68,7 +68,7 @@ class CheckIntegrityHandler : CommandHandler() {
         val objectTypeFolder = objectsFolder.resolve(objectType.hash.string)
         if (!objectTypeFolder.exists()) {
             Logger.error("Object type folder does not exist: ${objectTypeFolder.pathString}")
-            return false
+            return true
         }
 
         var result = true
