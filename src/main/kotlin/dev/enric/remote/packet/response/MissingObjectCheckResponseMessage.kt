@@ -1,9 +1,6 @@
 package dev.enric.remote.packet.response
 
-import dev.enric.domain.Hash
-import dev.enric.logger.Logger
 import dev.enric.remote.ITrackitMessage
-import dev.enric.remote.network.serialize.DeserializerHandler
 import dev.enric.remote.network.serialize.MessageFactory.MessageType
 import dev.enric.remote.packet.message.data.MissingObjectCheckData
 import java.net.Socket

@@ -108,14 +108,14 @@ data class DiffHandler(
         // Populate map1 with paths and hashes from treeList1
         treeList1.forEach { hash ->
             val tree = Tree.newInstance(hash)
-            val realPath = tree.serializablePath.toPath().toRealPath().normalize().relativeTo(repoRoot)
+            val realPath = tree.serializablePath.toPath().normalize().relativeTo(repoRoot)
             map1[realPath] = tree.content
         }
 
         // Populate map2 with paths and hashes from treeList2
         treeList2.forEach { hash ->
             val tree = Tree.newInstance(hash)
-            val realPath = tree.serializablePath.toPath().toRealPath().normalize().relativeTo(repoRoot)
+            val realPath = tree.serializablePath.toPath().normalize().relativeTo(repoRoot)
             map2[realPath] = tree.content
         }
 
@@ -203,7 +203,7 @@ data class DiffHandler(
                 CHANGE -> diff.appendLine(
                     """
                     - ${if (it.oldLine.isNotBlank()) ColorUtil.deleteLine(it.oldLine) else ""}
-                    + ${if (it.newLine.isNotBlank()) ColorUtil.deleteLine(it.newLine) else ""}"""
+                    + ${if (it.newLine.isNotBlank()) ColorUtil.insertLine(it.newLine) else ""}"""
                 )
 
                 else -> diff.appendLine("  ${it.oldLine}")
