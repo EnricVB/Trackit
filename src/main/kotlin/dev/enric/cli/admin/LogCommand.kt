@@ -171,6 +171,11 @@ class LogCommand : TrackitCommand() {
     override fun call(): Int {
         super.call()
 
+        // If inline option is set, print inline log replacing the default format
+        if (inline) {
+            format = "{chS} - {an} <{ahS}> : {title} - {message}"
+        }
+
         // Show the commit history
         val logHandler = LogHandler(
             format,
@@ -180,11 +185,6 @@ class LogCommand : TrackitCommand() {
             parseDateTime(until),
             message
         )
-
-        // If inline option is set, print inline log replacing the default format
-        if (inline) {
-            format = "{chS} - {an} <{ahS}> : {title} - {message}"
-        }
 
         // Depending if oneline option is introduced, print inline or formatted log
         if (graph) {

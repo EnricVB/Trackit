@@ -242,16 +242,6 @@ class LogHandler(
     }
 
     /**
-     * This function should be called before buildConnectionLines to ensure branches are correctly ordered
-     * @param branches List of branches to sort
-     * @return Sorted list of branches with newer branches on the right
-     */
-    private fun sortBranchesByCreationDate(branches: List<Branch>): List<Branch> {
-        // Sort branches by creation date - oldest first
-        return branches.sortedBy { it.creationDate }
-    }
-
-    /**
      * Prints commit details to the logger.
      * The output format can be customized using the provided format string.
      *
