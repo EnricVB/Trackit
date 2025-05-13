@@ -213,7 +213,7 @@ class CommitHandler(val commit: Commit) : CommandHandler() {
     private fun safeFileRead(file: File): Content? {
         return try {
             FileChannel.open(file.toPath(), StandardOpenOption.READ).use {
-                Content(Files.readString(file.toPath()).toByteArray())
+                Content(Files.readAllBytes(file.toPath()))
             }
         } catch (exception: Exception) {
             null
