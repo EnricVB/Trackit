@@ -56,7 +56,6 @@ class StageCommand : TrackitCommand() {
 
         stagingHandler.stagePath(stagePath)
 
-        println()
         return 0
     }
 }

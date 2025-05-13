@@ -149,6 +149,7 @@ data class StagingHandler(val force: Boolean = false) {
         if (checkIfOutdated(hash, relativePath)) return replaceOutdatedFile(hash, relativePath)
         if (!checkIfStaged(hash, relativePath)) return stageNewFile(hash, relativePath)
 
+        StagingCache.saveStagedFile(hash, relativePath)
         return false
     }
 
@@ -170,7 +171,6 @@ data class StagingHandler(val force: Boolean = false) {
                 )
             }
 
-            StagingCache.saveStagedFile(hash, relativePath)
             true
         } catch (e: IOException) {
             Logger.error("Error staging file $relativePath: ${e.message}")
@@ -204,7 +204,6 @@ data class StagingHandler(val force: Boolean = false) {
                 }
 
                 Files.move(tempFile, stagingIndex, StandardCopyOption.REPLACE_EXISTING)
-                StagingCache.saveStagedFile(hash, path)
                 return true
             } catch (e: IOException) {
                 Logger.error("Error replacing outdated staged file $path: ${e.message}")

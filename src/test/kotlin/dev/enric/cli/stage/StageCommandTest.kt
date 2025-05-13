@@ -19,7 +19,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @ExperimentalPathApi
-class StageCommandCommandTest : CommandTest() {
+class StageCommandTest : CommandTest() {
 
     companion object {
         // Given
