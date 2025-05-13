@@ -78,8 +78,6 @@ class CheckoutHandler(
             }
 
             try {
-                println("\nWriting file: ${file.pathString}")
-
                 Files.write(
                     file,
                     Content.newInstance(tree.content).content,
