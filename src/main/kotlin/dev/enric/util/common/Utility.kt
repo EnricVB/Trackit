@@ -2,7 +2,6 @@ package dev.enric.util.common
 
 import dev.enric.domain.Hash
 import dev.enric.domain.objects.Commit
-import dev.enric.logger.Logger
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
