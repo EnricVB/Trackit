@@ -164,13 +164,13 @@ enum class FileStatus(val symbol: String, val description: String) {
             val treeContentMap = currentCommit.tree.associate { tree ->
                 val treeObject = Tree.newInstance(tree)
                 val treePath = treeObject.serializablePath.relativePath(repositoryFolderManager.getInitFolderPath())
-                val treeContent = String(Content.newInstance(treeObject.content).content).trim()
+                val treeContent = Content.newInstance(treeObject.content).content
                 treePath to treeContent
             }
 
             return treeContentMap[filePath]?.let { treeContent ->
-                val fileContent = file.readText().trim()
-                treeContent == fileContent
+                val fileContent = file.readBytes()
+                treeContent.contentEquals(fileContent)
             } ?: false
         }
 
