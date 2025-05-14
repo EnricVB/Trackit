@@ -70,8 +70,8 @@ data class DiffHandler(
 
         allPaths.forEach { path ->
             val versions = path.value
-            val pathString = path.key.toString().replace("\\", "/").removePrefix(".")
-            val normalizedFilter = fileFilter?.replace("\\", "/")?.removePrefix(".")
+            val pathString = path.key.toString().replace("\\", "/").removePrefix("./").removePrefix(".")
+            val normalizedFilter = fileFilter?.replace("\\", "/")?.removePrefix("./")?.removePrefix(".")
 
             if (!normalizedFilter.isNullOrEmpty() && !pathString.contains(normalizedFilter)) return@forEach
 
