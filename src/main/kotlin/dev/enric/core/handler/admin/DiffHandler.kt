@@ -70,8 +70,10 @@ data class DiffHandler(
 
         allPaths.forEach { path ->
             val versions = path.value
-            val pathString = path.key.toString().replace("\\", "/")
-            if (!fileFilter.isNullOrEmpty() && !pathString.contains(fileFilter)) return@forEach
+            val pathString = path.key.toString().replace("\\", "/").removePrefix(".")
+            val normalizedFilter = fileFilter?.replace("\\", "/")?.removePrefix(".")
+
+            if (!normalizedFilter.isNullOrEmpty() && !pathString.contains(normalizedFilter)) return@forEach
 
             val version1 = versions.first?.let { hash -> String(Content.newInstance(hash).content) } ?: ""
             val version2 = versions.second?.let { hash -> String(Content.newInstance(hash).content) } ?: ""
