@@ -45,11 +45,12 @@ class StatusHandler : CommandHandler() {
 
     fun printBranchStatus() {
         val branch = BranchIndex.getCurrentBranch()
+        val branchHEAD = BranchIndex.getBranchHead(branch.generateKey())
         val currentCommit = CommitIndex.getCurrentCommit()
 
         Logger.info("On branch ${branch.name}")
         currentCommit?.let {
-            Logger.info("Current commit: ${it.generateKey()}")
+            Logger.info("Current commit: ${it.generateKey()} ${if (branchHEAD.generateKey() == it.generateKey()) "HEAD" else ""}")
             Logger.info("Author: ${User.newInstance(it.author).name}")
             Logger.info("Date: ${it.date}")
         }
